@@ -8,8 +8,8 @@ import (
 	"github.com/hyperledger/fabric-chaincode-go/shim"
 )
 
-// GetTx returns data in CCHeader
-var GetTx = Transaction{
+// getTx returns tx definitions
+var getTx = Transaction{
 	Tag:         "getTx",
 	Label:       "Get Tx",
 	Description: "",

@@ -23,5 +23,5 @@ func FetchTx(txName string) *Transaction {
 
 // InitTxList appends GetTx to txList to avoid initialization loop
 func InitTxList(l []Transaction) {
-	txList = l
+	txList = append([]Transaction{getTx}, l...)
 }
