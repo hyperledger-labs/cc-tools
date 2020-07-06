@@ -17,7 +17,7 @@ var GetTx = Transaction{
 
 	ReadOnly: true,
 	MetaTx:   true,
-	Args: map[string]txArgument{
+	Args: map[string]Argument{
 		"txName": {
 			DataType:    "string",
 			Description: "The name of the transaction of which you want to fetch the definition. Leave empty to fetch a list of possible transactions.",

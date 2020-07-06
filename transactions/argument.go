@@ -1,6 +1,6 @@
 package transactions
 
-type txArgument struct {
+type Argument struct {
 	Label       string `json:"label"`
 	Description string `json:"description"`
 
