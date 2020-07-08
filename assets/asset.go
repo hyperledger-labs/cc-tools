@@ -6,7 +6,7 @@ import (
 	"regexp"
 	"strings"
 
-	eh "github.com/goledgerdev/template-cc/chaincode/src/errorhandler"
+	"github.com/goledgerdev/cc-tools/errors"
 	"github.com/hyperledger/fabric-chaincode-go/pkg/cid"
 	"github.com/hyperledger/fabric-chaincode-go/shim"
 )
@@ -25,7 +25,7 @@ func (a *Asset) UnmarshalJSON(jsonData []byte) error {
 	aux := make(map[string]interface{})
 	err = json.Unmarshal(jsonData, &aux)
 	if err != nil {
-		return eh.NewCCError(400, err.Error())
+		return errors.NewCCError(err.Error(), 400)
 	}
 
 	newAsset, err := NewAsset(aux)
@@ -39,9 +39,9 @@ func (a *Asset) UnmarshalJSON(jsonData []byte) error {
 }
 
 // NewAsset constructs Asset object
-func NewAsset(m map[string]interface{}) (a Asset, err eh.ICCError) {
+func NewAsset(m map[string]interface{}) (a Asset, err errors.ICCError) {
 	if m == nil {
-		err = eh.NewCCError(500, "cannot create asset from nil map")
+		err = errors.NewCCError("cannot create asset from nil map", 500)
 		return
 	}
 
@@ -53,7 +53,7 @@ func NewAsset(m map[string]interface{}) (a Asset, err eh.ICCError) {
 	// Generate object key
 	key, err := GenerateKey(a)
 	if err != nil {
-		err = eh.WrapError(err, "error generating key for asset")
+		err = errors.WrapError(err, "error generating key for asset")
 		return
 	}
 	(a)["@key"] = key
@@ -61,7 +61,7 @@ func NewAsset(m map[string]interface{}) (a Asset, err eh.ICCError) {
 	// Filter, validate and convert props to proper format
 	err = a.ValidateProps()
 	if err != nil {
-		err = eh.WrapError(err, "format error")
+		err = errors.WrapError(err, "format error")
 		return
 	}
 
@@ -73,13 +73,13 @@ func (a Asset) CheckWriters(stub shim.ChaincodeStubInterface) error {
 	// Fetch asset properties
 	assetTypeDef := a.Type()
 	if assetTypeDef == nil {
-		return eh.NewCCError(400, fmt.Sprintf("asset type named %s does not exist", a.TypeTag()))
+		return errors.NewCCError(fmt.Sprintf("asset type named %s does not exist", a.TypeTag()), 400)
 	}
 
 	// Get tx creator MSP ID
 	txCreator, err := cid.GetMSPID(stub)
 	if err != nil {
-		return eh.WrapErrorWithStatus(err, "error getting tx creator", 500)
+		return errors.WrapErrorWithStatus(err, "error getting tx creator", 500)
 	}
 
 	// Check full asset write permission
@@ -88,14 +88,14 @@ func (a Asset) CheckWriters(stub shim.ChaincodeStubInterface) error {
 		for _, w := range assetTypeDef.Writers {
 			match, err := regexp.MatchString(w, txCreator)
 			if err != nil {
-				return eh.NewCCError(500, "failed to check if writer matches regexp")
+				return errors.NewCCError("failed to check if writer matches regexp", 500)
 			}
 			if match {
 				writePermission = true
 			}
 		}
 		if !writePermission {
-			return eh.NewCCError(403, fmt.Sprintf("%s cannot write to this asset", txCreator))
+			return errors.NewCCError(fmt.Sprintf("%s cannot write to this asset", txCreator), 403)
 		}
 	}
 
@@ -106,14 +106,14 @@ func (a Asset) CheckWriters(stub shim.ChaincodeStubInterface) error {
 			for _, w := range prop.Writers {
 				match, err := regexp.MatchString(w, txCreator)
 				if err != nil {
-					return eh.NewCCError(500, "failed to check if writer matches regexp")
+					return errors.NewCCError("failed to check if writer matches regexp", 500)
 				}
 				if match {
 					writePermission = true
 				}
 			}
 			if !writePermission {
-				return eh.NewCCError(403, fmt.Sprintf("%s cannot write to this asset property", txCreator))
+				return errors.NewCCError(fmt.Sprintf("%s cannot write to this asset property", txCreator), 403)
 			}
 		}
 	}
@@ -126,20 +126,20 @@ func (a *Asset) Put(stub shim.ChaincodeStubInterface) (map[string]interface{}, e
 	// Write index of references this asset points to
 	err := a.PutRefs(stub)
 	if err != nil {
-		return nil, eh.WrapError(err, "failed writing reference index")
+		return nil, errors.WrapError(err, "failed writing reference index")
 	}
 
 	// Marshal asset back to JSON format
 	assetJSON, err := json.Marshal(a)
 	if err != nil {
-		return nil, eh.WrapError(err, "failed to encode asset to JSON format")
+		return nil, errors.WrapError(err, "failed to encode asset to JSON format")
 	}
 
 	// Write asset to blockchain
 	if a.IsPrivate() {
 		err = stub.PutPrivateData(a.TypeTag(), a.Key(), assetJSON)
 		if err != nil {
-			return nil, eh.WrapError(err, "failed to write asset to ledger")
+			return nil, errors.WrapError(err, "failed to write asset to ledger")
 		}
 		assetKeyOnly := map[string]interface{}{
 			"@key":       a.Key(),
@@ -150,13 +150,13 @@ func (a *Asset) Put(stub shim.ChaincodeStubInterface) (map[string]interface{}, e
 
 	err = stub.PutState(a.Key(), assetJSON)
 	if err != nil {
-		return nil, eh.WrapError(err, "failed to write asset to ledger")
+		return nil, errors.WrapError(err, "failed to write asset to ledger")
 	}
 	return *a, nil
 }
 
 // Get reads asset from ledger
-func (a *Asset) Get(stub shim.ChaincodeStubInterface) (*Asset, eh.ICCError) {
+func (a *Asset) Get(stub shim.ChaincodeStubInterface) (*Asset, errors.ICCError) {
 	var assetBytes []byte
 	var err error
 	if a.IsPrivate() {
@@ -165,23 +165,23 @@ func (a *Asset) Get(stub shim.ChaincodeStubInterface) (*Asset, eh.ICCError) {
 		assetBytes, err = stub.GetState(a.Key())
 	}
 	if err != nil {
-		return nil, eh.WrapErrorWithStatus(err, "unable to get asset", 400)
+		return nil, errors.WrapErrorWithStatus(err, "unable to get asset", 400)
 	}
 	if assetBytes == nil {
-		return nil, eh.NewCCError(404, "asset not found")
+		return nil, errors.NewCCError("asset not found", 404)
 	}
 
 	var response Asset
 	err = json.Unmarshal(assetBytes, &response)
 	if err != nil {
-		return nil, eh.WrapErrorWithStatus(err, "failed to unmarshal asset from ledger", 500)
+		return nil, errors.WrapErrorWithStatus(err, "failed to unmarshal asset from ledger", 500)
 	}
 
 	return &response, nil
 }
 
 // ExistsInLedger checks if asset already exists
-func (a *Asset) ExistsInLedger(stub shim.ChaincodeStubInterface) (bool, eh.ICCError) {
+func (a *Asset) ExistsInLedger(stub shim.ChaincodeStubInterface) (bool, errors.ICCError) {
 	var assetBytes []byte
 	var err error
 	if a.IsPrivate() {
@@ -190,7 +190,7 @@ func (a *Asset) ExistsInLedger(stub shim.ChaincodeStubInterface) (bool, eh.ICCEr
 		assetBytes, err = stub.GetState(a.Key())
 	}
 	if err != nil {
-		return false, eh.WrapErrorWithStatus(err, "unable to check asset existence", 400)
+		return false, errors.WrapErrorWithStatus(err, "unable to check asset existence", 400)
 	}
 	if assetBytes != nil {
 		return true, nil
@@ -204,13 +204,13 @@ func (a *Asset) Update(stub shim.ChaincodeStubInterface, update map[string]inter
 	// Fetch asset properties
 	assetTypeDef := a.Type()
 	if assetTypeDef == nil {
-		return eh.NewCCError(400, fmt.Sprintf("asset type named %s does not exist", a.TypeTag()))
+		return errors.NewCCError(fmt.Sprintf("asset type named %s does not exist", a.TypeTag()), 400)
 	}
 
 	// Get tx creator MSP ID
 	txCreator, err := cid.GetMSPID(stub)
 	if err != nil {
-		return eh.WrapErrorWithStatus(err, "error getting tx creator", 500)
+		return errors.WrapErrorWithStatus(err, "error getting tx creator", 500)
 	}
 
 	// Check full asset write permission
@@ -219,14 +219,14 @@ func (a *Asset) Update(stub shim.ChaincodeStubInterface, update map[string]inter
 		for _, w := range assetTypeDef.Writers {
 			match, err := regexp.MatchString(w, txCreator)
 			if err != nil {
-				return eh.NewCCError(500, "failed to check if writer matches regexp")
+				return errors.NewCCError("failed to check if writer matches regexp", 500)
 			}
 			if match {
 				writePermission = true
 			}
 		}
 		if !writePermission {
-			return eh.NewCCError(403, fmt.Sprintf("%s cannot write to this asset", txCreator))
+			return errors.NewCCError(fmt.Sprintf("%s cannot write to this asset", txCreator), 403)
 		}
 	}
 
@@ -244,7 +244,7 @@ func (a *Asset) Update(stub shim.ChaincodeStubInterface, update map[string]inter
 		}
 
 		if prop.ReadOnly {
-			return eh.NewCCError(403, fmt.Sprintf("cannot update asset property %s", prop.Label))
+			return errors.NewCCError(fmt.Sprintf("cannot update asset property %s", prop.Label), 403)
 		}
 
 		// Check if tx creator is allowed to update this attribute
@@ -253,21 +253,21 @@ func (a *Asset) Update(stub shim.ChaincodeStubInterface, update map[string]inter
 			for _, w := range prop.Writers {
 				match, err := regexp.MatchString(w, txCreator)
 				if err != nil {
-					return eh.NewCCError(500, "failed to check if writer matches regexp")
+					return errors.NewCCError("failed to check if writer matches regexp", 500)
 				}
 				if match {
 					writePermission = true
 				}
 			}
 			if !writePermission {
-				return eh.NewCCError(403, fmt.Sprintf("%s cannot write to this asset property", txCreator))
+				return errors.NewCCError(fmt.Sprintf("%s cannot write to this asset property", txCreator), 403)
 			}
 		}
 
 		// Validate data types
 		propInterface, err := validateProp(propInterface, prop)
 		if err != nil {
-			return eh.WrapError(err, "error validating asset property")
+			return errors.WrapError(err, "error validating asset property")
 		}
 
 		(*a)[prop.Tag] = propInterface
@@ -279,31 +279,31 @@ func (a *Asset) Update(stub shim.ChaincodeStubInterface, update map[string]inter
 func (a *Asset) Delete(stub shim.ChaincodeStubInterface) ([]byte, error) {
 	isReferenced, err := a.IsReferenced(stub)
 	if err != nil {
-		return nil, eh.WrapError(err, "failed to check if asset if being referenced")
+		return nil, errors.WrapError(err, "failed to check if asset if being referenced")
 	}
 	if isReferenced {
-		return nil, eh.NewCCError(400, "another asset holds a reference to this one")
+		return nil, errors.NewCCError("another asset holds a reference to this one", 400)
 	}
 
 	err = a.DelRefs(stub)
 	if err != nil {
-		return nil, eh.WrapError(err, "failed cleaning reference index")
+		return nil, errors.WrapError(err, "failed cleaning reference index")
 	}
 
 	var assetJSON []byte
 	if !a.IsPrivate() {
 		err = stub.DelState(a.Key())
 		if err != nil {
-			return nil, eh.WrapError(err, "failed to delete state from ledger")
+			return nil, errors.WrapError(err, "failed to delete state from ledger")
 		}
 		assetJSON, err = json.Marshal(a)
 		if err != nil {
-			return nil, eh.WrapError(err, "failed to marshal asset")
+			return nil, errors.WrapError(err, "failed to marshal asset")
 		}
 	} else {
 		err = stub.DelPrivateData(a.TypeTag(), a.Key())
 		if err != nil {
-			return nil, eh.WrapError(err, "failed to delete state from private collection")
+			return nil, errors.WrapError(err, "failed to delete state from private collection")
 		}
 		assetKeyOnly := map[string]interface{}{
 			"@key":       a.Key(),
@@ -311,7 +311,7 @@ func (a *Asset) Delete(stub shim.ChaincodeStubInterface) ([]byte, error) {
 		}
 		assetJSON, err = json.Marshal(assetKeyOnly)
 		if err != nil {
-			return nil, eh.WrapError(err, "failed to marshal private asset key")
+			return nil, errors.WrapError(err, "failed to marshal private asset key")
 		}
 	}
 
@@ -339,11 +339,11 @@ func (a *Asset) InjectMetadata(stub shim.ChaincodeStubInterface) error {
 }
 
 // Refs returns all subAsset reference keys
-func (a Asset) Refs(stub shim.ChaincodeStubInterface) ([]Key, eh.ICCError) {
+func (a Asset) Refs(stub shim.ChaincodeStubInterface) ([]Key, errors.ICCError) {
 	// Fetch asset properties
 	assetTypeDef := a.Type()
 	if assetTypeDef == nil {
-		return nil, eh.NewCCError(400, fmt.Sprintf("asset type named %s does not exist", a.TypeTag()))
+		return nil, errors.NewCCError(fmt.Sprintf("asset type named %s does not exist", a.TypeTag()), 400)
 	}
 	assetSubAssets := assetTypeDef.SubAssets()
 	var keys []Key
@@ -369,7 +369,7 @@ func (a Asset) Refs(stub shim.ChaincodeStubInterface) ([]Key, eh.ICCError) {
 			var ok bool
 			subAssetAsArray, ok = subAssetRefInterface.([]interface{})
 			if !ok {
-				return nil, eh.NewCCError(400, fmt.Sprintf("asset property %s must and array of type %s", subAsset.Label, subAsset.DataType))
+				return nil, errors.NewCCError(fmt.Sprintf("asset property %s must and array of type %s", subAsset.Label, subAsset.DataType), 400)
 			}
 		}
 
@@ -377,14 +377,14 @@ func (a Asset) Refs(stub shim.ChaincodeStubInterface) ([]Key, eh.ICCError) {
 			subAssetRefMap, ok := subAssetRefInterface.(map[string]interface{})
 			if !ok {
 				// If subAsset is badly formatted, this method shouldn't have been called
-				return nil, eh.NewCCError(400, "sub-asset reference badly formatted")
+				return nil, errors.NewCCError("sub-asset reference badly formatted", 400)
 			}
 			subAssetRefMap["@assetType"] = subAsset.DataType
 
 			// Generate key for subAsset
 			key, err := NewKey(subAssetRefMap)
 			if err != nil {
-				return nil, eh.WrapError(err, "failed to generate unique identifier for asset")
+				return nil, errors.WrapError(err, "failed to generate unique identifier for asset")
 			}
 
 			// Append key to response
@@ -395,21 +395,21 @@ func (a Asset) Refs(stub shim.ChaincodeStubInterface) ([]Key, eh.ICCError) {
 }
 
 // ValidateProps checks if all props are compliant to format
-func (a Asset) ValidateProps() eh.ICCError {
+func (a Asset) ValidateProps() errors.ICCError {
 	// Perform validation of the @assetType field
 	assetType, exists := a["@assetType"]
 	if !exists {
-		return eh.NewCCError(400, "property @assetType is required")
+		return errors.NewCCError("property @assetType is required", 400)
 	}
 	assetTypeString, ok := assetType.(string)
 	if !ok {
-		return eh.NewCCError(400, "property @assetType must be a string")
+		return errors.NewCCError("property @assetType must be a string", 400)
 	}
 
 	// Fetch asset definition
 	assetTypeDef := FetchAssetType(assetTypeString)
 	if assetTypeDef == nil {
-		return eh.NewCCError(400, fmt.Sprintf("assetType named '%s' does not exist", assetTypeString))
+		return errors.NewCCError(fmt.Sprintf("assetType named '%s' does not exist", assetTypeString), 400)
 	}
 
 	// Validate asset properties
@@ -418,10 +418,10 @@ func (a Asset) ValidateProps() eh.ICCError {
 		propInterface, propIncluded := a[prop.Tag]
 		if !propIncluded {
 			if prop.Required {
-				return eh.NewCCError(400, fmt.Sprintf("property %s (%s) is required", prop.Tag, prop.Label))
+				return errors.NewCCError(fmt.Sprintf("property %s (%s) is required", prop.Tag, prop.Label), 400)
 			}
 			if prop.IsKey {
-				return eh.NewCCError(400, fmt.Sprintf("key property %s (%s) is required", prop.Tag, prop.Label))
+				return errors.NewCCError(fmt.Sprintf("key property %s (%s) is required", prop.Tag, prop.Label), 400)
 			}
 			continue
 		}
@@ -430,7 +430,7 @@ func (a Asset) ValidateProps() eh.ICCError {
 		propInterface, err := validateProp(propInterface, prop)
 		if err != nil {
 			msg := fmt.Sprintf("error validating asset '%s' property", prop.Tag)
-			return eh.WrapError(err, msg)
+			return errors.WrapError(err, msg)
 		}
 
 		a[prop.Tag] = propInterface
@@ -441,7 +441,7 @@ func (a Asset) ValidateProps() eh.ICCError {
 			continue
 		}
 		if !assetTypeDef.HasProp(propTag) {
-			return eh.NewCCError(400, fmt.Sprintf("property %s is not defined in type %s", propTag, assetTypeString))
+			return errors.NewCCError(fmt.Sprintf("property %s is not defined in type %s", propTag, assetTypeString), 400)
 		}
 	}
 
@@ -449,11 +449,11 @@ func (a Asset) ValidateProps() eh.ICCError {
 }
 
 // ValidateRefs checks if subAsset refs exists in blockchain
-func (a Asset) ValidateRefs(stub shim.ChaincodeStubInterface) eh.ICCError {
+func (a Asset) ValidateRefs(stub shim.ChaincodeStubInterface) errors.ICCError {
 	// Fetch references contained in asset
 	refKeys, err := a.Refs(stub)
 	if err != nil {
-		return eh.WrapError(err, "failed to fetch references")
+		return errors.WrapError(err, "failed to fetch references")
 	}
 
 	// Check if references exist
@@ -461,10 +461,10 @@ func (a Asset) ValidateRefs(stub shim.ChaincodeStubInterface) eh.ICCError {
 		// Check if asset exists in blockchain
 		assetJSON, err := referencedKey.Get(stub)
 		if err != nil {
-			return eh.WrapErrorWithStatus(err, "failed to read asset from blockchain", 400)
+			return errors.WrapErrorWithStatus(err, "failed to read asset from blockchain", 400)
 		}
 		if assetJSON == nil {
-			return eh.NewCCError(404, "referenced asset not found")
+			return errors.NewCCError("referenced asset not found", 404)
 		}
 	}
 	return nil
@@ -475,7 +475,7 @@ func (a Asset) DelRefs(stub shim.ChaincodeStubInterface) error {
 	// Fetch references contained in asset
 	refKeys, err := a.Refs(stub)
 	if err != nil {
-		return eh.WrapErrorWithStatus(err, "failed to fetch references", 400)
+		return errors.WrapErrorWithStatus(err, "failed to fetch references", 400)
 	}
 
 	assetKey := a.Key()
@@ -487,7 +487,7 @@ func (a Asset) DelRefs(stub shim.ChaincodeStubInterface) error {
 		// Check if asset exists in blockchain
 		err = stub.DelState(indexKey)
 		if err != nil {
-			return eh.WrapErrorWithStatus(err, "failed to read asset from blockchain", 400)
+			return errors.WrapErrorWithStatus(err, "failed to read asset from blockchain", 400)
 		}
 	}
 

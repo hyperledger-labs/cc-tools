@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"strings"
 
-	eh "github.com/goledgerdev/template-cc/chaincode/src/errorhandler"
+	"github.com/goledgerdev/cc-tools/errors"
 	"github.com/hyperledger/fabric-chaincode-go/shim"
 )
 
@@ -24,7 +24,7 @@ func (k *Key) UnmarshalJSON(jsonData []byte) error {
 	aux := make(map[string]interface{})
 	err = json.Unmarshal(jsonData, &aux)
 	if err != nil {
-		return eh.NewCCError(400, err.Error())
+		return errors.NewCCError(err.Error(), 400)
 	}
 
 	newKey, err := NewKey(aux)
@@ -38,9 +38,9 @@ func (k *Key) UnmarshalJSON(jsonData []byte) error {
 }
 
 // NewKey constructs Key object
-func NewKey(m map[string]interface{}) (k Key, err eh.ICCError) {
+func NewKey(m map[string]interface{}) (k Key, err errors.ICCError) {
 	if m == nil {
-		err = eh.NewCCError(500, "cannot create key from nil map")
+		err = errors.NewCCError("cannot create key from nil map", 500)
 		return
 	}
 
@@ -55,7 +55,7 @@ func NewKey(m map[string]interface{}) (k Key, err eh.ICCError) {
 		var keyStr string
 		keyStr, err = GenerateKey(k)
 		if err != nil {
-			err = eh.WrapError(err, "error generating key for asset")
+			err = errors.WrapError(err, "error generating key for asset")
 		}
 		k["@key"] = keyStr
 	}
@@ -68,17 +68,17 @@ func (k Key) ValidateProps() error {
 	// Perform validation of the @assetType field
 	assetType, exists := k["@assetType"]
 	if !exists {
-		return eh.NewCCError(400, "property @assetType is required")
+		return errors.NewCCError("property @assetType is required", 400)
 	}
 	assetTypeString, ok := assetType.(string)
 	if !ok {
-		return eh.NewCCError(400, "property @assetType must be a string")
+		return errors.NewCCError("property @assetType must be a string", 400)
 	}
 
 	// Fetch asset definition
 	assetTypeDef := FetchAssetType(assetTypeString)
 	if assetTypeDef == nil {
-		return eh.NewCCError(400, fmt.Sprintf("assetType named '%s' does not exist", assetTypeString))
+		return errors.NewCCError(fmt.Sprintf("assetType named '%s' does not exist", assetTypeString), 400)
 	}
 
 	// Validate asset properties
@@ -87,10 +87,10 @@ func (k Key) ValidateProps() error {
 		propInterface, propIncluded := k[prop.Tag]
 		if !propIncluded {
 			if prop.Required {
-				return eh.NewCCError(400, fmt.Sprintf("property %s (%s) is required", prop.Tag, prop.Label))
+				return errors.NewCCError(fmt.Sprintf("property %s (%s) is required", prop.Tag, prop.Label), 400)
 			}
 			if prop.IsKey {
-				return eh.NewCCError(400, fmt.Sprintf("key property %s (%s) is required", prop.Tag, prop.Label))
+				return errors.NewCCError(fmt.Sprintf("key property %s (%s) is required", prop.Tag, prop.Label), 400)
 			}
 			continue
 		}
@@ -99,7 +99,7 @@ func (k Key) ValidateProps() error {
 		propInterface, err := validateProp(propInterface, prop)
 		if err != nil {
 			msg := fmt.Sprintf("error validating asset '%s' property", prop.Tag)
-			return eh.WrapError(err, msg)
+			return errors.WrapError(err, msg)
 		}
 
 		k[prop.Tag] = propInterface
@@ -110,7 +110,7 @@ func (k Key) ValidateProps() error {
 			continue
 		}
 		if !assetTypeDef.HasProp(propTag) {
-			return eh.NewCCError(400, fmt.Sprintf("property %s is not defined in type %s", propTag, assetTypeString))
+			return errors.NewCCError(fmt.Sprintf("property %s is not defined in type %s", propTag, assetTypeString), 400)
 		}
 	}
 
@@ -118,7 +118,7 @@ func (k Key) ValidateProps() error {
 }
 
 // GetBytes reads asset bytes from ledger
-func (k *Key) GetBytes(stub shim.ChaincodeStubInterface) ([]byte, eh.ICCError) {
+func (k *Key) GetBytes(stub shim.ChaincodeStubInterface) ([]byte, errors.ICCError) {
 	var assetBytes []byte
 	var err error
 	if k.IsPrivate() {
@@ -127,17 +127,17 @@ func (k *Key) GetBytes(stub shim.ChaincodeStubInterface) ([]byte, eh.ICCError) {
 		assetBytes, err = stub.GetState(k.Key())
 	}
 	if err != nil {
-		return nil, eh.WrapErrorWithStatus(err, "failed to get asset bytes", 400)
+		return nil, errors.WrapErrorWithStatus(err, "failed to get asset bytes", 400)
 	}
 	if assetBytes == nil {
-		return nil, eh.NewCCError(404, "asset not found")
+		return nil, errors.NewCCError("asset not found", 404)
 	}
 
 	return assetBytes, nil
 }
 
 // Get reads asset from ledger
-func (k *Key) Get(stub shim.ChaincodeStubInterface) (*Asset, eh.ICCError) {
+func (k *Key) Get(stub shim.ChaincodeStubInterface) (*Asset, errors.ICCError) {
 	var assetBytes []byte
 	var err error
 	if k.IsPrivate() {
@@ -146,16 +146,16 @@ func (k *Key) Get(stub shim.ChaincodeStubInterface) (*Asset, eh.ICCError) {
 		assetBytes, err = stub.GetState(k.Key())
 	}
 	if err != nil {
-		return nil, eh.WrapErrorWithStatus(err, "unable to get asset", 400)
+		return nil, errors.WrapErrorWithStatus(err, "unable to get asset", 400)
 	}
 	if assetBytes == nil {
-		return nil, eh.NewCCError(404, "asset not found")
+		return nil, errors.NewCCError("asset not found", 404)
 	}
 
 	var response Asset
 	err = json.Unmarshal(assetBytes, &response)
 	if err != nil {
-		return nil, eh.WrapErrorWithStatus(err, "failed to unmarshal asset from ledger", 500)
+		return nil, errors.WrapErrorWithStatus(err, "failed to unmarshal asset from ledger", 500)
 	}
 
 	return &response, nil

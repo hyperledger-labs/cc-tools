@@ -7,12 +7,12 @@ import (
 	"strings"
 	"time"
 
-	eh "github.com/goledgerdev/template-cc/chaincode/src/errorhandler"
+	"github.com/goledgerdev/cc-tools/errors"
 	"github.com/google/uuid"
 )
 
 // GenerateKey implements the logic to generate an asset's unique key
-func GenerateKey(asset map[string]interface{}) (string, eh.ICCError) {
+func GenerateKey(asset map[string]interface{}) (string, errors.ICCError) {
 	if key, keyExists := asset["@key"]; keyExists {
 		keyStr, ok := key.(string)
 		if ok {
@@ -25,18 +25,18 @@ func GenerateKey(asset map[string]interface{}) (string, eh.ICCError) {
 	// Perform validation of the @assetType field
 	assetType, exists := asset["@assetType"]
 	if !exists {
-		return "", eh.NewCCError(400, "property @assetType is required")
+		return "", errors.NewCCError("property @assetType is required", 400)
 	}
 	assetTypeString, ok := assetType.(string)
 	if !ok {
-		return "", eh.NewCCError(400, "property @assetType must be a string")
+		return "", errors.NewCCError("property @assetType must be a string", 400)
 	}
 
 	// Fetch asset properties
 	assetProps := FetchAssetType(assetTypeString)
 	if assetProps == nil {
 		errMsg := fmt.Sprintf("assetType named '%s' does not exist", assetTypeString)
-		return "", eh.NewCCError(400, errMsg)
+		return "", errors.NewCCError(errMsg, 400)
 	}
 
 	keyProps := assetProps.Keys()
@@ -47,7 +47,7 @@ func GenerateKey(asset map[string]interface{}) (string, eh.ICCError) {
 		propInterface, propIncluded := asset[prop.Tag]
 		if !propIncluded {
 			errMsg := fmt.Sprintf("primary key %s (%s) is required", prop.Tag, prop.Label)
-			return "", eh.NewCCError(400, errMsg)
+			return "", errors.NewCCError(errMsg, 400)
 		}
 
 		var isArray bool
@@ -65,7 +65,7 @@ func GenerateKey(asset map[string]interface{}) (string, eh.ICCError) {
 		} else {
 			propAsArray, ok = propInterface.([]interface{})
 			if !ok {
-				return "", eh.NewCCError(400, fmt.Sprintf("asset property %s must and array of type %s", prop.Label, prop.DataType))
+				return "", errors.NewCCError(fmt.Sprintf("asset property %s must and array of type %s", prop.Label, prop.DataType), 400)
 			}
 		}
 
@@ -77,13 +77,13 @@ func GenerateKey(asset map[string]interface{}) (string, eh.ICCError) {
 				propMap, ok := propInterface.(map[string]interface{})
 				if !ok {
 					errMsg := fmt.Sprintf("subAsset key %s must be sent as JSON object", prop.Tag)
-					return "", eh.NewCCError(400, errMsg)
+					return "", errors.NewCCError(errMsg, 400)
 				}
 				propMap["@assetType"] = dataType
 				subAssetKey, err := GenerateKey(propMap)
 				if err != nil {
 					errMsg := fmt.Sprintf("error generating key for subAsset key '%s'", prop.Tag)
-					return "", eh.WrapError(err, errMsg)
+					return "", errors.WrapError(err, errMsg)
 				}
 				keySeed += subAssetKey
 			} else {
@@ -92,7 +92,7 @@ func GenerateKey(asset map[string]interface{}) (string, eh.ICCError) {
 				case "string":
 					propVal, ok := propInterface.(string)
 					if !ok {
-						return "", eh.NewCCError(400, fmt.Sprintf("asset property %s should be of type %s", prop.Label, prop.DataType))
+						return "", errors.NewCCError(fmt.Sprintf("asset property %s should be of type %s", prop.Label, prop.DataType), 400)
 					}
 					keySeed += propVal
 				case "number":
@@ -100,11 +100,11 @@ func GenerateKey(asset map[string]interface{}) (string, eh.ICCError) {
 					if !ok {
 						propValStr, okStr := propInterface.(string)
 						if !okStr {
-							return "", eh.NewCCError(400, fmt.Sprintf("asset property %s should be of type %s", prop.Label, prop.DataType))
+							return "", errors.NewCCError(fmt.Sprintf("asset property %s should be of type %s", prop.Label, prop.DataType), 400)
 						}
 						propVal, err = strconv.ParseFloat(propValStr, 64)
 						if err != nil {
-							return "", eh.NewCCError(400, fmt.Sprintf("asset property %s should be of type %s", prop.Label, prop.DataType))
+							return "", errors.NewCCError(fmt.Sprintf("asset property %s should be of type %s", prop.Label, prop.DataType), 400)
 						}
 					}
 					keySeed += strconv.FormatUint(math.Float64bits(propVal), 16) // Float IEEE 754 hexadecimal representation
@@ -113,10 +113,10 @@ func GenerateKey(asset map[string]interface{}) (string, eh.ICCError) {
 					if !ok {
 						propValStr, okStr := propInterface.(string)
 						if !okStr {
-							return "", eh.NewCCError(400, fmt.Sprintf("asset property %s should be of type %s", prop.Label, prop.DataType))
+							return "", errors.NewCCError(fmt.Sprintf("asset property %s should be of type %s", prop.Label, prop.DataType), 400)
 						}
 						if propValStr != "true" && propValStr != "false" {
-							return "", eh.NewCCError(400, fmt.Sprintf("asset property %s should be of type %s", prop.Label, prop.DataType))
+							return "", errors.NewCCError(fmt.Sprintf("asset property %s should be of type %s", prop.Label, prop.DataType), 400)
 						}
 						if propValStr == "true" {
 							propVal = true
@@ -130,15 +130,15 @@ func GenerateKey(asset map[string]interface{}) (string, eh.ICCError) {
 				case "datetime":
 					propVal, ok := propInterface.(string)
 					if !ok {
-						return "", eh.NewCCError(400, fmt.Sprintf("asset property %s should be a RFC3339 string", prop.Label))
+						return "", errors.NewCCError(fmt.Sprintf("asset property %s should be a RFC3339 string", prop.Label), 400)
 					}
 					propTime, err := time.Parse(time.RFC3339, propVal)
 					if err != nil {
-						return "", eh.WrapErrorWithStatus(err, fmt.Sprintf("invalid asset property %s RFC3339 format", prop.Label), 400)
+						return "", errors.WrapErrorWithStatus(err, fmt.Sprintf("invalid asset property %s RFC3339 format", prop.Label), 400)
 					}
 					keySeed += propTime.Format(time.RFC3339)
 				default:
-					return "", eh.NewCCError(500, fmt.Sprintf("internal error: invalid prop data type %s", prop.DataType))
+					return "", errors.NewCCError(fmt.Sprintf("internal error: invalid prop data type %s", prop.DataType), 500)
 				}
 			}
 		}
