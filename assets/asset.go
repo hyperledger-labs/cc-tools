@@ -122,7 +122,7 @@ func (a Asset) CheckWriters(stub shim.ChaincodeStubInterface) error {
 }
 
 // Put inserts asset in blockchain
-func (a *Asset) Put(stub shim.ChaincodeStubInterface) (map[string]interface{}, error) {
+func (a *Asset) Put(stub shim.ChaincodeStubInterface) (map[string]interface{}, errors.ICCError) {
 	// Write index of references this asset points to
 	err := a.PutRefs(stub)
 	if err != nil {
@@ -153,6 +153,26 @@ func (a *Asset) Put(stub shim.ChaincodeStubInterface) (map[string]interface{}, e
 		return nil, errors.WrapError(err, "failed to write asset to ledger")
 	}
 	return *a, nil
+}
+
+// PutNew inserts asset in blockchain and returns error if asset exists
+func (a *Asset) PutNew(stub shim.ChaincodeStubInterface) (map[string]interface{}, errors.ICCError) {
+	// Check if asset already exists
+	exists, err := a.ExistsInLedger(stub)
+	if err != nil {
+		return nil, errors.WrapError(err, "failed to verify if asset already exists")
+	}
+	if exists {
+		return nil, errors.NewCCError("asset already exists", 409)
+	}
+
+	// Marshal asset back to JSON format
+	res, err := a.Put(stub)
+	if err != nil {
+		return nil, errors.WrapError(err, "failed to write asset to ledger")
+	}
+
+	return res, nil
 }
 
 // Get reads asset from ledger
