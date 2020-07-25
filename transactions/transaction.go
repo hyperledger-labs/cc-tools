@@ -2,7 +2,7 @@ package transactions
 
 import (
 	"github.com/goledgerdev/cc-tools/errors"
-	"github.com/hyperledger/fabric-chaincode-go/shim"
+	"github.com/hyperledger/fabric/core/chaincode/shim"
 )
 
 // Transaction defines the object containing tx definitions

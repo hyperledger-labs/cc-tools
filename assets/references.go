@@ -1,0 +1,153 @@
+package assets
+
+import (
+	"fmt"
+	"strings"
+
+	"github.com/goledgerdev/cc-tools/errors"
+	"github.com/hyperledger/fabric/core/chaincode/shim"
+)
+
+// Refs returns all subAsset reference keys
+func (a Asset) Refs(stub shim.ChaincodeStubInterface) ([]Key, errors.ICCError) {
+	// Fetch asset properties
+	assetTypeDef := a.Type()
+	if assetTypeDef == nil {
+		return nil, errors.NewCCError(fmt.Sprintf("asset type named %s does not exist", a.TypeTag()), 400)
+	}
+	assetSubAssets := assetTypeDef.SubAssets()
+	var keys []Key
+	for _, subAsset := range assetSubAssets {
+		subAssetRefInterface, subAssetIncluded := a[subAsset.Tag]
+		if !subAssetIncluded {
+			// If subAsset is not included, no need to append
+			continue
+		}
+
+		var isArray bool
+		subAssetDataType := subAsset.DataType
+		if strings.HasPrefix(subAssetDataType, "[]") {
+			subAssetDataType = strings.TrimPrefix(subAssetDataType, "[]")
+			isArray = true
+		}
+
+		// Handle array-like sub-asset property types
+		var subAssetAsArray []interface{}
+		if !isArray {
+			subAssetAsArray = []interface{}{subAssetRefInterface}
+		} else {
+			var ok bool
+			subAssetAsArray, ok = subAssetRefInterface.([]interface{})
+			if !ok {
+				return nil, errors.NewCCError(fmt.Sprintf("asset property %s must and array of type %s", subAsset.Label, subAsset.DataType), 400)
+			}
+		}
+
+		for _, subAssetRefInterface := range subAssetAsArray {
+			subAssetRefMap, ok := subAssetRefInterface.(map[string]interface{})
+			if !ok {
+				// If subAsset is badly formatted, this method shouldn't have been called
+				return nil, errors.NewCCError("sub-asset reference badly formatted", 400)
+			}
+			subAssetRefMap["@assetType"] = subAsset.DataType
+
+			// Generate key for subAsset
+			key, err := NewKey(subAssetRefMap)
+			if err != nil {
+				return nil, errors.WrapError(err, "failed to generate unique identifier for asset")
+			}
+
+			// Append key to response
+			keys = append(keys, key)
+		}
+	}
+	return keys, nil
+}
+
+// ValidateRefs checks if subAsset refs exists in blockchain
+func (a Asset) ValidateRefs(stub shim.ChaincodeStubInterface) errors.ICCError {
+	// Fetch references contained in asset
+	refKeys, err := a.Refs(stub)
+	if err != nil {
+		return errors.WrapError(err, "failed to fetch references")
+	}
+
+	// Check if references exist
+	for _, referencedKey := range refKeys {
+		// Check if asset exists in blockchain
+		assetJSON, err := referencedKey.Get(stub)
+		if err != nil {
+			return errors.WrapErrorWithStatus(err, "failed to read asset from blockchain", 400)
+		}
+		if assetJSON == nil {
+			return errors.NewCCError("referenced asset not found", 404)
+		}
+	}
+	return nil
+}
+
+// DelRefs deletes all the reference index for this asset from blockchain
+func (a Asset) DelRefs(stub shim.ChaincodeStubInterface) error {
+	// Fetch references contained in asset
+	refKeys, err := a.Refs(stub)
+	if err != nil {
+		return errors.WrapErrorWithStatus(err, "failed to fetch references", 400)
+	}
+
+	assetKey := a.Key()
+
+	// Delete reference indexes
+	for _, referencedKey := range refKeys {
+		// Construct reference key
+		indexKey, err := stub.CreateCompositeKey(referencedKey.Key(), []string{assetKey})
+		// Check if asset exists in blockchain
+		err = stub.DelState(indexKey)
+		if err != nil {
+			return errors.WrapErrorWithStatus(err, "failed to read asset from blockchain", 400)
+		}
+	}
+
+	return nil
+}
+
+// PutRefs writes to the blockchain the references
+func (a Asset) PutRefs(stub shim.ChaincodeStubInterface) error {
+	// Fetch references contained in asset
+	refKeys, err := a.Refs(stub)
+	if err != nil {
+		return fmt.Errorf("failed to fetch references: %s", err)
+	}
+
+	assetKey := a.Key()
+
+	// Delete reference indexes
+	for _, referencedKey := range refKeys {
+		// Construct reference key
+		refKey, err := stub.CreateCompositeKey(referencedKey.Key(), []string{assetKey})
+		if err != nil {
+			return fmt.Errorf("failed generating composite key for reference: %s", err)
+		}
+		err = stub.PutState(refKey, []byte{0x00})
+		if err != nil {
+			return fmt.Errorf("failed to put sub asset reference into blockchain: %s", err)
+		}
+	}
+
+	return nil
+}
+
+// IsReferenced checks if asset is referenced by other asset
+func (a Asset) IsReferenced(stub shim.ChaincodeStubInterface) (bool, error) {
+	// Get asset key
+	assetKey := a.Key()
+	queryIt, err := stub.GetStateByPartialCompositeKey(assetKey, []string{})
+	if err != nil {
+		return false, fmt.Errorf("failed to check reference index: %s", err)
+	}
+	defer queryIt.Close()
+
+	if queryIt.HasNext() {
+		return true, nil
+	}
+	return false, nil
+}

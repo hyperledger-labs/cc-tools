@@ -5,8 +5,8 @@ import (
 	"regexp"
 
 	"github.com/goledgerdev/cc-tools/errors"
-	"github.com/hyperledger/fabric-chaincode-go/pkg/cid"
-	"github.com/hyperledger/fabric-chaincode-go/shim"
+	"github.com/hyperledger/fabric/core/chaincode/lib/cid"
+	"github.com/hyperledger/fabric/core/chaincode/shim"
 )
 
 // Run defines the rules of transaction execution for the chaincode.
