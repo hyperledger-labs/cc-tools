@@ -9,10 +9,26 @@ import (
 
 // Put inserts asset in blockchain
 func (a *Asset) Put(stub shim.ChaincodeStubInterface) (map[string]interface{}, errors.ICCError) {
+	// Check if org has write permission
+	err := a.CheckWriters(stub)
+	if err != nil {
+		return nil, errors.WrapError(err, "failed write permission check")
+	}
+
 	// Write index of references this asset points to
-	err := a.PutRefs(stub)
+	err = a.putRefs(stub)
 	if err != nil {
 		return nil, errors.WrapError(err, "failed writing reference index")
+	}
+
+	err = a.injectMetadata(stub)
+	if err != nil {
+		return nil, errors.WrapError(err, "failed injecting asset metadata")
+	}
+
+	err = a.validateRefs(stub)
+	if err != nil {
+		return nil, errors.WrapError(err, "failed reference validation")
 	}
 
 	// Marshal asset back to JSON format

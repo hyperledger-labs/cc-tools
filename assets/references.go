@@ -65,7 +65,7 @@ func (a Asset) Refs(stub shim.ChaincodeStubInterface) ([]Key, errors.ICCError) {
 }
 
 // ValidateRefs checks if subAsset refs exists in blockchain
-func (a Asset) ValidateRefs(stub shim.ChaincodeStubInterface) errors.ICCError {
+func (a Asset) validateRefs(stub shim.ChaincodeStubInterface) errors.ICCError {
 	// Fetch references contained in asset
 	refKeys, err := a.Refs(stub)
 	if err != nil {
@@ -87,7 +87,7 @@ func (a Asset) ValidateRefs(stub shim.ChaincodeStubInterface) errors.ICCError {
 }
 
 // DelRefs deletes all the reference index for this asset from blockchain
-func (a Asset) DelRefs(stub shim.ChaincodeStubInterface) error {
+func (a Asset) delRefs(stub shim.ChaincodeStubInterface) error {
 	// Fetch references contained in asset
 	refKeys, err := a.Refs(stub)
 	if err != nil {
@@ -111,7 +111,7 @@ func (a Asset) DelRefs(stub shim.ChaincodeStubInterface) error {
 }
 
 // PutRefs writes to the blockchain the references
-func (a Asset) PutRefs(stub shim.ChaincodeStubInterface) error {
+func (a Asset) putRefs(stub shim.ChaincodeStubInterface) error {
 	// Fetch references contained in asset
 	refKeys, err := a.Refs(stub)
 	if err != nil {

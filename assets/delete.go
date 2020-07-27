@@ -9,6 +9,13 @@ import (
 
 // Delete erases asset from world state
 func (a *Asset) Delete(stub shim.ChaincodeStubInterface) ([]byte, error) {
+	// Check if org has write permission
+	err := a.CheckWriters(stub)
+	if err != nil {
+		return nil, errors.WrapError(err, "failed write permission check")
+	}
+
+	// Check if asset is referenced in other assets to avoid data inconsistency
 	isReferenced, err := a.IsReferenced(stub)
 	if err != nil {
 		return nil, errors.WrapError(err, "failed to check if asset if being referenced")
@@ -17,7 +24,8 @@ func (a *Asset) Delete(stub shim.ChaincodeStubInterface) ([]byte, error) {
 		return nil, errors.NewCCError("another asset holds a reference to this one", 400)
 	}
 
-	err = a.DelRefs(stub)
+	// Clean up reference markers for this asset
+	err = a.delRefs(stub)
 	if err != nil {
 		return nil, errors.WrapError(err, "failed cleaning reference index")
 	}

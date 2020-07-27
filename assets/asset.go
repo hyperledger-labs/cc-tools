@@ -2,7 +2,6 @@ package assets
 
 import (
 	"encoding/json"
-	"fmt"
 
 	"github.com/goledgerdev/cc-tools/errors"
 	"github.com/hyperledger/fabric/core/chaincode/lib/cid"
@@ -67,19 +66,19 @@ func NewAsset(m map[string]interface{}) (a Asset, err errors.ICCError) {
 }
 
 // InjectMetadata handles injection internal variables to the asset
-func (a *Asset) InjectMetadata(stub shim.ChaincodeStubInterface) error {
+func (a *Asset) injectMetadata(stub shim.ChaincodeStubInterface) errors.ICCError {
+	var err error
+
 	// Generate object key
-	if _, keyExists := (*a)["@key"]; !keyExists {
-		key, err := GenerateKey(*a)
-		if err != nil {
-			return fmt.Errorf("error generating key for asset: %s", err)
-		}
-		(*a)["@key"] = key
+	key, err := GenerateKey(*a)
+	if err != nil {
+		return errors.WrapError(err, "error generating key for asset")
 	}
+	(*a)["@key"] = key
 
 	lastTouchBy, err := cid.GetMSPID(stub)
 	if err != nil {
-		return fmt.Errorf("error getting tx creator: %s", err)
+		return errors.WrapErrorWithStatus(err, "error getting tx creator", 500)
 	}
 	(*a)["@lastTouchBy"] = lastTouchBy
 
