@@ -48,3 +48,8 @@ func (t AssetType) HasProp(propTag string) bool {
 	}
 	return false
 }
+
+// IsPrivate returns true if asset is in a private collection
+func (t AssetType) IsPrivate() bool {
+	return len(t.Readers) > 0
+}

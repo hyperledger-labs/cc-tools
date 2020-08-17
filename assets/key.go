@@ -176,11 +176,7 @@ func (k Key) IsPrivate() bool {
 	if assetTypeDef == nil {
 		return false
 	}
-	if len(assetTypeDef.Readers) > 0 {
-		return true
-	}
-
-	return false
+	return assetTypeDef.IsPrivate()
 }
 
 // TypeTag returns @assetType attribute
