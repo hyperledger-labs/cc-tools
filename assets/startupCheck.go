@@ -27,19 +27,17 @@ func StartupCheck() errors.ICCError {
 		}
 		hasKey := false
 		for _, prop := range assetType.Props {
-			dataType := prop.DataType
-			if strings.HasPrefix(dataType, "[]") {
-				dataType = strings.TrimPrefix(dataType, "[]")
+			dataTypeName := prop.DataType
+			if strings.HasPrefix(dataTypeName, "[]") {
+				dataTypeName = strings.TrimPrefix(dataTypeName, "[]")
 			}
-			switch dataType {
-			case "string":
-			case "number":
-			case "boolean":
-			case "datetime":
-			default:
-				// Checks if the prop's datatype exists on assetMap
-				propTypeDef := FetchAssetType(dataType)
-				if propTypeDef == nil {
+
+			// Checks if the prop's datatype exists on assetMap
+			propTypeDef := FetchAssetType(dataTypeName)
+			if propTypeDef == nil {
+				// If prop's datatype is not an asset type, it must be a primitive type
+				_, dataTypeExists := dataTypeMap[dataTypeName]
+				if !dataTypeExists {
 					return errors.NewCCError(fmt.Sprintf("reference for undefined type '%s'", prop.DataType), 500)
 				}
 			}
