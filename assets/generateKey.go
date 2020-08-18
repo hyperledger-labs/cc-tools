@@ -88,7 +88,7 @@ func GenerateKey(asset map[string]interface{}) (string, errors.ICCError) {
 			}
 
 			// If key is a primitive data type, append its String value to seed
-			seed, err := dataType.String(propInterface)
+			seed, err := dataType.KeyString(propInterface)
 			if err != nil {
 				return "", errors.WrapError(err, fmt.Sprintf("failed to generate key for asset property '%s'", prop.Label))
 			}

@@ -11,14 +11,14 @@ import (
 
 // DataType is the struct defining a primitive data type
 type DataType struct {
-	String   func(interface{}) (string, error)
-	Validate func(interface{}) (interface{}, error)
+	KeyString func(interface{}) (string, error)
+	Validate  func(interface{}) (interface{}, error)
 }
 
 // CustomDataTypes allows cc developer to inject custom primitive data types
 func CustomDataTypes(m map[string]DataType) error {
 	for k, v := range m {
-		if v.String == nil || v.Validate == nil {
+		if v.KeyString == nil || v.Validate == nil {
 			return errors.NewCCError("invalid custom data type", 500)
 		}
 		dataTypeMap[k] = v
@@ -37,7 +37,7 @@ func DataTypeMap() map[string]DataType {
 
 var dataTypeMap = map[string]DataType{
 	"string": {
-		String: func(data interface{}) (string, error) {
+		KeyString: func(data interface{}) (string, error) {
 			dataVal, ok := data.(string)
 			if !ok {
 				return "", errors.NewCCError("asset property should be a string", 400)
@@ -55,7 +55,7 @@ var dataTypeMap = map[string]DataType{
 		},
 	},
 	"number": {
-		String: func(data interface{}) (string, error) {
+		KeyString: func(data interface{}) (string, error) {
 			dataVal, ok := data.(float64)
 			if !ok {
 				propValStr, okStr := data.(string)
@@ -83,7 +83,7 @@ var dataTypeMap = map[string]DataType{
 		},
 	},
 	"boolean": {
-		String: func(data interface{}) (string, error) {
+		KeyString: func(data interface{}) (string, error) {
 			dataVal, ok := data.(bool)
 			if !ok {
 				dataValStr, okStr := data.(string)
@@ -114,7 +114,7 @@ var dataTypeMap = map[string]DataType{
 		},
 	},
 	"datetime": {
-		String: func(data interface{}) (string, error) {
+		KeyString: func(data interface{}) (string, error) {
 			dataVal, ok := data.(string)
 			if !ok {
 				return "", errors.NewCCError("asset property should be a RFC3339 string", 400)
