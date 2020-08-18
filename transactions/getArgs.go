@@ -4,7 +4,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"strings"
-	"time"
 
 	"github.com/goledgerdev/cc-tools/assets"
 	"github.com/goledgerdev/cc-tools/errors"
@@ -106,81 +105,77 @@ func (tx Transaction) GetArgs(stub shim.ChaincodeStubInterface) (map[string]inte
 
 func validateTxArg(argType string, arg interface{}) (interface{}, errors.ICCError) {
 	var argAsInterface interface{}
-	ok := true
-	switch argType {
-	case "string":
-		argAsInterface, ok = arg.(string)
-	case "number":
-		argAsInterface, ok = arg.(float64)
-	case "boolean":
-		argAsInterface, ok = arg.(bool)
-	case "datetime":
-		var argString string
-		var err error
-		argString, ok = arg.(string)
-		if !ok {
-			return nil, errors.NewCCError("invalid argument format", 400)
-		}
-		argAsInterface, err = time.Parse(time.RFC3339, argString)
-		if err != nil {
-			return nil, errors.WrapErrorWithStatus(err, "invalid argument format", 400)
-		}
-	case "@asset":
-		var asset assets.Asset
-		argBytes, err := json.Marshal(arg)
-		if err != nil {
-			return nil, errors.WrapErrorWithStatus(err, "failed marshaling arg", 400)
-		}
-		err = json.Unmarshal(argBytes, &asset)
-		if err != nil {
-			return nil, errors.WrapErrorWithStatus(err, "failed unmarshaling arg", 400)
-		}
-		argAsInterface = asset
-	case "@key":
-		var key assets.Key
-		argBytes, err := json.Marshal(arg)
-		if err != nil {
-			return nil, errors.WrapErrorWithStatus(err, "failed marshaling arg", 400)
+	var err error
 
-		}
-		err = json.Unmarshal(argBytes, &key)
+	dataTypeMap := assets.DataTypeMap()
+	dataType, dataTypeExists := dataTypeMap[argType]
+	if dataTypeExists { // if argument is a primitive data type
+		argAsInterface, err = dataType.Validate(arg)
 		if err != nil {
-			return nil, errors.WrapErrorWithStatus(err, "failed unmarshaling arg", 400)
+			return nil, errors.WrapError(err, "invalid argument format")
 		}
-		argAsInterface = key
-	case "@update":
-		var argMap map[string]interface{}
-		argMap, ok = arg.(map[string]interface{})
-		if !ok {
-			return nil, errors.NewCCError("invalid argument format", 400)
+	} else {
+		switch argType {
+		case "@asset":
+			var asset assets.Asset
+			argBytes, err := json.Marshal(arg)
+			if err != nil {
+				return nil, errors.WrapErrorWithStatus(err, "failed marshaling arg", 400)
+			}
+			err = json.Unmarshal(argBytes, &asset)
+			if err != nil {
+				return nil, errors.WrapErrorWithStatus(err, "failed unmarshaling arg", 400)
+			}
+			argAsInterface = asset
+		case "@key":
+			var key assets.Key
+			argBytes, err := json.Marshal(arg)
+			if err != nil {
+				return nil, errors.WrapErrorWithStatus(err, "failed marshaling arg", 400)
+
+			}
+			err = json.Unmarshal(argBytes, &key)
+			if err != nil {
+				return nil, errors.WrapErrorWithStatus(err, "failed unmarshaling arg", 400)
+			}
+			argAsInterface = key
+		case "@update":
+			var argMap map[string]interface{}
+			argMap, ok := arg.(map[string]interface{})
+			if !ok {
+				return nil, errors.NewCCError("invalid argument format", 400)
+			}
+			_, ok = argMap["@assetType"]
+			if !ok {
+				return nil, errors.NewCCError("missing @assetType", 400)
+			}
+			argAsInterface = argMap
+		case "@query":
+			var argMap map[string]interface{}
+			argMap, ok := arg.(map[string]interface{})
+			if !ok {
+				return nil, errors.NewCCError("invalid argument format", 400)
+			}
+			_, ok = argMap["selector"]
+			if !ok {
+				return nil, errors.NewCCError("missing selector", 400)
+			}
+			argAsInterface = argMap
+		default:
+			var asset assets.Asset
+			argBytes, err := json.Marshal(arg)
+			if err != nil {
+				return nil, errors.NewCCError("failed to marshal arg", 400)
+			}
+			err = json.Unmarshal(argBytes, &asset)
+			if err != nil {
+				return nil, errors.WrapErrorWithStatus(err, "failed unmarshaling arg", 400)
+			}
+			if asset.TypeTag() != argType {
+				return nil, errors.NewCCError(fmt.Sprintf("arg must be of type %s", argType), 400)
+			}
+			argAsInterface = asset
 		}
-		_, ok = argMap["@assetType"]
-		argAsInterface = argMap
-	case "@query":
-		var argMap map[string]interface{}
-		argMap, ok = arg.(map[string]interface{})
-		if !ok {
-			return nil, errors.NewCCError("invalid argument format", 400)
-		}
-		_, ok = argMap["selector"]
-		argAsInterface = argMap
-	default:
-		var asset assets.Asset
-		argBytes, err := json.Marshal(arg)
-		if err != nil {
-			return nil, errors.NewCCError("failed to marshal arg", 400)
-		}
-		err = json.Unmarshal(argBytes, &asset)
-		if err != nil {
-			return nil, errors.WrapErrorWithStatus(err, "failed unmarshaling arg", 400)
-		}
-		if asset.TypeTag() != argType {
-			return nil, errors.NewCCError(fmt.Sprintf("arg must be of type %s", argType), 400)
-		}
-		argAsInterface = asset
-	}
-	if !ok {
-		return nil, errors.NewCCError("invalid argument format", 400)
 	}
 
 	return argAsInterface, nil

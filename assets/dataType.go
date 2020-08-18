@@ -9,10 +9,30 @@ import (
 	"github.com/goledgerdev/cc-tools/errors"
 )
 
-// DataType is the interface required
+// DataType is the struct defining a primitive data type
 type DataType struct {
 	String   func(interface{}) (string, error)
 	Validate func(interface{}) (interface{}, error)
+}
+
+// CustomDataTypes allows cc developer to inject custom primitive data types
+func CustomDataTypes(m map[string]DataType) error {
+	for k, v := range m {
+		if v.String == nil || v.Validate == nil {
+			return errors.NewCCError("invalid custom data type", 500)
+		}
+		dataTypeMap[k] = v
+	}
+	return nil
+}
+
+// DataTypeMap returns a copy of the primitive data type map
+func DataTypeMap() map[string]DataType {
+	ret := map[string]DataType{}
+	for k, v := range dataTypeMap {
+		ret[k] = v
+	}
+	return ret
 }
 
 var dataTypeMap = map[string]DataType{
@@ -27,7 +47,11 @@ var dataTypeMap = map[string]DataType{
 		},
 
 		Validate: func(data interface{}) (interface{}, error) {
-			return nil, nil
+			parsedData, ok := data.(string)
+			if !ok {
+				return nil, errors.NewCCError("property must be a string", 400)
+			}
+			return parsedData, nil
 		},
 	},
 	"number": {
@@ -50,7 +74,12 @@ var dataTypeMap = map[string]DataType{
 		},
 
 		Validate: func(data interface{}) (interface{}, error) {
-			return nil, nil
+			parsedData, ok := data.(float64)
+			if !ok {
+				return nil, errors.NewCCError("property must be a number", 400)
+			}
+
+			return parsedData, nil
 		},
 	},
 	"boolean": {
@@ -76,7 +105,12 @@ var dataTypeMap = map[string]DataType{
 		},
 
 		Validate: func(data interface{}) (interface{}, error) {
-			return nil, nil
+			parsedData, ok := data.(bool)
+			if !ok {
+				return nil, errors.NewCCError("property must be a boolean", 400)
+			}
+
+			return parsedData, nil
 		},
 	},
 	"datetime": {
@@ -94,7 +128,16 @@ var dataTypeMap = map[string]DataType{
 		},
 
 		Validate: func(data interface{}) (interface{}, error) {
-			return nil, nil
+			dataVal, ok := data.(string)
+			if !ok {
+				return nil, errors.NewCCError("asset property must be an RFC3339 string", 400)
+			}
+			parsedData, err := time.Parse(time.RFC3339, dataVal)
+			if err != nil {
+				return nil, errors.WrapErrorWithStatus(err, "invalid asset property RFC3339 format", 400)
+			}
+
+			return parsedData, nil
 		},
 	},
 }

@@ -66,9 +66,13 @@ func GenerateKey(asset map[string]interface{}) (string, errors.ICCError) {
 
 		// Iterate asset properties to form keySeed
 		for _, propInterface := range propAsArray {
-			// If key is a subAsset, generate subAsset's key to append to seed
-			assetTypeDef := FetchAssetType(dataTypeName)
-			if assetTypeDef != nil {
+			dataType, dataTypeExists := dataTypeMap[dataTypeName]
+			if !dataTypeExists {
+				// If key is a subAsset, generate subAsset's key to append to seed
+				assetTypeDef := FetchAssetType(dataTypeName)
+				if assetTypeDef == nil {
+					return "", errors.NewCCError(fmt.Sprintf("internal error: invalid prop data type %s", prop.DataType), 500)
+				}
 				propMap, ok := propInterface.(map[string]interface{})
 				if !ok {
 					errMsg := fmt.Sprintf("subAsset key %s must be sent as JSON object", prop.Tag)
@@ -81,20 +85,16 @@ func GenerateKey(asset map[string]interface{}) (string, errors.ICCError) {
 					return "", errors.WrapError(err, errMsg)
 				}
 				keySeed += subAssetKey
-			} else {
-				// If key is a primitive data type, append its raw value to seed
-				dataType, dataTypeExists := dataTypeMap[dataTypeName]
-				if !dataTypeExists {
-					return "", errors.NewCCError(fmt.Sprintf("internal error: invalid prop data type %s", prop.DataType), 500)
-				}
-
-				seed, err := dataType.String(propInterface)
-				if err != nil {
-					return "", errors.WrapError(err, fmt.Sprintf("failed to generate key for asset property '%s'", prop.Label))
-				}
-
-				keySeed += seed
 			}
+
+			// If key is a primitive data type, append its String value to seed
+			seed, err := dataType.String(propInterface)
+			if err != nil {
+				return "", errors.WrapError(err, fmt.Sprintf("failed to generate key for asset property '%s'", prop.Label))
+			}
+
+			keySeed += seed
+
 		}
 	}
 

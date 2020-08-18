@@ -32,12 +32,12 @@ func StartupCheck() errors.ICCError {
 				dataTypeName = strings.TrimPrefix(dataTypeName, "[]")
 			}
 
-			// Checks if the prop's datatype exists on assetMap
-			propTypeDef := FetchAssetType(dataTypeName)
-			if propTypeDef == nil {
-				// If prop's datatype is not an asset type, it must be a primitive type
-				_, dataTypeExists := dataTypeMap[dataTypeName]
-				if !dataTypeExists {
+			// Check if prop's datatype is a primitive type
+			_, dataTypeExists := dataTypeMap[dataTypeName]
+			if !dataTypeExists {
+				// Checks if the prop's datatype exists on assetMap
+				propTypeDef := FetchAssetType(dataTypeName)
+				if propTypeDef == nil {
 					return errors.NewCCError(fmt.Sprintf("reference for undefined type '%s'", prop.DataType), 500)
 				}
 			}

@@ -3,16 +3,15 @@ package assets
 import (
 	"fmt"
 	"strings"
-	"time"
 
 	"github.com/goledgerdev/cc-tools/errors"
 )
 
 func validateProp(prop interface{}, propDef AssetProp) (interface{}, error) {
 	var isArray bool
-	dataType := propDef.DataType
-	if strings.HasPrefix(dataType, "[]") {
-		dataType = strings.TrimPrefix(dataType, "[]")
+	dataTypeName := propDef.DataType
+	if strings.HasPrefix(dataTypeName, "[]") {
+		dataTypeName = strings.TrimPrefix(dataTypeName, "[]")
 		isArray = true
 	}
 
@@ -36,37 +35,15 @@ func validateProp(prop interface{}, propDef AssetProp) (interface{}, error) {
 		var parsedProp interface{}
 
 		// Validate data types
-		switch dataType {
-		case "string":
-			parsedProp, ok = prop.(string)
-			if !ok {
-				err := fmt.Errorf("property '%s' (%s) must be a string", propDef.Tag, propDef.Label)
-				return nil, errors.WrapErrorWithStatus(err, "invalid property type", 400)
-			}
-		case "number":
-			parsedProp, ok = prop.(float64)
-			if !ok {
-				err := fmt.Errorf("property '%s' (%s) must be a number", propDef.Tag, propDef.Label)
-				return nil, errors.WrapErrorWithStatus(err, "invalid property type", 400)
-			}
-		case "boolean":
-			parsedProp, ok = prop.(bool)
-			if !ok {
-				err := fmt.Errorf("property '%s' (%s) must be a boolean", propDef.Tag, propDef.Label)
-				return nil, errors.WrapErrorWithStatus(err, "invalid property type", 400)
-			}
-		case "datetime":
-			propVal, ok := prop.(string)
-			if !ok {
-				return nil, errors.NewCCError(fmt.Sprintf("asset property %s should be an RFC3339 string", propDef.Label), 400)
-			}
-			parsedProp, err = time.Parse(time.RFC3339, propVal)
+		dataType, dataTypeExists := dataTypeMap[dataTypeName]
+		if dataTypeExists { // if data type is a primary data type
+			parsedProp, err = dataType.Validate(prop)
 			if err != nil {
-				return nil, errors.WrapErrorWithStatus(err, fmt.Sprintf("invalid asset property %s RFC3339 format", propDef.Label), 400)
+				return nil, errors.WrapError(err, fmt.Sprintf("invalid '%s' (%s) asset property", propDef.Tag, propDef.Label))
 			}
-		default:
+		} else {
 			// If not a primary type, check if type is defined in assetMap
-			subAssetType := FetchAssetType(dataType)
+			subAssetType := FetchAssetType(dataTypeName)
 			if subAssetType == nil {
 				err := fmt.Errorf("invalid data type named '%s'", propDef.DataType)
 				return nil, errors.WrapErrorWithStatus(err, "invalid property type", 400)
@@ -79,7 +56,7 @@ func validateProp(prop interface{}, propDef AssetProp) (interface{}, error) {
 			}
 
 			// Add assetType to received object
-			recvMap["@assetType"] = dataType
+			recvMap["@assetType"] = dataTypeName
 
 			// Check if all key props are included
 			_, err := GenerateKey(recvMap)
@@ -89,6 +66,7 @@ func validateProp(prop interface{}, propDef AssetProp) (interface{}, error) {
 
 			parsedProp = recvMap
 		}
+
 		// If prop has specific validation method, call it
 		if propDef.Validate != nil {
 			err := propDef.Validate(prop)
