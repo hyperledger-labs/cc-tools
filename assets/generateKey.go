@@ -67,7 +67,15 @@ func GenerateKey(asset map[string]interface{}) (string, errors.ICCError) {
 		// Iterate asset properties to form keySeed
 		for _, propInterface := range propAsArray {
 			dataType, dataTypeExists := dataTypeMap[dataTypeName]
-			if !dataTypeExists {
+			if dataTypeExists {
+				// If key is a primitive data type, append its String value to seed
+				seed, err := dataType.KeyString(propInterface)
+				if err != nil {
+					return "", errors.WrapError(err, fmt.Sprintf("failed to generate key for asset property '%s'", prop.Label))
+				}
+
+				keySeed += seed
+			} else {
 				// If key is a subAsset, generate subAsset's key to append to seed
 				assetTypeDef := FetchAssetType(dataTypeName)
 				if assetTypeDef == nil {
@@ -86,14 +94,6 @@ func GenerateKey(asset map[string]interface{}) (string, errors.ICCError) {
 				}
 				keySeed += subAssetKey
 			}
-
-			// If key is a primitive data type, append its String value to seed
-			seed, err := dataType.KeyString(propInterface)
-			if err != nil {
-				return "", errors.WrapError(err, fmt.Sprintf("failed to generate key for asset property '%s'", prop.Label))
-			}
-
-			keySeed += seed
 
 		}
 	}
