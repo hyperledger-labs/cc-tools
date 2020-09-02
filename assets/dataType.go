@@ -11,8 +11,12 @@ import (
 
 // DataType is the struct defining a primitive data type
 type DataType struct {
-	KeyString func(interface{}) (string, error)
-	Validate  func(interface{}) (interface{}, error)
+	// AcceptedFormats is a list of "core" types that can be accepted (string, number or boolean)
+	AcceptedFormats []string `json:"acceptedFormats"`
+	Description     string   `json:"description,omitempty"`
+
+	KeyString func(interface{}) (string, error)      `json:"-"`
+	Validate  func(interface{}) (interface{}, error) `json:"-"`
 }
 
 // CustomDataTypes allows cc developer to inject custom primitive data types
@@ -37,6 +41,7 @@ func DataTypeMap() map[string]DataType {
 
 var dataTypeMap = map[string]DataType{
 	"string": {
+		AcceptedFormats: []string{"string"},
 		KeyString: func(data interface{}) (string, error) {
 			dataVal, ok := data.(string)
 			if !ok {
@@ -55,6 +60,7 @@ var dataTypeMap = map[string]DataType{
 		},
 	},
 	"number": {
+		AcceptedFormats: []string{"number"},
 		KeyString: func(data interface{}) (string, error) {
 			dataVal, ok := data.(float64)
 			if !ok {
@@ -83,6 +89,7 @@ var dataTypeMap = map[string]DataType{
 		},
 	},
 	"boolean": {
+		AcceptedFormats: []string{"boolean"},
 		KeyString: func(data interface{}) (string, error) {
 			dataVal, ok := data.(bool)
 			if !ok {
@@ -114,6 +121,7 @@ var dataTypeMap = map[string]DataType{
 		},
 	},
 	"datetime": {
+		AcceptedFormats: []string{"string"},
 		KeyString: func(data interface{}) (string, error) {
 			dataVal, ok := data.(string)
 			if !ok {
