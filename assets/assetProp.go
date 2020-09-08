@@ -16,7 +16,11 @@ type AssetProp struct {
 		<assetType>: the specific asset type key (reference) as defined by <assetType> in the assets packages
 		[]<type>: an array of elements specified by <type> as any of the above valid types
 	*/
-	DataType string                  `json:"dataType"`
+	DataType string `json:"dataType"`
+
+	// Writers accepts either []string{'org1MSP', 'org2MSP'} and cc-tools will
+	// check for an exact match  or []string{`$org\dMSP`} and cc-tools will
+	// check for a match with regular expression `org\dMSP`
 	Writers  []string                `json:"writers"`
 	Validate func(interface{}) error `json:"-"`
 }

@@ -28,12 +28,23 @@ func (a Asset) CheckWriters(stub shim.ChaincodeStubInterface) error {
 		if _, exists := a[prop.Tag]; exists && prop.Writers != nil {
 			writePermission := false
 			for _, w := range prop.Writers {
-				match, err := regexp.MatchString(w, txCreator)
-				if err != nil {
-					return errors.NewCCError("failed to check if writer matches regexp", 500)
+				if len(w) <= 1 {
+					continue
 				}
-				if match {
-					writePermission = true
+				if w[0] == '$' { // if writer is regexp
+					match, err := regexp.MatchString(w[1:], txCreator)
+					if err != nil {
+						return errors.NewCCError("failed to check if writer matches regexp", 500)
+					}
+					if match {
+						writePermission = true
+						break
+					}
+				} else { // if writer is not regexp
+					if w == txCreator {
+						writePermission = true
+						break
+					}
 				}
 			}
 			if !writePermission {

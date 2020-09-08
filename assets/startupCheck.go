@@ -38,12 +38,14 @@ func StartupCheck() errors.ICCError {
 			}
 
 			for _, w := range prop.Writers {
-				_, err := regexp.Compile(w)
-				if err != nil {
-					return errors.NewCCError(
-						fmt.Sprintf("invalid writer regular expression %s for property %s of asset %s: %s", w, prop.Label, tag, err),
-						500,
-					)
+				if len(w) <= 1 {
+					continue
+				}
+				if w[0] == '$' {
+					_, err := regexp.Compile(w[1:])
+					if err != nil {
+						return errors.WrapErrorWithStatus(err, fmt.Sprintf("invalid writer regular expression %s for property %s of asset %s", w, prop.Label, tag), 500)
+					}
 				}
 			}
 

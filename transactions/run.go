@@ -36,17 +36,28 @@ func Run(stub shim.ChaincodeStubInterface) ([]byte, errors.ICCError) {
 		}
 
 		// Check if caller is allowed
-		writePermission := false
-		for _, w := range tx.Callers {
-			match, err := regexp.MatchString(w, txCaller)
-			if err != nil {
-				return nil, errors.NewCCError("failed to check if caller matches regexp", 500)
+		callPermission := false
+		for _, c := range tx.Callers {
+			if len(c) <= 1 {
+				continue
 			}
-			if match {
-				writePermission = true
+			if c[0] == '$' { // if caller is regexp
+				match, err := regexp.MatchString(c[1:], txCaller)
+				if err != nil {
+					return nil, errors.NewCCError("failed to check if caller matches regexp", 500)
+				}
+				if match {
+					callPermission = true
+					break
+				}
+			} else { // if caller is not regexp
+				if c == txCaller {
+					callPermission = true
+					break
+				}
 			}
 		}
-		if !writePermission {
+		if !callPermission {
 			return nil, errors.NewCCError(fmt.Sprintf("%s cannot call this transaction", txCaller), 403)
 		}
 	}

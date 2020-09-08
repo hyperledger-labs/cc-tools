@@ -12,10 +12,15 @@ func StartupCheck() errors.ICCError {
 	// Checks if there are references to undefined types
 	for _, tx := range txList {
 		txName := tx.Tag
-		for _, w := range tx.Callers {
-			_, err := regexp.Compile(w)
-			if err != nil {
-				return errors.NewCCError(fmt.Sprintf("invalid caller regular expression %s for tx %s: %s", w, txName, err), 500)
+		for _, c := range tx.Callers {
+			if len(c) <= 1 {
+				continue
+			}
+			if c[0] == '$' {
+				_, err := regexp.Compile(c[1:])
+				if err != nil {
+					return errors.WrapErrorWithStatus(err, fmt.Sprintf("invalid caller regular expression %s for tx %s", c, txName), 500)
+				}
 			}
 		}
 	}

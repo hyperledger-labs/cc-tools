@@ -45,8 +45,7 @@ var getTx = Transaction{
 			}
 			txDefBytes, err := json.Marshal(txDef)
 			if err != nil {
-				errMsg := fmt.Sprintf("error marshaling transaction definition: %s", err)
-				return nil, errors.NewCCError(errMsg, 400)
+				return nil, errors.WrapErrorWithStatus(err, "error marshaling transaction definition", 400)
 			}
 			return txDefBytes, nil
 		}

@@ -115,7 +115,7 @@ func (a Asset) putRefs(stub shim.ChaincodeStubInterface) error {
 	// Fetch references contained in asset
 	refKeys, err := a.Refs(stub)
 	if err != nil {
-		return fmt.Errorf("failed to fetch references: %s", err)
+		return errors.WrapError(err, "failed to fetch references")
 	}
 
 	assetKey := a.Key()
@@ -125,11 +125,11 @@ func (a Asset) putRefs(stub shim.ChaincodeStubInterface) error {
 		// Construct reference key
 		refKey, err := stub.CreateCompositeKey(referencedKey.Key(), []string{assetKey})
 		if err != nil {
-			return fmt.Errorf("failed generating composite key for reference: %s", err)
+			return errors.WrapErrorWithStatus(err, "failed generating composite key for reference", 500)
 		}
 		err = stub.PutState(refKey, []byte{0x00})
 		if err != nil {
-			return fmt.Errorf("failed to put sub asset reference into blockchain: %s", err)
+			return errors.WrapErrorWithStatus(err, "failed to put sub asset reference into blockchain", 500)
 		}
 	}
 
@@ -142,7 +142,7 @@ func (a Asset) IsReferenced(stub shim.ChaincodeStubInterface) (bool, error) {
 	assetKey := a.Key()
 	queryIt, err := stub.GetStateByPartialCompositeKey(assetKey, []string{})
 	if err != nil {
-		return false, fmt.Errorf("failed to check reference index: %s", err)
+		return false, errors.WrapErrorWithStatus(err, "failed to check reference index", 500)
 	}
 	defer queryIt.Close()
 

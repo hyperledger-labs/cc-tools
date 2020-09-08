@@ -7,10 +7,10 @@ import (
 
 // Transaction defines the object containing tx definitions
 type Transaction struct {
-	// List of all MSPs allowed to run this transaction (regexp is supported).
+	// List of all MSPs allowed to run this transaction.
+	// Regexp is supported by putting '$' before the MSP regexp e.g. []string{`$org\dMSP`}.
 	// Please note this restriction DOES NOT protect ledger data from being read by unauthorized organizations.
-	// This should be done with Private Data, which is not directly supported by this template but can be implemented
-	// using the HL Fabric Chaincode API.
+	// This should be done with Private Data.
 	Callers []string `json:"callers,omitempty"`
 
 	Tag         string `json:"tag"`
