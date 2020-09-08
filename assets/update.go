@@ -17,12 +17,6 @@ func (a *Asset) Update(stub shim.ChaincodeStubInterface, update map[string]inter
 		return nil, errors.NewCCError(fmt.Sprintf("asset type named %s does not exist", a.TypeTag()), 400)
 	}
 
-	// Check full asset write permission
-	err := a.CheckGlobalWriters(stub)
-	if err != nil {
-		return nil, errors.WrapError(err, "failed writers check")
-	}
-
 	// Get tx creator MSP ID
 	txCreator, err := cid.GetMSPID(stub)
 	if err != nil {

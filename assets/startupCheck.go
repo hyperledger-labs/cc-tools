@@ -19,12 +19,7 @@ func StartupCheck() errors.ICCError {
 		if assetType.Label == "" {
 			return errors.NewCCError(fmt.Sprintf("asset with tag %s has no label", tag), 500)
 		}
-		for _, w := range assetType.Writers {
-			_, err := regexp.Compile(w)
-			if err != nil {
-				return errors.NewCCError(fmt.Sprintf("invalid writer regular expression %s for asset %s: %s", w, tag, err), 500)
-			}
-		}
+
 		hasKey := false
 		for _, prop := range assetType.Props {
 			dataTypeName := prop.DataType

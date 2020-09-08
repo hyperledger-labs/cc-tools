@@ -9,7 +9,6 @@ type AssetType struct {
 	Description string `json:"description"`
 
 	Props    []AssetProp       `json:"props"`
-	Writers  []string          `json:"writers,omitempty"`
 	Readers  []string          `json:"readers,omitempty"`
 	Validate func(Asset) error `json:"-"`
 }
