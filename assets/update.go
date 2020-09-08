@@ -59,7 +59,7 @@ func (a *Asset) Update(stub shim.ChaincodeStubInterface, update map[string]inter
 				}
 			}
 			if !writePermission {
-				return nil, errors.NewCCError(fmt.Sprintf("%s cannot write to this asset property", txCreator), 403)
+				return nil, errors.NewCCError(fmt.Sprintf("%s cannot write to the '%s' (%s) asset property", txCreator, prop.Tag, prop.Label), 403)
 			}
 		}
 

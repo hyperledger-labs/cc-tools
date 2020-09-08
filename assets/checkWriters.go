@@ -37,7 +37,7 @@ func (a Asset) CheckWriters(stub shim.ChaincodeStubInterface) error {
 				}
 			}
 			if !writePermission {
-				return errors.NewCCError(fmt.Sprintf("%s cannot write to this asset property", txCreator), 403)
+				return errors.NewCCError(fmt.Sprintf("%s cannot write to the '%s' (%s) asset property", txCreator, prop.Tag, prop.Label), 403)
 			}
 		}
 	}
