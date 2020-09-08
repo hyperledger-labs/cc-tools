@@ -82,7 +82,7 @@ func (a *Asset) Update(stub shim.ChaincodeStubInterface, update map[string]inter
 		return nil, errors.WrapError(err, "failed injecting asset metadata")
 	}
 
-	ret, err := a.Put(stub)
+	ret, err := a.put(stub)
 	if err != nil {
 		return nil, errors.WrapError(err, "failed putting asset in ledger")
 	}

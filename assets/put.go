@@ -7,16 +7,9 @@ import (
 	"github.com/hyperledger/fabric/core/chaincode/shim"
 )
 
-// Put inserts asset in blockchain
-func (a *Asset) Put(stub shim.ChaincodeStubInterface) (map[string]interface{}, errors.ICCError) {
-	// Check if org has write permission
-	err := a.CheckWriters(stub)
-	if err != nil {
-		return nil, errors.WrapError(err, "failed write permission check")
-	}
-
+func (a *Asset) put(stub shim.ChaincodeStubInterface) (map[string]interface{}, errors.ICCError) {
 	// Write index of references this asset points to
-	err = a.putRefs(stub)
+	err := a.putRefs(stub)
 	if err != nil {
 		return nil, errors.WrapError(err, "failed writing reference index")
 	}
@@ -55,6 +48,17 @@ func (a *Asset) Put(stub shim.ChaincodeStubInterface) (map[string]interface{}, e
 		return nil, errors.WrapError(err, "failed to write asset to ledger")
 	}
 	return *a, nil
+}
+
+// Put inserts asset in blockchain
+func (a *Asset) Put(stub shim.ChaincodeStubInterface) (map[string]interface{}, errors.ICCError) {
+	// Check if org has write permission
+	err := a.CheckWriters(stub)
+	if err != nil {
+		return nil, errors.WrapError(err, "failed write permission check")
+	}
+
+	return a.put(stub)
 }
 
 // PutNew inserts asset in blockchain and returns error if asset exists
