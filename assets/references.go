@@ -13,7 +13,7 @@ func (a Asset) Refs(stub shim.ChaincodeStubInterface) ([]Key, errors.ICCError) {
 	// Fetch asset properties
 	assetTypeDef := a.Type()
 	if assetTypeDef == nil {
-		return nil, errors.NewCCError(fmt.Sprintf("asset type named %s does not exist", a.TypeTag()), 400)
+		return nil, errors.NewCCError(fmt.Sprintf("asset type named '%s' does not exist", a.TypeTag()), 400)
 	}
 	assetSubAssets := assetTypeDef.SubAssets()
 	var keys []Key
@@ -39,7 +39,7 @@ func (a Asset) Refs(stub shim.ChaincodeStubInterface) ([]Key, errors.ICCError) {
 			var ok bool
 			subAssetAsArray, ok = subAssetRefInterface.([]interface{})
 			if !ok {
-				return nil, errors.NewCCError(fmt.Sprintf("asset property %s must and array of type %s", subAsset.Label, subAsset.DataType), 400)
+				return nil, errors.NewCCError(fmt.Sprintf("asset property '%s' must and array of type '%s'", subAsset.Label, subAsset.DataType), 400)
 			}
 		}
 
@@ -49,7 +49,7 @@ func (a Asset) Refs(stub shim.ChaincodeStubInterface) ([]Key, errors.ICCError) {
 				// If subAsset is badly formatted, this method shouldn't have been called
 				return nil, errors.NewCCError("sub-asset reference badly formatted", 400)
 			}
-			subAssetRefMap["@assetType"] = subAsset.DataType
+			subAssetRefMap["@assetType"] = subAssetDataType
 
 			// Generate key for subAsset
 			key, err := NewKey(subAssetRefMap)

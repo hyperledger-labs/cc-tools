@@ -190,3 +190,8 @@ func (k Key) Key() string {
 	assetKey := k["@key"].(string)
 	return assetKey
 }
+
+func (k Key) String() string {
+	ret, _ := json.Marshal(k)
+	return string(ret)
+}

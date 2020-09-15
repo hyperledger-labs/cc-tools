@@ -114,3 +114,8 @@ func (a Asset) Type() *AssetType {
 	assetTypeDef := FetchAssetType(assetTypeTag)
 	return assetTypeDef
 }
+
+func (a Asset) String() string {
+	ret, _ := json.Marshal(a)
+	return string(ret)
+}
