@@ -4,11 +4,13 @@ package assets
 AssetProp describes properties of each asset attribute
 */
 type AssetProp struct {
-	Tag      string `json:"tag"`
-	Label    string `json:"label"`
-	Required bool   `json:"required"`
-	IsKey    bool   `json:"isKey"`
-	ReadOnly bool   `json:"readOnly"`
+	Tag         string `json:"tag"`
+	Label       string `json:"label"`
+	Description string `json:"description"`
+
+	Required bool `json:"required"`
+	IsKey    bool `json:"isKey"`
+	ReadOnly bool `json:"readOnly"`
 
 	/* DataType can assume the following values:
 	Primary types: "string", "number", "boolean", "datetime"
