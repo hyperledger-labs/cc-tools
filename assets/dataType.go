@@ -15,16 +15,31 @@ type DataType struct {
 	AcceptedFormats []string `json:"acceptedFormats"`
 	Description     string   `json:"description,omitempty"`
 
-	KeyString func(interface{}) (string, error)      `json:"-"`
-	Validate  func(interface{}) (interface{}, error) `json:"-"`
+	Parse func(interface{}) (string, interface{}, error) `json:"-"`
+
+	KeyString func(interface{}) (string, error)      `json:"-"` // DEPRECATED. Use Parse instead.
+	Validate  func(interface{}) (interface{}, error) `json:"-"` // DEPRECATED. Use Parse instead.
 }
 
 // CustomDataTypes allows cc developer to inject custom primitive data types
 func CustomDataTypes(m map[string]DataType) error {
 	for k, v := range m {
-		if v.KeyString == nil || v.Validate == nil {
-			return errors.NewCCError("invalid custom data type", 500)
+		if v.Parse == nil {
+			// These function signatures are deprecated and this is here for backwards compatibility only.
+			if v.KeyString == nil || v.Validate == nil {
+				return errors.NewCCError("invalid custom data type", 500)
+			}
+			v.Parse = func(d interface{}) (key string, ret interface{}, err error) {
+				key, err = v.KeyString(d)
+				if err != nil {
+					return
+				}
+
+				ret, err = v.Validate(d)
+				return
+			}
 		}
+
 		dataTypeMap[k] = v
 	}
 	return nil
@@ -42,63 +57,45 @@ func DataTypeMap() map[string]DataType {
 var dataTypeMap = map[string]DataType{
 	"string": {
 		AcceptedFormats: []string{"string"},
-		KeyString: func(data interface{}) (string, error) {
-			dataVal, ok := data.(string)
-			if !ok {
-				return "", errors.NewCCError("asset property should be a string", 400)
-			}
-
-			return dataVal, nil
-		},
-
-		Validate: func(data interface{}) (interface{}, error) {
+		Parse: func(data interface{}) (string, interface{}, error) {
 			parsedData, ok := data.(string)
 			if !ok {
-				return nil, errors.NewCCError("property must be a string", 400)
+				return parsedData, nil, errors.NewCCError("property must be a string", 400)
 			}
-			return parsedData, nil
+			return parsedData, parsedData, nil
 		},
 	},
 	"number": {
 		AcceptedFormats: []string{"number"},
-		KeyString: func(data interface{}) (string, error) {
+		Parse: func(data interface{}) (string, interface{}, error) {
 			dataVal, ok := data.(float64)
 			if !ok {
 				propValStr, okStr := data.(string)
 				if !okStr {
-					return "", errors.NewCCError("asset property should be a number", 400)
+					return "", nil, errors.NewCCError("asset property should be a number", 400)
 				}
 				var err error
 				dataVal, err = strconv.ParseFloat(propValStr, 64)
 				if err != nil {
-					return "", errors.WrapErrorWithStatus(err, fmt.Sprintf("asset property should be a number"), 400)
+					return "", nil, errors.WrapErrorWithStatus(err, fmt.Sprintf("asset property should be a number"), 400)
 				}
 			}
 
 			// Float IEEE 754 hexadecimal representation
-			return strconv.FormatUint(math.Float64bits(dataVal), 16), nil
-		},
-
-		Validate: func(data interface{}) (interface{}, error) {
-			parsedData, ok := data.(float64)
-			if !ok {
-				return nil, errors.NewCCError("property must be a number", 400)
-			}
-
-			return parsedData, nil
+			return strconv.FormatUint(math.Float64bits(dataVal), 16), dataVal, nil
 		},
 	},
 	"boolean": {
 		AcceptedFormats: []string{"boolean"},
-		KeyString: func(data interface{}) (string, error) {
+		Parse: func(data interface{}) (string, interface{}, error) {
 			dataVal, ok := data.(bool)
 			if !ok {
 				dataValStr, okStr := data.(string)
 				if !okStr {
-					return "", errors.NewCCError("asset property should be a boolean", 400)
+					return "", nil, errors.NewCCError("asset property should be a boolean", 400)
 				}
 				if dataValStr != "true" && dataValStr != "false" {
-					return "", errors.NewCCError("asset property should be a boolean", 400)
+					return "", nil, errors.NewCCError("asset property should be a boolean", 400)
 				}
 				if dataValStr == "true" {
 					dataVal = true
@@ -106,46 +103,24 @@ var dataTypeMap = map[string]DataType{
 			}
 
 			if dataVal {
-				return "t", nil
+				return "t", dataVal, nil
 			}
-			return "f", nil
-		},
-
-		Validate: func(data interface{}) (interface{}, error) {
-			parsedData, ok := data.(bool)
-			if !ok {
-				return nil, errors.NewCCError("property must be a boolean", 400)
-			}
-
-			return parsedData, nil
+			return "f", dataVal, nil
 		},
 	},
 	"datetime": {
 		AcceptedFormats: []string{"string"},
-		KeyString: func(data interface{}) (string, error) {
+		Parse: func(data interface{}) (string, interface{}, error) {
 			dataVal, ok := data.(string)
 			if !ok {
-				return "", errors.NewCCError("asset property should be a RFC3339 string", 400)
+				return "", nil, errors.NewCCError("asset property should be a RFC3339 string", 400)
 			}
 			dataTime, err := time.Parse(time.RFC3339, dataVal)
 			if err != nil {
-				return "", errors.WrapErrorWithStatus(err, "invalid asset property RFC3339 format", 400)
+				return "", nil, errors.WrapErrorWithStatus(err, "invalid asset property RFC3339 format", 400)
 			}
 
-			return dataTime.Format(time.RFC3339), nil
-		},
-
-		Validate: func(data interface{}) (interface{}, error) {
-			dataVal, ok := data.(string)
-			if !ok {
-				return nil, errors.NewCCError("asset property must be an RFC3339 string", 400)
-			}
-			parsedData, err := time.Parse(time.RFC3339, dataVal)
-			if err != nil {
-				return nil, errors.WrapErrorWithStatus(err, "invalid asset property RFC3339 format", 400)
-			}
-
-			return parsedData, nil
+			return dataTime.Format(time.RFC3339), dataTime, nil
 		},
 	},
 }

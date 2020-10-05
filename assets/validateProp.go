@@ -37,7 +37,7 @@ func validateProp(prop interface{}, propDef AssetProp) (interface{}, error) {
 		// Validate data types
 		dataType, dataTypeExists := dataTypeMap[dataTypeName]
 		if dataTypeExists { // if data type is a primary data type
-			parsedProp, err = dataType.Validate(prop)
+			_, parsedProp, err = dataType.Parse(prop)
 			if err != nil {
 				return nil, errors.WrapError(err, fmt.Sprintf("invalid '%s' (%s) asset property", propDef.Tag, propDef.Label))
 			}
