@@ -5,7 +5,7 @@ type Argument struct {
 	Description string `json:"description"`
 
 	/* DataType can assume the following values:
-	Primary types: "string", "number", "boolean", "datetime"
+	Primary types: "string", "number", "integer", "boolean", "datetime"
 	Special types:
 		@asset: any asset type defined in the assets package
 		@key: key properties for any asset type defined in the assets package

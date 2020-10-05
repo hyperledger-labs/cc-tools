@@ -85,6 +85,32 @@ var dataTypeMap = map[string]DataType{
 			return strconv.FormatUint(math.Float64bits(dataVal), 16), dataVal, nil
 		},
 	},
+	"integer": {
+		AcceptedFormats: []string{"number"},
+		Parse: func(data interface{}) (string, interface{}, error) {
+			dataVal, ok := data.(float64)
+			if !ok {
+				propValStr, okStr := data.(string)
+				if !okStr {
+					return "", nil, errors.NewCCError("asset property should be an integer", 400)
+				}
+				var err error
+				dataVal, err = strconv.ParseFloat(propValStr, 64)
+				if err != nil {
+					return "", nil, errors.WrapErrorWithStatus(err, fmt.Sprintf("asset property should be an integer"), 400)
+				}
+			}
+
+			retVal := math.Trunc(dataVal)
+
+			if dataVal != retVal {
+				return "", nil, errors.NewCCError("asset property should be an integer", 400)
+			}
+
+			// Float IEEE 754 hexadecimal representation
+			return fmt.Sprintf("%d", int64(retVal)), int64(retVal), nil
+		},
+	},
 	"boolean": {
 		AcceptedFormats: []string{"boolean"},
 		Parse: func(data interface{}) (string, interface{}, error) {

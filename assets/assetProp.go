@@ -13,7 +13,7 @@ type AssetProp struct {
 	ReadOnly bool `json:"readOnly"`
 
 	/* DataType can assume the following values:
-	Primary types: "string", "number", "boolean", "datetime"
+	Primary types: "string", "number", "integer", "boolean", "datetime"
 	Special types:
 		<assetType>: the specific asset type key (reference) as defined by <assetType> in the assets packages
 		[]<type>: an array of elements specified by <type> as any of the above valid types
