@@ -10,7 +10,7 @@ func (a *Asset) ExistsInLedger(stub shim.ChaincodeStubInterface) (bool, errors.I
 	var assetBytes []byte
 	var err error
 	if a.IsPrivate() {
-		assetBytes, err = stub.GetPrivateData(a.TypeTag(), a.Key())
+		assetBytes, err = stub.GetPrivateDataHash(a.TypeTag(), a.Key())
 	} else {
 		assetBytes, err = stub.GetState(a.Key())
 	}
