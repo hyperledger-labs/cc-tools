@@ -8,8 +8,8 @@ type AssetProp struct {
 	Label       string `json:"label"`
 	Description string `json:"description"`
 
-	Required bool `json:"required"`
 	IsKey    bool `json:"isKey"`
+	Required bool `json:"required"`
 	ReadOnly bool `json:"readOnly"`
 
 	/* DataType can assume the following values:
