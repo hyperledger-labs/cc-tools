@@ -48,11 +48,11 @@ func StartupCheck() errors.ICCError {
 			}
 
 			// Check if prop tag or label is duplicate
-			if _, duplicate := assetTagSet[tag]; duplicate {
+			if _, duplicate := propTagSet[tag]; duplicate {
 				return errors.NewCCError(fmt.Sprintf("duplicate asset prop tag '%s' in asset type '%s'", tag, assetType.Tag), 500)
 			}
 			propTagSet[tag] = struct{}{}
-			if _, duplicate := assetLabelSet[label]; duplicate {
+			if _, duplicate := propLabelSet[label]; duplicate {
 				return errors.NewCCError(fmt.Sprintf("duplicate asset prop label '%s' in asset type '%s'", label, assetType.Tag), 500)
 			}
 			propLabelSet[label] = struct{}{}
