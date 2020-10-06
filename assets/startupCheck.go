@@ -36,13 +36,13 @@ func StartupCheck() errors.ICCError {
 		propTagSet := map[string]struct{}{}
 		propLabelSet := map[string]struct{}{}
 		hasKey := false
-		for _, prop := range assetType.Props {
+		for _, propDef := range assetType.Props {
 			// Check if prop tag or label is empty
-			tag := prop.Tag
+			tag := propDef.Tag
 			if tag == "" {
 				return errors.NewCCError(fmt.Sprintf("asset '%s' prop has empty tag", assetType.Tag), 500)
 			}
-			label := prop.Label
+			label := propDef.Label
 			if label == "" {
 				return errors.NewCCError(fmt.Sprintf("asset '%s' prop with tag '%s' has no label", assetType.Tag, tag), 500)
 			}
@@ -57,46 +57,47 @@ func StartupCheck() errors.ICCError {
 			}
 			propLabelSet[label] = struct{}{}
 
-			dataTypeName := prop.DataType
+			dataTypeName := propDef.DataType
 			if strings.HasPrefix(dataTypeName, "[]") {
 				dataTypeName = strings.TrimPrefix(dataTypeName, "[]")
 			}
 
 			// Check if there are references to undefined types
 			// Check if prop's datatype is a primitive type
-			dataType, dataTypeExists := dataTypeMap[dataTypeName]
+			_, dataTypeExists := dataTypeMap[dataTypeName]
 			if !dataTypeExists {
 				// Checks if the prop's datatype exists on assetMap
 				propTypeDef := FetchAssetType(dataTypeName)
 				if propTypeDef == nil {
-					return errors.NewCCError(fmt.Sprintf("reference for undefined type '%s'", prop.DataType), 500)
+					return errors.NewCCError(fmt.Sprintf("reference for undefined type '%s'", propDef.DataType), 500)
 				}
-				if prop.DefaultValue != nil {
-					return errors.NewCCError(fmt.Sprintf("default value cannot be used in reference in prop '%s' of asset '%s'", prop.Label, assetType.Label), 500)
+				if propDef.DefaultValue != nil {
+					return errors.NewCCError(fmt.Sprintf("default value cannot be used in reference in prop '%s' of asset '%s'", propDef.Label, assetType.Label), 500)
 				}
 			} else {
-				if prop.DefaultValue != nil {
-					_, _, err := dataType.Parse(prop.DefaultValue)
+				// Make sure default value is valid
+				if propDef.DefaultValue != nil {
+					_, err := validateProp(propDef.DefaultValue, propDef)
 					if err != nil {
-						return errors.WrapErrorWithStatus(err, fmt.Sprintf("invalid default value in prop '%s' of asset '%s'", prop.Label, assetType.Label), 500)
+						return errors.WrapErrorWithStatus(err, fmt.Sprintf("invalid default value in prop '%s' of asset '%s'", propDef.Label, assetType.Label), 500)
 					}
 				}
 			}
 
 			// Check if writers in regex mode compile
-			for _, w := range prop.Writers {
+			for _, w := range propDef.Writers {
 				if len(w) <= 1 {
 					continue
 				}
 				if w[0] == '$' {
 					_, err := regexp.Compile(w[1:])
 					if err != nil {
-						return errors.WrapErrorWithStatus(err, fmt.Sprintf("invalid writer regular expression %s for property %s of asset %s", w, prop.Label, tag), 500)
+						return errors.WrapErrorWithStatus(err, fmt.Sprintf("invalid writer regular expression %s for property %s of asset %s", w, propDef.Label, tag), 500)
 					}
 				}
 			}
 
-			if prop.IsKey {
+			if propDef.IsKey {
 				hasKey = true
 			}
 		}
