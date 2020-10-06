@@ -11,9 +11,11 @@ import (
 
 // DataType is the struct defining a primitive data type
 type DataType struct {
-	// AcceptedFormats is a list of "core" types that can be accepted (string, number or boolean)
+	// AcceptedFormats is a list of "core" types that can be accepted (string, number, integer, boolean, datetime)
 	AcceptedFormats []string `json:"acceptedFormats"`
 	Description     string   `json:"description,omitempty"`
+
+	DropDownValues map[interface{}]string
 
 	Parse func(interface{}) (string, interface{}, error) `json:"-"`
 
