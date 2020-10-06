@@ -15,7 +15,7 @@ type DataType struct {
 	AcceptedFormats []string `json:"acceptedFormats"`
 	Description     string   `json:"description,omitempty"`
 
-	DropDownValues map[interface{}]string
+	DropDownValues map[string]interface{}
 
 	Parse func(interface{}) (string, interface{}, error) `json:"-"`
 
