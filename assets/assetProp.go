@@ -12,7 +12,7 @@ type AssetProp struct {
 	Required bool `json:"required"`
 	ReadOnly bool `json:"readOnly"`
 
-	DefaultValue interface{}
+	DefaultValue interface{} `json:"defaultValue,omitempty"`
 
 	/* DataType can assume the following values:
 	Primary types: "string", "number", "integer", "boolean", "datetime"
