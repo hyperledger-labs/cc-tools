@@ -30,13 +30,16 @@ func (a Asset) ValidateProps() errors.ICCError {
 		// Check if required property is included
 		propInterface, propIncluded := a[prop.Tag]
 		if !propIncluded {
-			if prop.Required {
-				return errors.NewCCError(fmt.Sprintf("property %s (%s) is required", prop.Tag, prop.Label), 400)
+			if prop.DefaultValue == nil {
+				if prop.Required {
+					return errors.NewCCError(fmt.Sprintf("property %s (%s) is required", prop.Tag, prop.Label), 400)
+				}
+				if prop.IsKey {
+					return errors.NewCCError(fmt.Sprintf("key property %s (%s) is required", prop.Tag, prop.Label), 400)
+				}
+				continue
 			}
-			if prop.IsKey {
-				return errors.NewCCError(fmt.Sprintf("key property %s (%s) is required", prop.Tag, prop.Label), 400)
-			}
-			continue
+			propInterface = prop.DefaultValue
 		}
 
 		// Validate data types
