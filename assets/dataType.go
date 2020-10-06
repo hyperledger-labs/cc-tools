@@ -137,13 +137,17 @@ var dataTypeMap = map[string]DataType{
 	"datetime": {
 		AcceptedFormats: []string{"string"},
 		Parse: func(data interface{}) (string, interface{}, error) {
-			dataVal, ok := data.(string)
+			dataTime, ok := data.(time.Time)
 			if !ok {
-				return "", nil, errors.NewCCError("asset property should be a RFC3339 string", 400)
-			}
-			dataTime, err := time.Parse(time.RFC3339, dataVal)
-			if err != nil {
-				return "", nil, errors.WrapErrorWithStatus(err, "invalid asset property RFC3339 format", 400)
+				dataVal, ok := data.(string)
+				if !ok {
+					return "", nil, errors.NewCCError("asset property should be a RFC3339 string", 400)
+				}
+				var err error
+				dataTime, err = time.Parse(time.RFC3339, dataVal)
+				if err != nil {
+					return "", nil, errors.WrapErrorWithStatus(err, "invalid asset property RFC3339 format", 400)
+				}
 			}
 
 			return dataTime.Format(time.RFC3339), dataTime, nil
