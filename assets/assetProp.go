@@ -11,6 +11,7 @@ type AssetProp struct {
 	IsKey    bool `json:"isKey"`
 	Required bool `json:"required"`
 	ReadOnly bool `json:"readOnly"`
+	Unique   bool `json:"unique"`
 
 	DefaultValue interface{} `json:"defaultValue,omitempty"`
 

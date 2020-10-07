@@ -45,8 +45,7 @@ func validateProp(prop interface{}, propDef AssetProp) (interface{}, error) {
 			// If not a primary type, check if type is defined in assetMap
 			subAssetType := FetchAssetType(dataTypeName)
 			if subAssetType == nil {
-				err := fmt.Errorf("invalid data type named '%s'", propDef.DataType)
-				return nil, errors.WrapErrorWithStatus(err, "invalid property type", 400)
+				return nil, errors.NewCCError(fmt.Sprintf("invalid data type named '%s'", dataTypeName), 400)
 			}
 
 			// Check if received subAsset is a map

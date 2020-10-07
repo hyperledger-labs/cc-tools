@@ -30,6 +30,12 @@ func (a *Asset) Delete(stub shim.ChaincodeStubInterface) ([]byte, error) {
 		return nil, errors.WrapError(err, "failed cleaning reference index")
 	}
 
+	// Clean up unique markers for this asset
+	err = a.delUniqueMarkers(stub)
+	if err != nil {
+		return nil, errors.WrapError(err, "failed cleaning unique markers")
+	}
+
 	var assetJSON []byte
 	if !a.IsPrivate() {
 		err = stub.DelState(a.Key())

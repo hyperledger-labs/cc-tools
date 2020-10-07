@@ -14,6 +14,11 @@ func (a *Asset) put(stub shim.ChaincodeStubInterface) (map[string]interface{}, e
 		return nil, errors.WrapError(err, "failed writing reference index")
 	}
 
+	err = a.putUniqueMarkers(stub)
+	if err != nil {
+		return nil, errors.WrapError(err, "failed writing unique markers")
+	}
+
 	err = a.injectMetadata(stub)
 	if err != nil {
 		return nil, errors.WrapError(err, "failed injecting asset metadata")
@@ -56,6 +61,11 @@ func (a *Asset) Put(stub shim.ChaincodeStubInterface) (map[string]interface{}, e
 	err := a.CheckWriters(stub)
 	if err != nil {
 		return nil, errors.WrapError(err, "failed write permission check")
+	}
+
+	err = a.checkUniqueMarkers(stub)
+	if err != nil {
+		return nil, errors.WrapError(err, "failed unique props validation")
 	}
 
 	return a.put(stub)

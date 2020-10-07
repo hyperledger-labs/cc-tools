@@ -57,9 +57,16 @@ func StartupCheck() errors.ICCError {
 			}
 			propLabelSet[label] = struct{}{}
 
+			var isArray = false
 			dataTypeName := propDef.DataType
 			if strings.HasPrefix(dataTypeName, "[]") {
 				dataTypeName = strings.TrimPrefix(dataTypeName, "[]")
+				isArray = true
+			}
+
+			// Check if Unique flag is set in array-like prop
+			if propDef.Unique && isArray {
+				return errors.NewCCError("array-like props cannot be set as unique", 500)
 			}
 
 			// Check if there are references to undefined types

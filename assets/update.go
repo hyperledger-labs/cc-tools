@@ -26,7 +26,13 @@ func (a *Asset) Update(stub shim.ChaincodeStubInterface, update map[string]inter
 	// Delete current reference indexes
 	err = a.delRefs(stub)
 	if err != nil {
-		return nil, errors.WrapError(err, "failed erasing old reference indexes from blockchain")
+		return nil, errors.WrapError(err, "failed erasing old reference indexes from ledger")
+	}
+
+	// Delete current unique markers
+	err = a.delUniqueMarkers(stub)
+	if err != nil {
+		return nil, errors.WrapError(err, "failed erasing old unique markers from ledger")
 	}
 
 	// Validate new asset properties
@@ -86,6 +92,11 @@ func (a *Asset) Update(stub shim.ChaincodeStubInterface, update map[string]inter
 	err = a.validateRefs(stub)
 	if err != nil {
 		return nil, errors.WrapError(err, "failed reference validation")
+	}
+
+	err = a.checkUniqueMarkers(stub)
+	if err != nil {
+		return nil, errors.WrapError(err, "failed unique props validation")
 	}
 
 	err = a.injectMetadata(stub)

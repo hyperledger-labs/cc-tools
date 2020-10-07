@@ -44,6 +44,7 @@ func NewKey(m map[string]interface{}) (k Key, err errors.ICCError) {
 		return
 	}
 
+	// Copy input to new map
 	k = Key{}
 	for t, v := range m {
 		k[t] = v
