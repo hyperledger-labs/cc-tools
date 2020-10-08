@@ -62,19 +62,27 @@ func StartupCheck() errors.ICCError {
 				dataTypeName = strings.TrimPrefix(dataTypeName, "[]")
 			}
 
+			var isSubAsset = false
+			if strings.HasPrefix(dataTypeName, "->") {
+				dataTypeName = strings.TrimPrefix(dataTypeName, "->")
+				isSubAsset = true
+			}
+
 			// Check if there are references to undefined types
-			// Check if prop's datatype is a primitive type
-			_, dataTypeExists := dataTypeMap[dataTypeName]
-			if !dataTypeExists {
+			if isSubAsset {
 				// Checks if the prop's datatype exists on assetMap
 				propTypeDef := FetchAssetType(dataTypeName)
 				if propTypeDef == nil {
-					return errors.NewCCError(fmt.Sprintf("reference for undefined type '%s'", propDef.DataType), 500)
+					return errors.NewCCError(fmt.Sprintf("reference for undefined asset type '%s'", propDef.DataType), 500)
 				}
 				if propDef.DefaultValue != nil {
-					return errors.NewCCError(fmt.Sprintf("default value cannot be used in reference in prop '%s' of asset '%s'", propDef.Label, assetType.Label), 500)
+					return errors.NewCCError(fmt.Sprintf("reference cannot have a default value in prop '%s' of asset '%s'", propDef.Label, assetType.Label), 500)
 				}
 			} else {
+				_, dataTypeExists := dataTypeMap[dataTypeName]
+				if !dataTypeExists {
+					return errors.NewCCError(fmt.Sprintf("reference for undefined data type '%s'", propDef.DataType), 500)
+				}
 				// Make sure default value is valid
 				if propDef.DefaultValue != nil {
 					_, err := validateProp(propDef.DefaultValue, propDef)

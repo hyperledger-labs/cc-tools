@@ -17,7 +17,7 @@ type AssetProp struct {
 	/* DataType can assume the following values:
 	Primary types: "string", "number", "integer", "boolean", "datetime"
 	Special types:
-		<assetType>: the specific asset type key (reference) as defined by <assetType> in the assets packages
+		-><assetType>: the specific asset type key (reference) as defined by <assetType> in the assets packages
 		[]<type>: an array of elements specified by <type> as any of the above valid types
 	*/
 	DataType string `json:"dataType"`

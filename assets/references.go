@@ -31,6 +31,8 @@ func (a Asset) Refs(stub shim.ChaincodeStubInterface) ([]Key, errors.ICCError) {
 			isArray = true
 		}
 
+		subAssetDataType = strings.TrimPrefix(subAssetDataType, "->")
+
 		// Handle array-like sub-asset property types
 		var subAssetAsArray []interface{}
 		if !isArray {

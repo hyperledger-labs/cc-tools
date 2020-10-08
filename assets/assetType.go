@@ -30,6 +30,9 @@ func (t AssetType) SubAssets() (subAssets []AssetProp) {
 		if strings.HasPrefix(dataType, "[]") {
 			dataType = strings.TrimPrefix(dataType, "[]")
 		}
+		if strings.HasPrefix(dataType, "->") {
+			dataType = strings.TrimPrefix(dataType, "->")
+		}
 		subAssetType := FetchAssetType(dataType)
 		if subAssetType != nil {
 			subAssets = append(subAssets, prop)

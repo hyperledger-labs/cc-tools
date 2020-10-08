@@ -46,11 +46,17 @@ func GenerateKey(asset map[string]interface{}) (string, errors.ICCError) {
 		}
 
 		var isArray bool
+		var isSubAsset bool
 		dataTypeName := prop.DataType
 
 		if strings.HasPrefix(dataTypeName, "[]") {
 			dataTypeName = strings.TrimPrefix(dataTypeName, "[]")
 			isArray = true
+		}
+
+		if strings.HasPrefix(dataTypeName, "->") {
+			dataTypeName = strings.TrimPrefix(dataTypeName, "->")
+			isSubAsset = true
 		}
 
 		// Handle array-like asset property types
@@ -66,9 +72,12 @@ func GenerateKey(asset map[string]interface{}) (string, errors.ICCError) {
 
 		// Iterate asset properties to form keySeed
 		for _, propInterface := range propAsArray {
-			dataType, dataTypeExists := dataTypeMap[dataTypeName]
-			if dataTypeExists {
+			if !isSubAsset {
 				// If key is a primitive data type, append its String value to seed
+				dataType, dataTypeExists := dataTypeMap[dataTypeName]
+				if !dataTypeExists {
+					return "", errors.NewCCError(fmt.Sprintf("internal error: invalid prop data type %s", prop.DataType), 500)
+				}
 				seed, _, err := dataType.Parse(propInterface)
 				if err != nil {
 					return "", errors.WrapError(err, fmt.Sprintf("failed to generate key for asset property '%s'", prop.Label))
@@ -79,7 +88,7 @@ func GenerateKey(asset map[string]interface{}) (string, errors.ICCError) {
 				// If key is a subAsset, generate subAsset's key to append to seed
 				assetTypeDef := FetchAssetType(dataTypeName)
 				if assetTypeDef == nil {
-					return "", errors.NewCCError(fmt.Sprintf("internal error: invalid prop data type %s", prop.DataType), 500)
+					return "", errors.NewCCError(fmt.Sprintf("internal error: invalid sub asset type %s", prop.DataType), 500)
 				}
 				propMap, ok := propInterface.(map[string]interface{})
 				if !ok {
@@ -92,9 +101,9 @@ func GenerateKey(asset map[string]interface{}) (string, errors.ICCError) {
 					errMsg := fmt.Sprintf("error generating key for subAsset key '%s'", prop.Tag)
 					return "", errors.WrapError(err, errMsg)
 				}
+
 				keySeed += subAssetKey
 			}
-
 		}
 	}
 
