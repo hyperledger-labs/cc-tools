@@ -43,7 +43,7 @@ func validateProp(prop interface{}, propDef AssetProp) (interface{}, error) {
 		// Validate data types
 		if !isSubAsset {
 			dataType, dataTypeExists := dataTypeMap[dataTypeName]
-			if dataTypeExists {
+			if !dataTypeExists {
 				return nil, errors.NewCCError(fmt.Sprintf("invalid data type named '%s'", propDef.DataType), 400)
 			}
 			_, parsedProp, err = dataType.Parse(prop)
@@ -54,7 +54,7 @@ func validateProp(prop interface{}, propDef AssetProp) (interface{}, error) {
 			// Check if type is defined in assetList
 			subAssetType := FetchAssetType(dataTypeName)
 			if subAssetType == nil {
-				return nil, errors.NewCCError(fmt.Sprintf("invalid data type named '%s'", propDef.DataType), 400)
+				return nil, errors.NewCCError(fmt.Sprintf("invalid asset type named '%s'", propDef.DataType), 400)
 			}
 
 			// Check if received subAsset is a map
