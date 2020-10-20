@@ -110,7 +110,11 @@ func validateTxArg(argType string, arg interface{}) (interface{}, errors.ICCErro
 	dataTypeMap := assets.DataTypeMap()
 	dataType, dataTypeExists := dataTypeMap[argType]
 	if dataTypeExists { // if argument is a primitive data type
-		_, argAsInterface, err = dataType.Parse(arg)
+		if !dataType.IsLegacy() {
+			_, argAsInterface, err = dataType.Parse(arg)
+		} else {
+			argAsInterface, err = dataType.Validate(arg)
+		}
 		if err != nil {
 			return nil, errors.WrapError(err, "invalid argument format")
 		}

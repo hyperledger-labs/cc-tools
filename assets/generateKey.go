@@ -78,7 +78,13 @@ func GenerateKey(asset map[string]interface{}) (string, errors.ICCError) {
 				if !dataTypeExists {
 					return "", errors.NewCCError(fmt.Sprintf("internal error: invalid prop data type %s", prop.DataType), 500)
 				}
-				seed, _, err := dataType.Parse(propInterface)
+				var seed string
+				var err error
+				if !dataType.IsLegacy() {
+					seed, _, err = dataType.Parse(propInterface)
+				} else {
+					seed, err = dataType.KeyString(propInterface)
+				}
 				if err != nil {
 					return "", errors.WrapError(err, fmt.Sprintf("failed to generate key for asset property '%s'", prop.Label))
 				}

@@ -46,7 +46,11 @@ func validateProp(prop interface{}, propDef AssetProp) (interface{}, error) {
 			if !dataTypeExists {
 				return nil, errors.NewCCError(fmt.Sprintf("invalid data type named '%s'", propDef.DataType), 400)
 			}
-			_, parsedProp, err = dataType.Parse(prop)
+			if !dataType.IsLegacy() {
+				_, parsedProp, err = dataType.Parse(prop)
+			} else {
+				parsedProp, err = dataType.Validate(prop)
+			}
 			if err != nil {
 				return nil, errors.WrapError(err, fmt.Sprintf("invalid '%s' (%s) asset property", propDef.Tag, propDef.Label))
 			}

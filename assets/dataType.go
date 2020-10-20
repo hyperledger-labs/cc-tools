@@ -19,8 +19,14 @@ type DataType struct {
 
 	Parse func(interface{}) (string, interface{}, error) `json:"-"`
 
-	KeyString func(interface{}) (string, error)      `json:"-"` // DEPRECATED. Use Parse instead.
-	Validate  func(interface{}) (interface{}, error) `json:"-"` // DEPRECATED. Use Parse instead.
+	legacyMode bool
+	KeyString  func(interface{}) (string, error)      `json:"-"` // DEPRECATED. Use Parse instead.
+	Validate   func(interface{}) (interface{}, error) `json:"-"` // DEPRECATED. Use Parse instead.
+}
+
+// IsLegacy checks if datatype uses legacy functions KeyString and Validate instead of Parse
+func (d DataType) IsLegacy() bool {
+	return d.legacyMode
 }
 
 // CustomDataTypes allows cc developer to inject custom primitive data types
@@ -29,17 +35,9 @@ func CustomDataTypes(m map[string]DataType) error {
 		if v.Parse == nil {
 			// These function signatures are deprecated and this is here for backwards compatibility only.
 			if v.KeyString == nil || v.Validate == nil {
-				return errors.NewCCError("invalid custom data type", 500)
+				return errors.NewCCError(fmt.Sprintf("invalid custom data type '%s': nil Parse function", k), 500)
 			}
-			v.Parse = func(d interface{}) (key string, ret interface{}, err error) {
-				key, err = v.KeyString(d)
-				if err != nil {
-					return
-				}
-
-				ret, err = v.Validate(d)
-				return
-			}
+			v.legacyMode = true
 		}
 
 		dataTypeMap[k] = v
@@ -74,12 +72,12 @@ var dataTypeMap = map[string]DataType{
 			if !ok {
 				propValStr, okStr := data.(string)
 				if !okStr {
-					return "", nil, errors.NewCCError("asset property should be a number", 400)
+					return "", nil, errors.NewCCError("asset property must be a number", 400)
 				}
 				var err error
 				dataVal, err = strconv.ParseFloat(propValStr, 64)
 				if err != nil {
-					return "", nil, errors.WrapErrorWithStatus(err, fmt.Sprintf("asset property should be a number"), 400)
+					return "", nil, errors.WrapErrorWithStatus(err, fmt.Sprintf("asset property must be a number"), 400)
 				}
 			}
 
@@ -94,19 +92,19 @@ var dataTypeMap = map[string]DataType{
 			if !ok {
 				propValStr, okStr := data.(string)
 				if !okStr {
-					return "", nil, errors.NewCCError("asset property should be an integer", 400)
+					return "", nil, errors.NewCCError("asset property must be an integer", 400)
 				}
 				var err error
 				dataVal, err = strconv.ParseFloat(propValStr, 64)
 				if err != nil {
-					return "", nil, errors.WrapErrorWithStatus(err, fmt.Sprintf("asset property should be an integer"), 400)
+					return "", nil, errors.WrapErrorWithStatus(err, fmt.Sprintf("asset property must be an integer"), 400)
 				}
 			}
 
 			retVal := math.Trunc(dataVal)
 
 			if dataVal != retVal {
-				return "", nil, errors.NewCCError("asset property should be an integer", 400)
+				return "", nil, errors.NewCCError("asset property must be an integer", 400)
 			}
 
 			// Float IEEE 754 hexadecimal representation
@@ -120,10 +118,10 @@ var dataTypeMap = map[string]DataType{
 			if !ok {
 				dataValStr, okStr := data.(string)
 				if !okStr {
-					return "", nil, errors.NewCCError("asset property should be a boolean", 400)
+					return "", nil, errors.NewCCError("asset property must be a boolean", 400)
 				}
 				if dataValStr != "true" && dataValStr != "false" {
-					return "", nil, errors.NewCCError("asset property should be a boolean", 400)
+					return "", nil, errors.NewCCError("asset property must be a boolean", 400)
 				}
 				if dataValStr == "true" {
 					dataVal = true
@@ -143,7 +141,7 @@ var dataTypeMap = map[string]DataType{
 			if !ok {
 				dataVal, ok := data.(string)
 				if !ok {
-					return "", nil, errors.NewCCError("asset property should be a RFC3339 string", 400)
+					return "", nil, errors.NewCCError("asset property must be a RFC3339 string", 400)
 				}
 				var err error
 				dataTime, err = time.Parse(time.RFC3339, dataVal)
