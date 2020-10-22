@@ -166,19 +166,19 @@ func validateTxArg(argType string, arg interface{}) (interface{}, errors.ICCErro
 			}
 			argAsInterface = argMap
 		default:
-			var asset assets.Asset
+			var key assets.Key
 			argBytes, err := json.Marshal(arg)
 			if err != nil {
 				return nil, errors.NewCCError("failed to marshal arg", 400)
 			}
-			err = json.Unmarshal(argBytes, &asset)
+			err = json.Unmarshal(argBytes, &key)
 			if err != nil {
 				return nil, errors.WrapErrorWithStatus(err, "failed unmarshaling arg", 400)
 			}
-			if asset.TypeTag() != argType {
-				return nil, errors.NewCCError(fmt.Sprintf("arg must be of type %s", argType), 400)
+			if key.TypeTag() != argType {
+				return nil, errors.NewCCError(fmt.Sprintf("arg must be key of type %s", argType), 400)
 			}
-			argAsInterface = asset
+			argAsInterface = key
 		}
 	}
 
