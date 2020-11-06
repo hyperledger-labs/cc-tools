@@ -51,7 +51,14 @@ func (a Asset) Refs(stub shim.ChaincodeStubInterface) ([]Key, errors.ICCError) {
 				// If subAsset is badly formatted, this method shouldn't have been called
 				return nil, errors.NewCCError("sub-asset reference badly formatted", 400)
 			}
-			subAssetRefMap["@assetType"] = subAssetDataType
+
+			subAssetTypeName, ok := subAssetRefMap["@assetType"]
+			if ok && subAssetTypeName != subAssetDataType {
+				return nil, errors.NewCCError("sub-asset reference of wrong asset type", 400)
+			}
+			if !ok {
+				subAssetRefMap["@assetType"] = subAssetDataType
+			}
 
 			// Generate key for subAsset
 			key, err := NewKey(subAssetRefMap)

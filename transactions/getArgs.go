@@ -121,26 +121,25 @@ func validateTxArg(argType string, arg interface{}) (interface{}, errors.ICCErro
 	} else {
 		switch argType {
 		case "@asset":
-			var asset assets.Asset
-			argBytes, err := json.Marshal(arg)
-			if err != nil {
-				return nil, errors.WrapErrorWithStatus(err, "failed marshaling arg", 400)
+			var argMap map[string]interface{}
+			argMap, ok := arg.(map[string]interface{})
+			if !ok {
+				return nil, errors.NewCCError("invalid argument format", 400)
 			}
-			err = json.Unmarshal(argBytes, &asset)
+			asset, err := assets.NewAsset(argMap)
 			if err != nil {
-				return nil, errors.WrapErrorWithStatus(err, "failed unmarshaling arg", 400)
+				return nil, errors.WrapErrorWithStatus(err, "failed constructing asset", 400)
 			}
 			argAsInterface = asset
 		case "@key":
-			var key assets.Key
-			argBytes, err := json.Marshal(arg)
-			if err != nil {
-				return nil, errors.WrapErrorWithStatus(err, "failed marshaling arg", 400)
-
+			var argMap map[string]interface{}
+			argMap, ok := arg.(map[string]interface{})
+			if !ok {
+				return nil, errors.NewCCError("invalid argument format", 400)
 			}
-			err = json.Unmarshal(argBytes, &key)
+			key, err := assets.NewKey(argMap)
 			if err != nil {
-				return nil, errors.WrapErrorWithStatus(err, "failed unmarshaling arg", 400)
+				return nil, errors.WrapErrorWithStatus(err, "failed constructing key", 400)
 			}
 			argAsInterface = key
 		case "@update":
@@ -165,18 +164,23 @@ func validateTxArg(argType string, arg interface{}) (interface{}, errors.ICCErro
 				return nil, errors.NewCCError("missing selector", 400)
 			}
 			argAsInterface = argMap
-		default:
-			var key assets.Key
-			argBytes, err := json.Marshal(arg)
-			if err != nil {
-				return nil, errors.NewCCError("failed to marshal arg", 400)
+		default: // should be a specific asset key
+			// Handle @assetType
+			var argMap map[string]interface{}
+			argMap, ok := arg.(map[string]interface{})
+			if !ok {
+				return nil, errors.NewCCError("invalid argument format", 400)
 			}
-			err = json.Unmarshal(argBytes, &key)
-			if err != nil {
-				return nil, errors.WrapErrorWithStatus(err, "failed unmarshaling arg", 400)
+			assetTypeName, ok := argMap["@assetType"]
+			if ok && assetTypeName != argType { // in case an @assetType is specified, check if it is correct
+				return nil, errors.NewCCError(fmt.Sprintf("invalid @assetType '%s' (expecting '%s')", assetTypeName, argType), 400)
 			}
-			if key.TypeTag() != argType {
-				return nil, errors.NewCCError(fmt.Sprintf("arg must be key of type %s", argType), 400)
+			if !ok { // if @assetType is not specified, inject it
+				argMap["@assetType"] = argType
+			}
+			key, err := assets.NewKey(argMap)
+			if err != nil {
+				return nil, errors.WrapErrorWithStatus(err, "failed constructing key", 400)
 			}
 			argAsInterface = key
 		}
