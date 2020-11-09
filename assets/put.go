@@ -8,6 +8,9 @@ import (
 )
 
 func (a *Asset) put(stub shim.ChaincodeStubInterface) (map[string]interface{}, errors.ICCError) {
+	// Clean asset of any nil entries
+	a.clean()
+
 	// Write index of references this asset points to
 	err := a.putRefs(stub)
 	if err != nil {
