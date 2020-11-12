@@ -40,6 +40,10 @@ func validateProp(prop interface{}, propDef AssetProp) (interface{}, error) {
 	for _, prop := range propAsArray {
 		var parsedProp interface{}
 
+		if prop == nil {
+			continue
+		}
+
 		// Validate data types
 		if !isSubAsset {
 			dataType, dataTypeExists := dataTypeMap[dataTypeName]
