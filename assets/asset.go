@@ -44,7 +44,9 @@ func NewAsset(m map[string]interface{}) (a Asset, err errors.ICCError) {
 
 	a = Asset{}
 	for k, v := range m {
-		a[k] = v
+		if v != nil {
+			a[k] = v
+		}
 	}
 
 	// Generate object key

@@ -19,7 +19,7 @@ func (a Asset) Refs(stub shim.ChaincodeStubInterface) ([]Key, errors.ICCError) {
 	var keys []Key
 	for _, subAsset := range assetSubAssets {
 		subAssetRefInterface, subAssetIncluded := a[subAsset.Tag]
-		if !subAssetIncluded {
+		if !subAssetIncluded || subAssetRefInterface == nil {
 			// If subAsset is not included, no need to append
 			continue
 		}
@@ -46,6 +46,11 @@ func (a Asset) Refs(stub shim.ChaincodeStubInterface) ([]Key, errors.ICCError) {
 		}
 
 		for _, subAssetRefInterface := range subAssetAsArray {
+			// This is here as a safety measure
+			if subAssetRefInterface == nil {
+				continue
+			}
+
 			subAssetRefMap, ok := subAssetRefInterface.(map[string]interface{})
 			if !ok {
 				// If subAsset is badly formatted, this method shouldn't have been called
