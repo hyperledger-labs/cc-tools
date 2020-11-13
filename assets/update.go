@@ -38,7 +38,7 @@ func (a *Asset) Update(stub shim.ChaincodeStubInterface, update map[string]inter
 
 		// Check if property is included in the update map
 		propInterface, propIncluded := update[prop.Tag]
-		if !propIncluded {
+		if !propIncluded || propInterface == nil {
 			continue
 		}
 

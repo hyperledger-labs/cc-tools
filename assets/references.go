@@ -57,6 +57,10 @@ func (a Asset) Refs(stub shim.ChaincodeStubInterface) ([]Key, errors.ICCError) {
 				return nil, errors.NewCCError("sub-asset reference badly formatted", 400)
 			}
 
+			if subAssetRefMap == nil {
+				return nil, errors.NewCCError(fmt.Sprintf("sub-asset reference '%s' cannot be nil", subAsset.Tag), 400)
+			}
+
 			subAssetTypeName, ok := subAssetRefMap["@assetType"]
 			if ok && subAssetTypeName != subAssetDataType {
 				return nil, errors.NewCCError("sub-asset reference of wrong asset type", 400)
