@@ -51,6 +51,16 @@ func (t AssetType) HasProp(propTag string) bool {
 	return false
 }
 
+// GetPropDef fetches the propDef with tag propTag
+func (t AssetType) GetPropDef(propTag string) *AssetProp {
+	for _, prop := range t.Props {
+		if prop.Tag == propTag {
+			return &prop
+		}
+	}
+	return nil
+}
+
 // IsPrivate returns true if asset is in a private collection
 func (t AssetType) IsPrivate() bool {
 	return len(t.Readers) > 0

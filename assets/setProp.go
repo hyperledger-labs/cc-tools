@@ -1,0 +1,34 @@
+package assets
+
+import (
+	"fmt"
+
+	"github.com/goledgerdev/cc-tools/errors"
+)
+
+// SetProp sets the prop value with proper validation.
+func (a *Asset) SetProp(propTag string, value interface{}) errors.ICCError {
+	if len(propTag) == 0 {
+		return errors.NewCCError("propTag cannot be empty", 500)
+	}
+	if propTag[0] == '@' {
+		return errors.NewCCError("cannot modify internal properties", 500)
+	}
+	assetType := a.Type()
+	if assetType == nil {
+		return errors.NewCCError("asset type does not exist", 500)
+	}
+	propDef := assetType.GetPropDef(propTag)
+	if propDef == nil {
+		return errors.NewCCError(fmt.Sprintf("asset type '%s' does not have prop named '%s'", assetType.Tag, propTag), 500)
+	}
+	propType := DataTypeMap()[propDef.DataType]
+
+	_, parsedVal, err := propType.Parse(value)
+	if err != nil {
+		return errors.WrapError(err, fmt.Sprintf("invalid '%s' value", propTag))
+	}
+	(*a)[propTag] = parsedVal
+
+	return nil
+}

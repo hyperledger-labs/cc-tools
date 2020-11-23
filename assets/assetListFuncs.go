@@ -7,7 +7,7 @@ func AssetTypeList() []AssetType {
 	return listCopy
 }
 
-// FetchAssetType returns a pointer to the AssetType object or nil if tx is not found
+// FetchAssetType returns a pointer to the AssetType object or nil if asset type is not found
 func FetchAssetType(assetTypeTag string) *AssetType {
 	for _, assetType := range assetTypeList {
 		if assetType.Tag == assetTypeTag {

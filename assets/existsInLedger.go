@@ -23,3 +23,22 @@ func (a *Asset) ExistsInLedger(stub shim.ChaincodeStubInterface) (bool, errors.I
 
 	return false, nil
 }
+
+// ExistsInLedger checks if asset referenced by key already exists
+func (k *Key) ExistsInLedger(stub shim.ChaincodeStubInterface) (bool, errors.ICCError) {
+	var assetBytes []byte
+	var err error
+	if k.IsPrivate() {
+		assetBytes, err = stub.GetPrivateDataHash(k.TypeTag(), k.Key())
+	} else {
+		assetBytes, err = stub.GetState(k.Key())
+	}
+	if err != nil {
+		return false, errors.WrapErrorWithStatus(err, "unable to check asset existence", 400)
+	}
+	if assetBytes != nil {
+		return true, nil
+	}
+
+	return false, nil
+}
