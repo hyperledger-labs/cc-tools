@@ -17,10 +17,23 @@ type Transaction struct {
 	Label       string `json:"label"`
 	Description string `json:"description"`
 
-	Args     map[string]Argument `json:"args"`
-	Method   string              `json:"method"`
-	ReadOnly bool                `json:"readOnly"`
-	MetaTx   bool                `json:"metaTx"`
+	Args     ArgList `json:"args"`
+	Method   string  `json:"method"`
+	ReadOnly bool    `json:"readOnly"`
+	MetaTx   bool    `json:"metaTx"`
 
 	Routine func(shim.ChaincodeStubInterface, map[string]interface{}) ([]byte, errors.ICCError) `json:"-"`
+}
+
+// ArgList defines the type for argument list in Transaction object
+type ArgList []Argument
+
+// GetArgDef fetches arg definition for arg with given tag
+func (l ArgList) GetArgDef(tag string) *Argument {
+	for _, arg := range l {
+		if arg.Tag == tag {
+			return &arg
+		}
+	}
+	return nil
 }

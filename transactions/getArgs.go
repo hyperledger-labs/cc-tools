@@ -46,7 +46,8 @@ func (tx Transaction) GetArgs(stub shim.ChaincodeStubInterface) (map[string]inte
 	}
 
 	// Validate args format
-	for argKey, argDef := range tx.Args {
+	for _, argDef := range tx.Args {
+		argKey := argDef.Tag
 		var arg interface{}
 		var argExists bool
 		if argDef.Private {

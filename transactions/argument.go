@@ -1,6 +1,7 @@
 package transactions
 
 type Argument struct {
+	Tag         string `json:"tag"`
 	Label       string `json:"label"`
 	Description string `json:"description"`
 
