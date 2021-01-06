@@ -51,14 +51,17 @@ func (a Asset) Refs(stub shim.ChaincodeStubInterface) ([]Key, errors.ICCError) {
 				continue
 			}
 
-			subAssetRefMap, ok := subAssetRefInterface.(map[string]interface{})
-			if !ok {
+			var subAssetRefMap map[string]interface{}
+			switch t := subAssetRefInterface.(type) {
+			case map[string]interface{}:
+				subAssetRefMap = t
+			case Key:
+				subAssetRefMap = t
+			case Asset:
+				subAssetRefMap = t
+			default:
 				// If subAsset is badly formatted, this method shouldn't have been called
-				return nil, errors.NewCCError("sub-asset reference badly formatted", 400)
-			}
-
-			if subAssetRefMap == nil {
-				return nil, errors.NewCCError(fmt.Sprintf("sub-asset reference '%s' cannot be nil", subAsset.Tag), 400)
+				return nil, errors.NewCCError("asset reference must be an object", 400)
 			}
 
 			subAssetTypeName, ok := subAssetRefMap["@assetType"]

@@ -66,21 +66,28 @@ func validateProp(prop interface{}, propDef AssetProp) (interface{}, error) {
 			}
 
 			// Check if received subAsset is a map
-			recvMap, isMap := prop.(map[string]interface{})
-			if !isMap {
-				return nil, errors.NewCCError("asset reference must be sent as a JSON object", 400)
+			var recvMap map[string]interface{}
+			switch t := prop.(type) {
+			case map[string]interface{}:
+				recvMap = t
+			case Key:
+				recvMap = t
+			case Asset:
+				recvMap = t
+			default:
+				return nil, errors.NewCCError("asset reference must be an object", 400)
 			}
 
 			// Add assetType to received object
 			recvMap["@assetType"] = dataTypeName
 
 			// Check if all key props are included
-			_, err := GenerateKey(recvMap)
+			key, err := NewKey(recvMap)
 			if err != nil {
 				return nil, errors.WrapError(err, "error validating subAsset reference")
 			}
 
-			parsedProp = recvMap
+			parsedProp = (map[string]interface{})(key)
 		}
 
 		// If prop has specific validation method, call it
