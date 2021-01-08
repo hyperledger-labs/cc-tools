@@ -102,6 +102,27 @@ var assetList = []AssetType{
 			},
 		},
 	},
+	{
+		Tag:         "sampleSecret",
+		Label:       "Sample Secret",
+		Description: "",
+
+		Readers: []string{"org1MSP"},
+		Props: []AssetProp{
+			{
+				Tag:      "secretName",
+				Label:    "Secret Name",
+				IsKey:    true,
+				DataType: "string",
+			},
+			{
+				Tag:      "secret",
+				Label:    "Secret",
+				Required: true,
+				DataType: "string",
+			},
+		},
+	},
 }
 
 var customDataTypes = map[string]DataType{

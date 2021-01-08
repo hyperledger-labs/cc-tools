@@ -61,10 +61,9 @@ func NewKey(m map[string]interface{}) (k Key, err errors.ICCError) {
 	}
 
 	for t := range k {
-		if t == "@key" || t == "@assetType" {
-			continue
+		if t != "@key" && t != "@assetType" {
+			delete(k, t)
 		}
-		delete(k, t)
 	}
 
 	return

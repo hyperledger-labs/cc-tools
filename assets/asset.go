@@ -118,6 +118,9 @@ func (a Asset) Type() *AssetType {
 }
 
 func (a Asset) String() string {
-	ret, _ := json.Marshal(a)
+	ret, err := json.Marshal(a)
+	if err != nil {
+		return ""
+	}
 	return string(ret)
 }
