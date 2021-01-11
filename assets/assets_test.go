@@ -21,13 +21,23 @@ func TestMain(m *testing.M) {
 
 	InitAssetList(assetList)
 
-	err = StartupCheck()
+	os.Exit(m.Run())
+}
+
+func TestStartUp(t *testing.T) {
+	err := StartupCheck()
 	if err != nil {
 		log.Println(err)
-		os.Exit(1)
+		t.FailNow()
 	}
+}
 
-	os.Exit(m.Run())
+func TestAssetList(t *testing.T) {
+	l := AssetTypeList()
+	if len(l) != 3 {
+		fmt.Println("expected only 3 asset types in asset type list")
+		t.FailNow()
+	}
 }
 
 var assetList = []AssetType{
@@ -57,11 +67,17 @@ var assetList = []AssetType{
 				},
 			},
 			{
-				Tag:      "readerScore",
-				Label:    "Reader Score",
-				Required: true,
-				DataType: "number",
-				Writers:  []string{`org1MSP`},
+				Tag:          "readerScore",
+				Label:        "Reader Score",
+				DefaultValue: 0.0,
+				DataType:     "number",
+				Writers:      []string{`org1MSP`},
+			},
+			{
+				Tag:          "active",
+				Label:        "Active",
+				DefaultValue: false,
+				DataType:     "boolean",
 			},
 		},
 	},
@@ -127,7 +143,7 @@ var assetList = []AssetType{
 
 var customDataTypes = map[string]DataType{
 	"cpf": {
-		Parse: func(data interface{}) (string, interface{}, error) {
+		Parse: func(data interface{}) (string, interface{}, errors.ICCError) {
 			cpf, ok := data.(string)
 			if !ok {
 				return "", nil, errors.NewCCError("property must be a string", 400)
@@ -138,10 +154,6 @@ var customDataTypes = map[string]DataType{
 
 			if len(cpf) != 11 {
 				return "", nil, errors.NewCCError("CPF must have 11 digits", 400)
-			}
-
-			for _, _ = range cpf {
-				// perform CPF validation
 			}
 
 			return cpf, cpf, nil

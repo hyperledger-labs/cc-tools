@@ -17,7 +17,7 @@ type DataType struct {
 
 	DropDownValues map[string]interface{}
 
-	Parse func(interface{}) (string, interface{}, error) `json:"-"`
+	Parse func(interface{}) (string, interface{}, errors.ICCError) `json:"-"`
 
 	legacyMode bool
 	KeyString  func(interface{}) (string, error)      `json:"-"` // DEPRECATED. Use Parse instead.
@@ -57,7 +57,7 @@ func DataTypeMap() map[string]DataType {
 var dataTypeMap = map[string]DataType{
 	"string": {
 		AcceptedFormats: []string{"string"},
-		Parse: func(data interface{}) (string, interface{}, error) {
+		Parse: func(data interface{}) (string, interface{}, errors.ICCError) {
 			parsedData, ok := data.(string)
 			if !ok {
 				return parsedData, nil, errors.NewCCError("property must be a string", 400)
@@ -67,18 +67,21 @@ var dataTypeMap = map[string]DataType{
 	},
 	"number": {
 		AcceptedFormats: []string{"number"},
-		Parse: func(data interface{}) (string, interface{}, error) {
-			dataVal, ok := data.(float64)
-			if !ok {
-				propValStr, okStr := data.(string)
-				if !okStr {
-					return "", nil, errors.NewCCError("asset property must be a number", 400)
-				}
+		Parse: func(data interface{}) (string, interface{}, errors.ICCError) {
+			var dataVal float64
+			switch v := data.(type) {
+			case float64:
+				dataVal = v
+			case int:
+				dataVal = (float64)(v)
+			case string:
 				var err error
-				dataVal, err = strconv.ParseFloat(propValStr, 64)
+				dataVal, err = strconv.ParseFloat(v, 64)
 				if err != nil {
 					return "", nil, errors.WrapErrorWithStatus(err, fmt.Sprintf("asset property must be a number"), 400)
 				}
+			default:
+				return "", nil, errors.NewCCError("asset property must be a number", 400)
 			}
 
 			// Float IEEE 754 hexadecimal representation
@@ -87,18 +90,21 @@ var dataTypeMap = map[string]DataType{
 	},
 	"integer": {
 		AcceptedFormats: []string{"number"},
-		Parse: func(data interface{}) (string, interface{}, error) {
-			dataVal, ok := data.(float64)
-			if !ok {
-				propValStr, okStr := data.(string)
-				if !okStr {
-					return "", nil, errors.NewCCError("asset property must be an integer", 400)
-				}
+		Parse: func(data interface{}) (string, interface{}, errors.ICCError) {
+			var dataVal float64
+			switch v := data.(type) {
+			case float64:
+				dataVal = v
+			case int:
+				dataVal = (float64)(v)
+			case string:
 				var err error
-				dataVal, err = strconv.ParseFloat(propValStr, 64)
+				dataVal, err = strconv.ParseFloat(v, 64)
 				if err != nil {
 					return "", nil, errors.WrapErrorWithStatus(err, fmt.Sprintf("asset property must be an integer"), 400)
 				}
+			default:
+				return "", nil, errors.NewCCError("asset property must be an integer", 400)
 			}
 
 			retVal := math.Trunc(dataVal)
@@ -113,7 +119,7 @@ var dataTypeMap = map[string]DataType{
 	},
 	"boolean": {
 		AcceptedFormats: []string{"boolean"},
-		Parse: func(data interface{}) (string, interface{}, error) {
+		Parse: func(data interface{}) (string, interface{}, errors.ICCError) {
 			dataVal, ok := data.(bool)
 			if !ok {
 				dataValStr, okStr := data.(string)
@@ -136,7 +142,7 @@ var dataTypeMap = map[string]DataType{
 	},
 	"datetime": {
 		AcceptedFormats: []string{"string"},
-		Parse: func(data interface{}) (string, interface{}, error) {
+		Parse: func(data interface{}) (string, interface{}, errors.ICCError) {
 			dataTime, ok := data.(time.Time)
 			if !ok {
 				dataVal, ok := data.(string)

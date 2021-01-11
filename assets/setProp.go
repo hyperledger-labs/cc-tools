@@ -22,6 +22,11 @@ func (a *Asset) SetProp(propTag string, value interface{}) errors.ICCError {
 	if propDef == nil {
 		return errors.NewCCError(fmt.Sprintf("asset type '%s' does not have prop named '%s'", assetType.Tag, propTag), 500)
 	}
+
+	if propDef.IsKey {
+		return errors.NewCCError(fmt.Sprintf("SetProp on key asset property is not yet implemented"), 501) // TODO
+	}
+
 	propType := DataTypeMap()[propDef.DataType]
 
 	_, parsedVal, err := propType.Parse(value)

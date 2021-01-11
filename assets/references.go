@@ -9,7 +9,7 @@ import (
 )
 
 // Refs returns all subAsset reference keys
-func (a Asset) Refs(stub shim.ChaincodeStubInterface) ([]Key, errors.ICCError) {
+func (a Asset) Refs() ([]Key, errors.ICCError) {
 	// Fetch asset properties
 	assetTypeDef := a.Type()
 	if assetTypeDef == nil {
@@ -88,7 +88,7 @@ func (a Asset) Refs(stub shim.ChaincodeStubInterface) ([]Key, errors.ICCError) {
 // ValidateRefs checks if subAsset refs exists in blockchain
 func (a Asset) validateRefs(stub shim.ChaincodeStubInterface) errors.ICCError {
 	// Fetch references contained in asset
-	refKeys, err := a.Refs(stub)
+	refKeys, err := a.Refs()
 	if err != nil {
 		return errors.WrapError(err, "failed to fetch references")
 	}
@@ -110,7 +110,7 @@ func (a Asset) validateRefs(stub shim.ChaincodeStubInterface) errors.ICCError {
 // DelRefs deletes all the reference index for this asset from blockchain
 func (a Asset) delRefs(stub shim.ChaincodeStubInterface) error {
 	// Fetch references contained in asset
-	refKeys, err := a.Refs(stub)
+	refKeys, err := a.Refs()
 	if err != nil {
 		return errors.WrapErrorWithStatus(err, "failed to fetch references", 400)
 	}
@@ -134,7 +134,7 @@ func (a Asset) delRefs(stub shim.ChaincodeStubInterface) error {
 // PutRefs writes to the blockchain the references
 func (a Asset) putRefs(stub shim.ChaincodeStubInterface) error {
 	// Fetch references contained in asset
-	refKeys, err := a.Refs(stub)
+	refKeys, err := a.Refs()
 	if err != nil {
 		return errors.WrapError(err, "failed to fetch references")
 	}

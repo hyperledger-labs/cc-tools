@@ -7,7 +7,7 @@ import (
 )
 
 func TestAssetUnmarshal(t *testing.T) {
-	assetJSON := []byte("{\"@assetType\": \"sampleBook\",\"title\": \"Meu Nome é Maria\",\"author\": \"Maria Viana\",\"currentTenant\": {\"name\": \"Maria\"},\"genres\": [\"biography\", \"non-fiction\"],\"published\": \"2019-05-06T22:12:41Z\"}")
+	assetJSON := []byte("{\"@assetType\": \"samplePerson\",\"name\": \"Maria\",\"cpf\": \"318.207.920-48\",\"readerScore\": 70}")
 	var a Asset
 	err := json.Unmarshal(assetJSON, &a)
 	if err != nil {
