@@ -1,4 +1,4 @@
-package assets
+package transactions
 
 import (
 	"fmt"
@@ -7,19 +7,22 @@ import (
 	"strings"
 	"testing"
 
+	"github.com/goledgerdev/cc-tools/assets"
 	"github.com/goledgerdev/cc-tools/errors"
 )
 
 func TestMain(m *testing.M) {
 	log.Println("begin TestMain")
 
-	err := CustomDataTypes(testCustomDataTypes)
+	err := assets.CustomDataTypes(testCustomDataTypes)
 	if err != nil {
 		log.Println(err)
 		os.Exit(1)
 	}
 
-	InitAssetList(testAssetList)
+	assets.InitAssetList(testAssetList)
+
+	InitTxList(testTxList)
 
 	os.Exit(m.Run())
 }
@@ -32,21 +35,15 @@ func TestStartUp(t *testing.T) {
 	}
 }
 
-func TestAssetList(t *testing.T) {
-	l := AssetTypeList()
-	if len(l) != 3 {
-		fmt.Println("expected only 3 asset types in asset type list")
-		t.FailNow()
-	}
-}
+var testTxList = []Transaction{}
 
-var testAssetList = []AssetType{
+var testAssetList = []assets.AssetType{
 	{
 		Tag:         "samplePerson",
 		Label:       "Sample Person",
 		Description: "",
 
-		Props: []AssetProp{
+		Props: []assets.AssetProp{
 			{
 				Tag:      "cpf",
 				Label:    "CPF",
@@ -86,7 +83,7 @@ var testAssetList = []AssetType{
 		Label:       "Sample Book",
 		Description: "",
 
-		Props: []AssetProp{
+		Props: []assets.AssetProp{
 			{
 				Tag:      "title",
 				Label:    "Book Title",
@@ -124,7 +121,7 @@ var testAssetList = []AssetType{
 		Description: "",
 
 		Readers: []string{"org1MSP"},
-		Props: []AssetProp{
+		Props: []assets.AssetProp{
 			{
 				Tag:      "secretName",
 				Label:    "Secret Name",
@@ -141,7 +138,7 @@ var testAssetList = []AssetType{
 	},
 }
 
-var testCustomDataTypes = map[string]DataType{
+var testCustomDataTypes = map[string]assets.DataType{
 	"cpf": {
 		Parse: func(data interface{}) (string, interface{}, errors.ICCError) {
 			cpf, ok := data.(string)
