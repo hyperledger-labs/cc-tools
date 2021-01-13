@@ -108,7 +108,7 @@ func (a Asset) validateRefs(stub shim.ChaincodeStubInterface) errors.ICCError {
 }
 
 // DelRefs deletes all the reference index for this asset from blockchain
-func (a Asset) delRefs(stub shim.ChaincodeStubInterface) error {
+func (a Asset) delRefs(stub shim.ChaincodeStubInterface) errors.ICCError {
 	// Fetch references contained in asset
 	refKeys, err := a.Refs()
 	if err != nil {
@@ -158,7 +158,7 @@ func (a Asset) putRefs(stub shim.ChaincodeStubInterface) error {
 }
 
 // IsReferenced checks if asset is referenced by other asset
-func (a Asset) IsReferenced(stub shim.ChaincodeStubInterface) (bool, error) {
+func (a Asset) IsReferenced(stub shim.ChaincodeStubInterface) (bool, errors.ICCError) {
 	// Get asset key
 	assetKey := a.Key()
 	queryIt, err := stub.GetStateByPartialCompositeKey(assetKey, []string{})

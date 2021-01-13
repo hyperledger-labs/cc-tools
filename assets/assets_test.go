@@ -51,6 +51,7 @@ var testAssetList = []AssetType{
 				Tag:      "cpf",
 				Label:    "CPF",
 				DataType: "cpf",
+				Writers:  []string{"org2MSP"},
 			},
 			{
 				Tag:      "name",
@@ -71,7 +72,7 @@ var testAssetList = []AssetType{
 				Label:        "Reader Score",
 				DefaultValue: 0.0,
 				DataType:     "number",
-				Writers:      []string{`org1MSP`},
+				Writers:      []string{`$org\dMSP`},
 			},
 			{
 				Tag:          "active",

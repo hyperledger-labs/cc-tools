@@ -9,8 +9,10 @@ import (
 
 // Delete erases asset from world state
 func (a *Asset) Delete(stub shim.ChaincodeStubInterface) ([]byte, error) {
+	var err error
+
 	// Check if org has write permission
-	err := a.CheckWriters(stub)
+	err = a.CheckWriters(stub)
 	if err != nil {
 		return nil, errors.WrapError(err, "failed write permission check")
 	}

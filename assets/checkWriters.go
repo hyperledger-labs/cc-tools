@@ -10,17 +10,21 @@ import (
 )
 
 // CheckWriters checks if tx creator is allowed to write asset
-func (a Asset) CheckWriters(stub shim.ChaincodeStubInterface) error {
-	// Fetch asset properties
-	assetTypeDef := a.Type()
-	if assetTypeDef == nil {
-		return errors.NewCCError(fmt.Sprintf("asset type named %s does not exist", a.TypeTag()), 400)
-	}
-
+func (a Asset) CheckWriters(stub shim.ChaincodeStubInterface) errors.ICCError {
 	// Get tx creator MSP ID
 	txCreator, err := cid.GetMSPID(stub)
 	if err != nil {
 		return errors.WrapErrorWithStatus(err, "error getting tx creator", 500)
+	}
+
+	return a.checkWriters(txCreator)
+}
+
+func (a Asset) checkWriters(txCreator string) errors.ICCError {
+	// Fetch asset properties
+	assetTypeDef := a.Type()
+	if assetTypeDef == nil {
+		return errors.NewCCError(fmt.Sprintf("asset type named %s does not exist", a.TypeTag()), 400)
 	}
 
 	// Check attributes write permission

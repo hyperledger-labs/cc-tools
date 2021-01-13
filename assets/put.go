@@ -17,11 +17,6 @@ func (a *Asset) put(stub shim.ChaincodeStubInterface) (map[string]interface{}, e
 		return nil, errors.WrapError(err, "failed writing reference index")
 	}
 
-	err = a.injectMetadata(stub)
-	if err != nil {
-		return nil, errors.WrapError(err, "failed injecting asset metadata")
-	}
-
 	err = a.validateRefs(stub)
 	if err != nil {
 		return nil, errors.WrapError(err, "failed reference validation")
@@ -59,6 +54,11 @@ func (a *Asset) Put(stub shim.ChaincodeStubInterface) (map[string]interface{}, e
 	err := a.CheckWriters(stub)
 	if err != nil {
 		return nil, errors.WrapError(err, "failed write permission check")
+	}
+
+	err = a.injectMetadata(stub)
+	if err != nil {
+		return nil, errors.WrapError(err, "failed injecting asset metadata")
 	}
 
 	return a.put(stub)

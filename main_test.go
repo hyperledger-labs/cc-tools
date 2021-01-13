@@ -1,4 +1,4 @@
-package transactions
+package cctools
 
 import (
 	"fmt"
@@ -22,20 +22,10 @@ func TestMain(m *testing.M) {
 
 	assets.InitAssetList(testAssetList)
 
-	InitTxList(testTxList)
+	// shim.NewMockStub("testCC")
 
 	os.Exit(m.Run())
 }
-
-func TestStartUp(t *testing.T) {
-	err := StartupCheck()
-	if err != nil {
-		log.Println(err)
-		t.FailNow()
-	}
-}
-
-var testTxList = []Transaction{}
 
 var testAssetList = []assets.AssetType{
 	{
@@ -48,7 +38,6 @@ var testAssetList = []assets.AssetType{
 				Tag:      "cpf",
 				Label:    "CPF",
 				DataType: "cpf",
-				Writers:  []string{"org2MSP"},
 			},
 			{
 				Tag:      "name",
@@ -69,7 +58,7 @@ var testAssetList = []assets.AssetType{
 				Label:        "Reader Score",
 				DefaultValue: 0.0,
 				DataType:     "number",
-				Writers:      []string{`$org\dMSP`},
+				Writers:      []string{`org1MSP`},
 			},
 			{
 				Tag:          "active",
