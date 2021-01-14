@@ -117,6 +117,11 @@ var testAssetList = []AssetType{
 				Label:    "Publishment Date",
 				DataType: "datetime",
 			},
+			{
+				Tag:      "secret",
+				Label:    "Book Secret",
+				DataType: "->sampleSecret",
+			},
 		},
 	},
 	{

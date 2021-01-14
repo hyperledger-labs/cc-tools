@@ -86,31 +86,6 @@ func (k *Key) GetBytes(stub shim.ChaincodeStubInterface) ([]byte, errors.ICCErro
 	return assetBytes, nil
 }
 
-// Get reads asset from ledger
-func (k *Key) Get(stub shim.ChaincodeStubInterface) (*Asset, errors.ICCError) {
-	var assetBytes []byte
-	var err error
-	if k.IsPrivate() {
-		assetBytes, err = stub.GetPrivateData(k.TypeTag(), k.Key())
-	} else {
-		assetBytes, err = stub.GetState(k.Key())
-	}
-	if err != nil {
-		return nil, errors.WrapErrorWithStatus(err, "unable to get asset", 400)
-	}
-	if assetBytes == nil {
-		return nil, errors.NewCCError("asset not found", 404)
-	}
-
-	var response Asset
-	err = json.Unmarshal(assetBytes, &response)
-	if err != nil {
-		return nil, errors.WrapErrorWithStatus(err, "failed to unmarshal asset from ledger", 500)
-	}
-
-	return &response, nil
-}
-
 // Type return the AssetType object for the asset
 func (k Key) Type() *AssetType {
 	// Fetch asset properties
