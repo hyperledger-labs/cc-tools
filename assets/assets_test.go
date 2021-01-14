@@ -75,6 +75,11 @@ var testAssetList = []AssetType{
 				Writers:      []string{`$org\dMSP`},
 			},
 			{
+				Tag:      "secrets",
+				Label:    "Secrets",
+				DataType: "[]->sampleSecret",
+			},
+			{
 				Tag:          "active",
 				Label:        "Active",
 				DefaultValue: false,

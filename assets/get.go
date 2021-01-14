@@ -51,11 +51,26 @@ func (k *Key) Get(stub shim.ChaincodeStubInterface) (*Asset, errors.ICCError) {
 	return get(stub, pvtCollection, k.Key())
 }
 
+/* GetRecursive-related code */
+
 func getRecursive(stub shim.ChaincodeStubInterface, pvtCollection, key string) (*Asset, errors.ICCError) {
 	var assetBytes []byte
 	var err error
 	if pvtCollection != "" {
 		assetBytes, err = stub.GetPrivateData(pvtCollection, key)
+		// If org cannot get private data it might be because it has no permission, so we fetch the data hash
+		if err != nil {
+			hash, err := stub.GetPrivateDataHash(pvtCollection, key)
+			if err != nil {
+				return nil, errors.WrapErrorWithStatus(err, "unable to get asset", 400)
+			}
+			response := Asset{
+				"@key":       key,
+				"@assetType": pvtCollection,
+				"@hash":      hash,
+			}
+			return &response, nil
+		}
 	} else {
 		assetBytes, err = stub.GetState(key)
 	}
@@ -73,6 +88,7 @@ func getRecursive(stub shim.ChaincodeStubInterface, pvtCollection, key string) (
 	}
 
 	for k, v := range response {
+		var fullValue interface{}
 		switch prop := v.(type) {
 		case map[string]interface{}:
 			propKey, err := NewKey(prop)
@@ -90,11 +106,33 @@ func getRecursive(stub shim.ChaincodeStubInterface, pvtCollection, key string) (
 				return nil, errors.WrapErrorWithStatus(err, "failed to get subasset", 500)
 			}
 
-			response[k] = *subAsset
-
+			fullValue = *subAsset
 		case []interface{}:
+			for idx, elem := range prop {
+				if elemMap, ok := elem.(map[string]interface{}); ok {
+					elemKey, err := NewKey(elemMap)
+					if err != nil {
+						return nil, errors.WrapErrorWithStatus(err, "failed to resolve asset references", 500)
+					}
+
+					var subAsset *Asset
+					if elemKey.IsPrivate() {
+						subAsset, err = getRecursive(stub, elemKey.TypeTag(), elemKey.Key())
+					} else {
+						subAsset, err = getRecursive(stub, "", elemKey.Key())
+					}
+					if err != nil {
+						return nil, errors.WrapErrorWithStatus(err, "failed to get subasset", 500)
+					}
+
+					prop[idx] = *subAsset
+				}
+			}
+			fullValue = prop
 		default:
+			continue
 		}
+		response[k] = fullValue
 	}
 
 	return &response, nil
