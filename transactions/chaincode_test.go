@@ -1,9 +1,10 @@
-package assets
+package transactions
 
 import (
 	"fmt"
 	"strings"
 
+	"github.com/goledgerdev/cc-tools/assets"
 	"github.com/goledgerdev/cc-tools/errors"
 	"github.com/hyperledger/fabric/core/chaincode/shim"
 	pb "github.com/hyperledger/fabric/protos/peer"
@@ -12,13 +13,15 @@ import (
 // testCC implements the shim.Chaincode interface
 type testCC struct{}
 
-var testAssetList = []AssetType{
+var testTxList = []Transaction{}
+
+var testAssetList = []assets.AssetType{
 	{
 		Tag:         "samplePerson",
 		Label:       "Sample Person",
 		Description: "",
 
-		Props: []AssetProp{
+		Props: []assets.AssetProp{
 			{
 				Tag:      "cpf",
 				Label:    "CPF",
@@ -64,7 +67,7 @@ var testAssetList = []AssetType{
 		Label:       "Author",
 		Description: "",
 
-		Props: []AssetProp{
+		Props: []assets.AssetProp{
 			{
 				Tag:      "person",
 				Label:    "Person",
@@ -78,7 +81,7 @@ var testAssetList = []AssetType{
 		Label:       "Sample Book",
 		Description: "",
 
-		Props: []AssetProp{
+		Props: []assets.AssetProp{
 			{
 				Tag:      "title",
 				Label:    "Book Title",
@@ -121,7 +124,7 @@ var testAssetList = []AssetType{
 		Description: "",
 
 		Readers: []string{"org1MSP"},
-		Props: []AssetProp{
+		Props: []assets.AssetProp{
 			{
 				Tag:      "secretName",
 				Label:    "Secret Name",
@@ -138,7 +141,7 @@ var testAssetList = []AssetType{
 	},
 }
 
-var testCustomDataTypes = map[string]DataType{
+var testCustomDataTypes = map[string]assets.DataType{
 	"cpf": {
 		Parse: func(data interface{}) (string, interface{}, errors.ICCError) {
 			cpf, ok := data.(string)
@@ -191,6 +194,14 @@ func (t *testCC) Init(stub shim.ChaincodeStubInterface) (response pb.Response) {
 
 // Invoke is called per transaction on the chaincode.
 func (t *testCC) Invoke(stub shim.ChaincodeStubInterface) (response pb.Response) {
-	response = shim.Success([]byte(""))
+	var result []byte
+
+	result, err := Run(stub)
+
+	if err != nil {
+		response = err.GetErrorResponse()
+		return
+	}
+	response = shim.Success([]byte(result))
 	return
 }
