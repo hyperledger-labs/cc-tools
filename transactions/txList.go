@@ -2,6 +2,20 @@ package transactions
 
 var txList = []Transaction{}
 
+var basicTxs = []Transaction{
+	getTx,
+	GetSchema,
+	GetDataTypes,
+	CreateAsset,
+	ReadAsset,
+	ReadAssetHistory,
+	Search,
+	UpdateAsset,
+	DeleteAsset,
+	// CreateDocument,
+	// CompareDocument,
+}
+
 // TxList returns a copy of the txList variable
 func TxList() []Transaction {
 	listCopy := []Transaction{}
@@ -23,5 +37,5 @@ func FetchTx(txName string) *Transaction {
 
 // InitTxList appends GetTx to txList to avoid initialization loop
 func InitTxList(l []Transaction) {
-	txList = append([]Transaction{getTx}, l...)
+	txList = append(l, basicTxs...)
 }

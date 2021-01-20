@@ -7,7 +7,7 @@ import (
 	"github.com/goledgerdev/cc-tools/errors"
 )
 
-// StartupCheck verifies if asset definitions are properly coded, panicking if they're not
+// StartupCheck verifies if asset definitions are properly coded
 func StartupCheck() errors.ICCError {
 	// Checks if there are references to undefined types
 	for _, tx := range txList {
