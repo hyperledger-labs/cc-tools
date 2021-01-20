@@ -64,6 +64,9 @@ func getRecursive(stub shim.ChaincodeStubInterface, pvtCollection, key string) (
 			if err != nil {
 				return nil, errors.WrapErrorWithStatus(err, "unable to get asset", 400)
 			}
+			if hash == nil {
+				return nil, errors.NewCCError("asset not found", 404)
+			}
 			response := Asset{
 				"@key":       key,
 				"@assetType": pvtCollection,
