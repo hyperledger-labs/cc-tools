@@ -3,6 +3,7 @@ package transactions
 import (
 	"encoding/json"
 
+	"github.com/goledgerdev/cc-tools/assets"
 	"github.com/goledgerdev/cc-tools/errors"
 	"github.com/hyperledger/fabric/core/chaincode/shim"
 	pb "github.com/hyperledger/fabric/protos/peer"
@@ -26,6 +27,11 @@ var Search = Transaction{
 			Tag:         "collection",
 			Description: "Name of the private collection to be searched.",
 			DataType:    "string",
+		},
+		{
+			Tag:         "resolve",
+			Description: "Resolve references recursively.",
+			DataType:    "boolean",
 		},
 	},
 	ReadOnly: true,
@@ -119,6 +125,19 @@ var Search = Transaction{
 			err = json.Unmarshal(queryResponse.Value, &data)
 			if err != nil {
 				return nil, errors.WrapErrorWithStatus(err, "failed to unmarshal queryResponse values", 500)
+			}
+
+			resolve, ok := req["resolve"].(bool)
+			if ok && resolve {
+				key, err := assets.NewKey(data)
+				if err != nil {
+					return nil, errors.WrapError(err, "failed to create key object to resolve result")
+				}
+				asset, err := key.GetRecursive(stub)
+				if err != nil {
+					return nil, errors.WrapError(err, "failed to resolve result")
+				}
+				data = *asset
 			}
 
 			searchResult = append(searchResult, data)

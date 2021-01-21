@@ -23,20 +23,39 @@ var ReadAsset = Transaction{
 			DataType:    "@key",
 			Required:    true,
 		},
+		{
+			Tag:         "resolve",
+			Description: "Resolve references recursively.",
+			DataType:    "boolean",
+		},
 	},
 	ReadOnly: true,
 	Routine: func(stub shim.ChaincodeStubInterface, req map[string]interface{}) ([]byte, errors.ICCError) {
+		var assetJSON []byte
 		var err error
 
 		// This is safe to do because validation is done before calling routine
 		key := req["key"].(assets.Key)
 
-		asset, err := key.GetRecursive(stub)
-		if err != nil {
-			return nil, errors.WrapError(err, "failed to read asset from blockchain")
-		}
+		resolve, ok := req["resolve"].(bool)
 
-		assetJSON, err := json.Marshal(*asset)
+		if ok && resolve {
+			var asset *assets.Asset
+			asset, err = key.GetRecursive(stub)
+			if err != nil {
+				return nil, errors.WrapError(err, "failed to read asset from blockchain")
+			}
+
+			assetJSON, err = json.Marshal(*asset)
+			if err != nil {
+				return nil, errors.WrapErrorWithStatus(err, "failed to serialize asset", 500)
+			}
+		} else {
+			assetJSON, err = key.GetBytes(stub)
+			if err != nil {
+				return nil, errors.WrapError(err, "failed to get asset state")
+			}
+		}
 
 		return assetJSON, nil
 	},
