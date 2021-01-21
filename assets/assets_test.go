@@ -29,7 +29,7 @@ func TestStartUp(t *testing.T) {
 
 func TestAssetList(t *testing.T) {
 	l := AssetTypeList()
-	if len(l) != 3 {
+	if len(l) != 4 {
 		fmt.Println("expected only 3 asset types in asset type list")
 		t.FailNow()
 	}
