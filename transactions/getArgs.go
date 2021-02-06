@@ -165,6 +165,13 @@ func validateTxArg(argType string, arg interface{}) (interface{}, errors.ICCErro
 				return nil, errors.NewCCError("missing selector", 400)
 			}
 			argAsInterface = argMap
+		case "@object":
+			var argMap map[string]interface{}
+			argMap, ok := arg.(map[string]interface{})
+			if !ok {
+				return nil, errors.NewCCError("invalid argument format", 400)
+			}
+			argAsInterface = argMap
 		default: // should be a specific asset key
 			// Handle @assetType
 			var argMap map[string]interface{}
