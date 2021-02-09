@@ -66,7 +66,7 @@ func GenerateKey(asset map[string]interface{}) (string, errors.ICCError) {
 		} else {
 			propAsArray, ok = propInterface.([]interface{})
 			if !ok {
-				return "", errors.NewCCError(fmt.Sprintf("asset property %s must and array of type %s", prop.Label, prop.DataType), 400)
+				return "", errors.NewCCError(fmt.Sprintf("asset property %s must an array of type %s", prop.Label, prop.DataType), 400)
 			}
 		}
 
