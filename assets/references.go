@@ -132,7 +132,7 @@ func (a Asset) delRefs(stub shim.ChaincodeStubInterface) errors.ICCError {
 }
 
 // PutRefs writes to the blockchain the references
-func (a Asset) putRefs(stub shim.ChaincodeStubInterface) error {
+func (a Asset) putRefs(stub shim.ChaincodeStubInterface) errors.ICCError {
 	// Fetch references contained in asset
 	refKeys, err := a.Refs()
 	if err != nil {
