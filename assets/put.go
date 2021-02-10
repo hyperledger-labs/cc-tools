@@ -91,25 +91,30 @@ func (a *Asset) PutNew(stub shim.ChaincodeStubInterface) (map[string]interface{}
 func putRecursive(stub shim.ChaincodeStubInterface, object map[string]interface{}, root bool) (map[string]interface{}, errors.ICCError) {
 	var err error
 
-	objAsAsset, err := NewAsset(object)
+	objAsKey, err := NewKey(object)
 	if err != nil {
 		return nil, errors.WrapError(err, "unable to create asset object")
 	}
 
 	if !root {
-		exists, err := objAsAsset.ExistsInLedger(stub)
+		exists, err := objAsKey.ExistsInLedger(stub)
 		if err != nil {
 			return nil, errors.WrapError(err, "failed checking if asset exists")
 		}
 		if exists {
-			asset, err := objAsAsset.GetRecursive(stub)
+			asset, err := objAsKey.GetRecursive(stub)
 			return *asset, err
 		}
 	}
 
+	objAsAsset, err := NewAsset(object)
+	if err != nil {
+		return nil, errors.WrapError(err, "unable to create asset object")
+	}
+
 	putAsset, err := objAsAsset.put(stub)
 	if err != nil {
-		return nil, errors.WrapError(err, "failed to put asset")
+		return nil, errors.WrapError(err, fmt.Sprintf("failed to put asset of type %s", objAsAsset.TypeTag()))
 	}
 
 	subAssets := objAsAsset.Type().SubAssets()
@@ -145,7 +150,7 @@ func putRecursive(stub shim.ChaincodeStubInterface, object map[string]interface{
 			}
 			putSubAsset, err := putRecursive(stub, obj, false)
 			if err != nil {
-				return nil, errors.WrapError(err, "failed to put sub-asset recursively")
+				return nil, errors.WrapError(err, fmt.Sprintf("failed to put sub-asset %s recursively", subAsset.Tag))
 			}
 			objArray[idx] = putSubAsset
 		}
