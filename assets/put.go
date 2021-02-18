@@ -144,10 +144,19 @@ func putRecursive(stub shim.ChaincodeStubInterface, object map[string]interface{
 		}
 
 		for idx, objInterface := range objArray {
-			obj, ok := objInterface.(map[string]interface{})
-			if !ok {
-				return nil, errors.NewCCError(fmt.Sprintf("asset property %s must of type %s", subAsset.Label, subAsset.DataType), 400)
+			var obj map[string]interface{}
+			switch t := objInterface.(type) {
+			case map[string]interface{}:
+				obj = t
+			case Key:
+				obj = t
+			case Asset:
+				obj = t
+			default:
+				// If subAsset is badly formatted, this method shouldn't have been called
+				return nil, errors.NewCCError(fmt.Sprintf("asset reference property '%s' must be an object", subAsset.Tag), 400)
 			}
+			obj["@assetType"] = dType
 			putSubAsset, err := putRecursive(stub, obj, false)
 			if err != nil {
 				return nil, errors.WrapError(err, fmt.Sprintf("failed to put sub-asset %s recursively", subAsset.Tag))
