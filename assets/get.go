@@ -2,10 +2,14 @@ package assets
 
 import (
 	"encoding/json"
+	"fmt"
+	"reflect"
 
 	"github.com/goledgerdev/cc-tools/errors"
 	"github.com/hyperledger/fabric/core/chaincode/shim"
 )
+
+var keysPassed []Key
 
 func get(stub shim.ChaincodeStubInterface, pvtCollection, key string) (*Asset, errors.ICCError) {
 	var assetBytes []byte
@@ -92,9 +96,24 @@ func getRecursive(stub shim.ChaincodeStubInterface, pvtCollection, key string) (
 
 	for k, v := range response {
 		var fullValue interface{}
+		var keyIsFectched bool
 		switch prop := v.(type) {
 		case map[string]interface{}:
 			propKey, err := NewKey(prop)
+
+			keyIsFectched = false
+			for _, key := range keysPassed {
+				if key["@key"] == propKey["@key"] {
+					keyIsFectched = true
+					fullValue = propKey
+					break
+				}
+			}
+			if keyIsFectched {
+				continue
+			}
+			keysPassed = append(keysPassed, propKey)
+
 			if err != nil {
 				return nil, errors.WrapErrorWithStatus(err, "failed to resolve asset references", 500)
 			}
@@ -110,12 +129,27 @@ func getRecursive(stub shim.ChaincodeStubInterface, pvtCollection, key string) (
 			}
 
 			fullValue = *subAsset
+
 		case []interface{}:
 			for idx, elem := range prop {
+				var keyIsFectched bool
+
 				if elemMap, ok := elem.(map[string]interface{}); ok {
 					elemKey, err := NewKey(elemMap)
 					if err != nil {
 						return nil, errors.WrapErrorWithStatus(err, "failed to resolve asset references", 500)
+					}
+
+					keyIsFectched = false
+					for _, key := range keysPassed {
+						if reflect.DeepEqual(key, elemKey) {
+							keyIsFectched = true
+							fullValue = elemKey
+							break
+						}
+					}
+					if keyIsFectched {
+						continue
 					}
 
 					var subAsset *Asset
@@ -129,6 +163,7 @@ func getRecursive(stub shim.ChaincodeStubInterface, pvtCollection, key string) (
 					}
 
 					prop[idx] = *subAsset
+					keysPassed = append(keysPassed, elemKey)
 				}
 			}
 			fullValue = prop
@@ -158,5 +193,8 @@ func (k *Key) GetRecursive(stub shim.ChaincodeStubInterface) (*Asset, errors.ICC
 		pvtCollection = k.TypeTag()
 	}
 
-	return getRecursive(stub, pvtCollection, k.Key())
+	asset, err := getRecursive(stub, pvtCollection, k.Key())
+	fmt.Println(keysPassed)
+
+	return asset, err
 }
