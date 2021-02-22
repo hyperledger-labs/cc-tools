@@ -2,7 +2,6 @@ package assets
 
 import (
 	"encoding/json"
-	"fmt"
 	"reflect"
 
 	"github.com/goledgerdev/cc-tools/errors"
@@ -193,8 +192,5 @@ func (k *Key) GetRecursive(stub shim.ChaincodeStubInterface) (*Asset, errors.ICC
 		pvtCollection = k.TypeTag()
 	}
 
-	asset, err := getRecursive(stub, pvtCollection, k.Key())
-	fmt.Println(keysPassed)
-
-	return asset, err
+	return getRecursive(stub, pvtCollection, k.Key())
 }
