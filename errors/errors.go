@@ -6,7 +6,9 @@ import (
 	"github.com/hyperledger/fabric/protos/peer"
 )
 
-// ICCError Interface
+// ICCError Interface implements an error interface.
+// It contains the return http status, error message and function
+// It also has a function to convert a response to a peer struct
 type ICCError interface {
 	Status() int32
 	Message() string
