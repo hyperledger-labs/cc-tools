@@ -41,7 +41,7 @@ func (a Asset) Refs() ([]Key, errors.ICCError) {
 			var ok bool
 			subAssetAsArray, ok = subAssetRefInterface.([]interface{})
 			if !ok {
-				return nil, errors.NewCCError(fmt.Sprintf("asset property '%s' must and array of type '%s'", subAsset.Label, subAsset.DataType), 400)
+				return nil, errors.NewCCError(fmt.Sprintf("asset property '%s' must be an array of type '%s'", subAsset.Label, subAsset.DataType), 400)
 			}
 		}
 
