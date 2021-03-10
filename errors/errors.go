@@ -32,6 +32,7 @@ func (c *CCError) Message() string {
 	return c.err.Error()
 }
 
+// Implements the error interface
 func (c *CCError) Error() string {
 	return string(c.status) + c.err.Error()
 }
