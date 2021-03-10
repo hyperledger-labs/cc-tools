@@ -1,8 +1,15 @@
 package assets
 
-/*
-AssetProp describes properties of each asset attribute
-*/
+//AssetProp describes properties of each asset attribute
+// The tag is used to reference the prop
+// The label is for frontend rendering
+// The description is a simple explanation for the specific field
+// IsKey defines if the prop is a Primary Key
+// Readonly makes impossible to overwrite a property
+// The DefaulValue is the assets default state
+// DataType defines the asset's type. It can receive custom data types
+// Writers is an array of orgs that specify who can write in the asset
+// Validate receives a function to validate the asset input
 type AssetProp struct {
 	Tag         string `json:"tag"`
 	Label       string `json:"label"`
