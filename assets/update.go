@@ -9,7 +9,8 @@ import (
 	"github.com/hyperledger/fabric/core/chaincode/shim"
 )
 
-// Update receives a map[string]interface{} with key/vals to update in asset
+// Update receives a map[string]interface{} with key/vals to update the asset value in the wolrd state
+// The old asset is still on the blockchain history
 func (a *Asset) Update(stub shim.ChaincodeStubInterface, update map[string]interface{}) (map[string]interface{}, error) {
 	// Fetch asset properties
 	assetTypeDef := a.Type()
