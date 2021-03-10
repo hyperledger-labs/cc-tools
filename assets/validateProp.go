@@ -7,6 +7,7 @@ import (
 	"github.com/goledgerdev/cc-tools/errors"
 )
 
+// validateProp checks if the given assetProp is valid
 func validateProp(prop interface{}, propDef AssetProp) (interface{}, error) {
 	var isArray bool
 	dataTypeName := propDef.DataType
