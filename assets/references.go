@@ -8,7 +8,7 @@ import (
 	"github.com/hyperledger/fabric/core/chaincode/shim"
 )
 
-// Refs returns all subAsset reference keys
+// Refs returns an array of keys, containing the subAssets reference keys
 func (a Asset) Refs() ([]Key, errors.ICCError) {
 	// Fetch asset properties
 	assetTypeDef := a.Type()
@@ -85,7 +85,7 @@ func (a Asset) Refs() ([]Key, errors.ICCError) {
 	return keys, nil
 }
 
-// ValidateRefs checks if subAsset refs exists in blockchain
+// ValidateRefs checks if subAsset references exists in blockchain
 func (a Asset) validateRefs(stub shim.ChaincodeStubInterface) errors.ICCError {
 	// Fetch references contained in asset
 	refKeys, err := a.Refs()
@@ -131,7 +131,7 @@ func (a Asset) delRefs(stub shim.ChaincodeStubInterface) errors.ICCError {
 	return nil
 }
 
-// PutRefs writes to the blockchain the references
+// PutRefs writes the references to the blockchain
 func (a Asset) putRefs(stub shim.ChaincodeStubInterface) errors.ICCError {
 	// Fetch references contained in asset
 	refKeys, err := a.Refs()
