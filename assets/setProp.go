@@ -6,7 +6,7 @@ import (
 	"github.com/goledgerdev/cc-tools/errors"
 )
 
-// SetProp sets the prop value with proper validation.
+// SetProp sets the prop value with proper validation. It does not update the asset in the ledger
 func (a *Asset) SetProp(propTag string, value interface{}) errors.ICCError {
 	if len(propTag) == 0 {
 		return errors.NewCCError("propTag cannot be empty", 500)
