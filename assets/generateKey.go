@@ -8,7 +8,8 @@ import (
 	"github.com/google/uuid"
 )
 
-// GenerateKey implements the logic to generate an asset's unique key
+// GenerateKey implements the logic to generate an asset's unique key. It validates
+// the assets properties and generates a hash with this values. Based around SHA1 hash function
 func GenerateKey(asset map[string]interface{}) (string, errors.ICCError) {
 	if key, keyExists := asset["@key"]; keyExists {
 		keyStr, ok := key.(string)
