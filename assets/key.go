@@ -7,14 +7,12 @@ import (
 	"github.com/hyperledger/fabric/core/chaincode/shim"
 )
 
-/*
-Key implements the json.Unmarshaler interface
-*/
+//Key implements the json.Unmarshaler interface
+//It stores the information for retrieving assets from the ledger
+//Instead of having every field, it only has the ones needes for querying
 type Key map[string]interface{}
 
-/*
-UnmarshalJSON parses JSON-encoded data and returns
-*/
+//UnmarshalJSON parses JSON-encoded data and returns
 func (k *Key) UnmarshalJSON(jsonData []byte) error {
 	*k = make(Key)
 	var err error
@@ -35,7 +33,7 @@ func (k *Key) UnmarshalJSON(jsonData []byte) error {
 	return nil
 }
 
-// NewKey constructs Key object
+// NewKey constructs Key object from a map
 func NewKey(m map[string]interface{}) (k Key, err errors.ICCError) {
 	if m == nil {
 		err = errors.NewCCError("cannot create key from nil map", 500)
@@ -67,7 +65,7 @@ func NewKey(m map[string]interface{}) (k Key, err errors.ICCError) {
 	return
 }
 
-// GetBytes reads asset bytes from ledger
+// GetBytes reads the asset as bytes from ledger
 func (k *Key) GetBytes(stub shim.ChaincodeStubInterface) ([]byte, errors.ICCError) {
 	var assetBytes []byte
 	var err error
@@ -86,7 +84,7 @@ func (k *Key) GetBytes(stub shim.ChaincodeStubInterface) ([]byte, errors.ICCErro
 	return assetBytes, nil
 }
 
-// Type return the AssetType object for the asset
+// Type return the AssetType object configuration for the asset
 func (k Key) Type() *AssetType {
 	// Fetch asset properties
 	assetTypeTag := k.TypeTag()
