@@ -8,14 +8,12 @@ import (
 	"github.com/hyperledger/fabric/core/chaincode/shim"
 )
 
-/*
-Asset implements the json.Unmarshaler interface
-*/
+// Asset implements the json.Unmarshaler interface and is the base object in cc-tools network.
+// It is a generic map that stores information about a specific ledger asset. It is also used
+// as the base interface to perform operations on the blockchain.
 type Asset map[string]interface{}
 
-/*
-UnmarshalJSON parses JSON-encoded data and returns
-*/
+//UnmarshalJSON parses JSON-encoded data and returns
 func (a *Asset) UnmarshalJSON(jsonData []byte) error {
 	var err error
 
@@ -36,6 +34,7 @@ func (a *Asset) UnmarshalJSON(jsonData []byte) error {
 }
 
 // NewAsset constructs Asset object
+// Receives a map containing the asset data
 func NewAsset(m map[string]interface{}) (a Asset, err errors.ICCError) {
 	if m == nil {
 		err = errors.NewCCError("cannot create asset from nil map", 500)
