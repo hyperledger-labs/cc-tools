@@ -7,7 +7,9 @@ import (
 	"github.com/hyperledger/fabric/core/chaincode/shim"
 )
 
-// Delete erases asset from world state
+// Delete erases asset from world state and checks for all necessary permissions.
+// A asset cannot be deleted if other asset references it
+// The asset is not deleted from the blockchain
 func (a *Asset) Delete(stub shim.ChaincodeStubInterface) ([]byte, error) {
 	var err error
 
