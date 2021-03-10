@@ -3,6 +3,11 @@ package assets
 import "strings"
 
 // AssetType is a list of all asset properties
+// The label is for frontend rendering
+// The description is a simple explanation for the specific field
+// Props receives an array of assetProps, definig the assets properties
+// Readers is an array that specifies which organizations can read the asset (used for private data)
+// Validates is a function that performs the asset input validation
 type AssetType struct {
 	Tag         string `json:"tag"`
 	Label       string `json:"label"`
