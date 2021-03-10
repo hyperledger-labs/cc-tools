@@ -20,6 +20,7 @@ func (a Asset) CheckWriters(stub shim.ChaincodeStubInterface) errors.ICCError {
 	return a.checkWriters(txCreator)
 }
 
+// checkWriters is an intern function that checks if tx creator is allowed to write asset
 func (a Asset) checkWriters(txCreator string) errors.ICCError {
 	// Fetch asset properties
 	assetTypeDef := a.Type()
