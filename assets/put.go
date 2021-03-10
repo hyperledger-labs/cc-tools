@@ -9,6 +9,8 @@ import (
 	"github.com/hyperledger/fabric/core/chaincode/shim"
 )
 
+// put writes the reference index to the ledger, then encodes the asset to JSON format
+// and puts it into the ledger. It checks if the asset belongs in a private collection
 func (a *Asset) put(stub shim.ChaincodeStubInterface) (map[string]interface{}, errors.ICCError) {
 	var err error
 
