@@ -32,7 +32,7 @@ func validateProp(prop interface{}, propDef AssetProp) (interface{}, error) {
 	} else {
 		propAsArray, ok = prop.([]interface{})
 		if !ok {
-			return nil, errors.NewCCError(fmt.Sprintf("asset property '%s' must and array of type '%s'", propDef.Label, propDef.DataType), 400)
+			return nil, errors.NewCCError(fmt.Sprintf("asset property '%s' must be an array of type '%s'", propDef.Label, propDef.DataType), 400)
 		}
 		retProp = []interface{}{}
 	}
