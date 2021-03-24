@@ -13,7 +13,7 @@ import (
 // as the base interface to perform operations on the blockchain.
 type Asset map[string]interface{}
 
-//UnmarshalJSON parses JSON-encoded data and returns
+// UnmarshalJSON parses JSON-encoded data and returns an Asset object pointer
 func (a *Asset) UnmarshalJSON(jsonData []byte) error {
 	var err error
 
@@ -33,8 +33,9 @@ func (a *Asset) UnmarshalJSON(jsonData []byte) error {
 	return nil
 }
 
-// NewAsset constructs Asset object
-// Receives a map containing the asset data
+// NewAsset constructs Asset object from a map of properties. It ensures every
+// asset property is properly formatted and computes the asset's identifying
+// key on the ledger, storing it in the property "@key".
 func NewAsset(m map[string]interface{}) (a Asset, err errors.ICCError) {
 	if m == nil {
 		err = errors.NewCCError("cannot create asset from nil map", 500)
@@ -66,7 +67,7 @@ func NewAsset(m map[string]interface{}) (a Asset, err errors.ICCError) {
 	return
 }
 
-// InjectMetadata handles injection internal variables to the asset
+// InjectMetadata adds internal properties to the asset.
 func (a *Asset) injectMetadata(stub shim.ChaincodeStubInterface) errors.ICCError {
 	var err error
 
@@ -86,7 +87,7 @@ func (a *Asset) injectMetadata(stub shim.ChaincodeStubInterface) errors.ICCError
 	return nil
 }
 
-// IsPrivate returns true if asset type belongs to private collection
+// IsPrivate returns true if the Asset's asset type belongs to a private collection.
 func (a Asset) IsPrivate() bool {
 	// Fetch asset properties
 	assetTypeDef := a.Type()
@@ -96,19 +97,19 @@ func (a Asset) IsPrivate() bool {
 	return assetTypeDef.IsPrivate()
 }
 
-// TypeTag returns @assetType attribute
+// TypeTag returns the @assetType attribute.
 func (a Asset) TypeTag() string {
 	assetType, _ := a["@assetType"].(string)
 	return assetType
 }
 
-// Key returns the asset's unique key
+// Key returns the asset's unique identifying key in the ledger.
 func (a Asset) Key() string {
 	assetKey, _ := a["@key"].(string)
 	return assetKey
 }
 
-// Type return the AssetType object for the asset
+// Type return the AssetType object for the asset.
 func (a Asset) Type() *AssetType {
 	// Fetch asset properties
 	assetTypeTag := a.TypeTag()
@@ -116,6 +117,7 @@ func (a Asset) Type() *AssetType {
 	return assetTypeDef
 }
 
+// String returns the Asset in stringified JSON format.
 func (a Asset) String() string {
 	ret, err := json.Marshal(a)
 	if err != nil {
