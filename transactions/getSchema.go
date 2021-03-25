@@ -9,7 +9,7 @@ import (
 	"github.com/hyperledger/fabric/core/chaincode/shim"
 )
 
-// GetSchema returns data in CCHeader
+// GetSchema returns information about a specific AssetType or a list of every configured AssetType
 var GetSchema = Transaction{
 	Tag:         "getSchema",
 	Label:       "Get Schema",

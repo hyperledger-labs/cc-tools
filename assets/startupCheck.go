@@ -8,7 +8,7 @@ import (
 	"github.com/goledgerdev/cc-tools/errors"
 )
 
-// StartupCheck verifies if asset definitions are properly coded, panicking if they're not
+// StartupCheck verifies if asset definitions are properly coded, returning an error if they're not
 func StartupCheck() errors.ICCError {
 	assetTagSet := map[string]struct{}{}
 	assetLabelSet := map[string]struct{}{}

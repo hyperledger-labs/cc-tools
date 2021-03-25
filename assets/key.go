@@ -7,12 +7,12 @@ import (
 	"github.com/hyperledger/fabric/core/chaincode/shim"
 )
 
-//Key implements the json.Unmarshaler interface
-//It stores the information for retrieving assets from the ledger
-//Instead of having every field, it only has the ones needes for querying
+// Key stores the information for retrieving an Asset from the ledger.
+// Instead of having every asset property mapped such as the Asset type,
+// Key only has the properties needed for fetching the full Asset.
 type Key map[string]interface{}
 
-//UnmarshalJSON parses JSON-encoded data and returns
+// UnmarshalJSON parses JSON-encoded data and returns a Key object pointer
 func (k *Key) UnmarshalJSON(jsonData []byte) error {
 	*k = make(Key)
 	var err error
@@ -33,7 +33,12 @@ func (k *Key) UnmarshalJSON(jsonData []byte) error {
 	return nil
 }
 
-// NewKey constructs Key object from a map
+// NewKey constructs Key object from a map of properties.
+// The map must contain the `@assetType` entry and either
+// all the key properties of the asset (`IsKey == true`) or
+// the `@key` property.
+// Either way, the Key object returned contains only the
+// `@assetType` and `@key` entries.
 func NewKey(m map[string]interface{}) (k Key, err errors.ICCError) {
 	if m == nil {
 		err = errors.NewCCError("cannot create key from nil map", 500)
@@ -84,7 +89,7 @@ func (k *Key) GetBytes(stub shim.ChaincodeStubInterface) ([]byte, errors.ICCErro
 	return assetBytes, nil
 }
 
-// Type return the AssetType object configuration for the asset
+// Type returns the AssetType configuration object for the asset
 func (k Key) Type() *AssetType {
 	// Fetch asset properties
 	assetTypeTag := k.TypeTag()
@@ -108,12 +113,13 @@ func (k Key) TypeTag() string {
 	return assetType
 }
 
-// Key returns the asset's unique key
+// Key returns the asset's unique identifying key in the ledger.
 func (k Key) Key() string {
 	assetKey := k["@key"].(string)
 	return assetKey
 }
 
+// String returns the Key in stringified JSON format.
 func (k Key) String() string {
 	ret, _ := json.Marshal(k)
 	return string(ret)

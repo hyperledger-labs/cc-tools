@@ -9,7 +9,7 @@ import (
 	"github.com/hyperledger/fabric/core/chaincode/shim"
 )
 
-// CheckWriters checks if tx creator is allowed to write asset
+// CheckWriters checks if tx creator is allowed to write asset.
 func (a Asset) CheckWriters(stub shim.ChaincodeStubInterface) errors.ICCError {
 	// Get tx creator MSP ID
 	txCreator, err := cid.GetMSPID(stub)
@@ -20,7 +20,7 @@ func (a Asset) CheckWriters(stub shim.ChaincodeStubInterface) errors.ICCError {
 	return a.checkWriters(txCreator)
 }
 
-// checkWriters is an intern function that checks if tx creator is allowed to write asset
+// checkWriters is an internal function that checks if tx creator is allowed to write asset.
 func (a Asset) checkWriters(txCreator string) errors.ICCError {
 	// Fetch asset properties
 	assetTypeDef := a.Type()

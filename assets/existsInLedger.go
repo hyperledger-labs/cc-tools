@@ -5,7 +5,7 @@ import (
 	"github.com/hyperledger/fabric/core/chaincode/shim"
 )
 
-// ExistsInLedger checks if asset already exists
+// ExistsInLedger checks if asset currently has a state on the ledger.
 func (a *Asset) ExistsInLedger(stub shim.ChaincodeStubInterface) (bool, errors.ICCError) {
 	var assetBytes []byte
 	var err error
@@ -24,7 +24,7 @@ func (a *Asset) ExistsInLedger(stub shim.ChaincodeStubInterface) (bool, errors.I
 	return false, nil
 }
 
-// ExistsInLedger checks if asset referenced by a key object already exists
+// ExistsInLedger checks if asset referenced by a key object currently has a state on the ledger.
 func (k *Key) ExistsInLedger(stub shim.ChaincodeStubInterface) (bool, errors.ICCError) {
 	var assetBytes []byte
 	var err error

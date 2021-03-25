@@ -34,7 +34,7 @@ func get(stub shim.ChaincodeStubInterface, pvtCollection, key string) (*Asset, e
 	return &response, nil
 }
 
-// Get reads asset from ledger
+// Get fetches asset entry from ledger.
 func (a *Asset) Get(stub shim.ChaincodeStubInterface) (*Asset, errors.ICCError) {
 	var pvtCollection string
 	if a.IsPrivate() {
@@ -44,7 +44,7 @@ func (a *Asset) Get(stub shim.ChaincodeStubInterface) (*Asset, errors.ICCError) 
 	return get(stub, pvtCollection, a.Key())
 }
 
-// Get reads asset from ledger
+// Get fetches asset entry from ledger.
 func (k *Key) Get(stub shim.ChaincodeStubInterface) (*Asset, errors.ICCError) {
 	var pvtCollection string
 	if k.IsPrivate() {

@@ -9,8 +9,8 @@ import (
 	"github.com/hyperledger/fabric/core/chaincode/shim"
 )
 
-// put writes the reference index to the ledger, then encodes the asset to JSON format
-// and puts it into the ledger. It checks if the asset belongs in a private collection
+// put writes the reference index to the ledger, then encodes the
+// asset to JSON format and puts it into the ledger.
 func (a *Asset) put(stub shim.ChaincodeStubInterface) (map[string]interface{}, errors.ICCError) {
 	var err error
 
@@ -70,7 +70,7 @@ func (a *Asset) Put(stub shim.ChaincodeStubInterface) (map[string]interface{}, e
 	return a.put(stub)
 }
 
-// PutNew inserts asset in blockchain and returns error if asset exists
+// PutNew inserts asset in blockchain and returns error if asset exists.
 func (a *Asset) PutNew(stub shim.ChaincodeStubInterface) (map[string]interface{}, errors.ICCError) {
 	// Check if asset already exists
 	exists, err := a.ExistsInLedger(stub)
@@ -181,7 +181,9 @@ func PutRecursive(stub shim.ChaincodeStubInterface, object map[string]interface{
 	return putRecursive(stub, object, true)
 }
 
-// PutNewRecursive inserts asset and all it's subassets in blockchain and returns error if asset exists
+// PutNewRecursive inserts asset and all it's subassets in blockchain
+// It returns conflict error only if root asset exists.
+// If one of the subassets already exist in ledger, it is not updated.
 func PutNewRecursive(stub shim.ChaincodeStubInterface, object map[string]interface{}) (map[string]interface{}, errors.ICCError) {
 	objAsAsset, err := NewAsset(object)
 	if err != nil {

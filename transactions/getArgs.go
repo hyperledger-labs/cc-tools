@@ -10,7 +10,7 @@ import (
 	"github.com/hyperledger/fabric/core/chaincode/shim"
 )
 
-// GetArgs validates the arguments and assembles a map with the parsed key/values
+// GetArgs validates the received arguments and assembles a map with the parsed key/values.
 func (tx Transaction) GetArgs(stub shim.ChaincodeStubInterface) (map[string]interface{}, errors.ICCError) {
 	var err error
 

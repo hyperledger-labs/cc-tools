@@ -8,7 +8,7 @@ import (
 	"github.com/hyperledger/fabric/core/chaincode/shim"
 )
 
-// getTx returns tx definitions
+// getTx returns a specific tx definition or a list of all configured txs
 var getTx = Transaction{
 	Tag:         "getTx",
 	Label:       "Get Tx",

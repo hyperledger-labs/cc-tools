@@ -8,7 +8,7 @@ import (
 	"github.com/hyperledger/fabric/core/chaincode/shim"
 )
 
-// Refs returns an array of keys, containing the subAssets reference keys
+// Refs returns an array of Keys containing the reference keys for all present subAssets.
 func (a Asset) Refs() ([]Key, errors.ICCError) {
 	// Fetch asset properties
 	assetTypeDef := a.Type()
@@ -85,7 +85,7 @@ func (a Asset) Refs() ([]Key, errors.ICCError) {
 	return keys, nil
 }
 
-// ValidateRefs checks if subAsset references exists in blockchain
+// validateRefs checks if subAsset references exist in blockchain.
 func (a Asset) validateRefs(stub shim.ChaincodeStubInterface) errors.ICCError {
 	// Fetch references contained in asset
 	refKeys, err := a.Refs()
@@ -107,7 +107,7 @@ func (a Asset) validateRefs(stub shim.ChaincodeStubInterface) errors.ICCError {
 	return nil
 }
 
-// DelRefs deletes all the reference index for this asset from blockchain
+// delRefs deletes all the reference index for this asset from blockchain.
 func (a Asset) delRefs(stub shim.ChaincodeStubInterface) errors.ICCError {
 	// Fetch references contained in asset
 	refKeys, err := a.Refs()
@@ -131,7 +131,7 @@ func (a Asset) delRefs(stub shim.ChaincodeStubInterface) errors.ICCError {
 	return nil
 }
 
-// PutRefs writes the references to the blockchain
+// putRefs writes the asset's reference index to the blockchain.
 func (a Asset) putRefs(stub shim.ChaincodeStubInterface) errors.ICCError {
 	// Fetch references contained in asset
 	refKeys, err := a.Refs()
@@ -157,7 +157,7 @@ func (a Asset) putRefs(stub shim.ChaincodeStubInterface) errors.ICCError {
 	return nil
 }
 
-// IsReferenced checks if asset is referenced by other asset
+// IsReferenced checks if the asset is referenced by another asset.
 func (a Asset) IsReferenced(stub shim.ChaincodeStubInterface) (bool, errors.ICCError) {
 	// Get asset key
 	assetKey := a.Key()

@@ -8,7 +8,7 @@ import (
 	"github.com/hyperledger/fabric/core/chaincode/shim"
 )
 
-// GetDataTypes returns the data type map
+// GetDataTypes returns the primitive data type map
 var GetDataTypes = Transaction{
 	Tag:         "getDataTypes",
 	Label:       "Get DataTypes",

@@ -8,8 +8,7 @@ import (
 )
 
 // Delete erases asset from world state and checks for all necessary permissions.
-// A asset cannot be deleted if other asset references it
-// The asset is not deleted from the blockchain
+// An asset cannot be deleted if any other asset references it.
 func (a *Asset) Delete(stub shim.ChaincodeStubInterface) ([]byte, error) {
 	var err error
 

@@ -40,6 +40,6 @@ type AssetProp struct {
 	// check for a match with regular expression `org\dMSP`
 	Writers []string `json:"writers"`
 
-	// Validate receives a function to be called when validating property format
+	// Validate is a function called when validating property format.
 	Validate func(interface{}) error `json:"-"`
 }

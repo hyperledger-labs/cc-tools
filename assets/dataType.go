@@ -9,17 +9,19 @@ import (
 	"github.com/goledgerdev/cc-tools/errors"
 )
 
-// DataType is the struct defining a primitive data type
-// The description is a simple explanation for the specific field
-// DropDownValues is a set of pre determined values to be used in a dropdown menu on frontend rendering
-// Parse is a function that parses the interface received, validates the input and stores a string representation of the value
+// DataType is the struct defining a primitive data type.
 type DataType struct {
 	// AcceptedFormats is a list of "core" types that can be accepted (string, number, integer, boolean, datetime)
 	AcceptedFormats []string `json:"acceptedFormats"`
-	Description     string   `json:"description,omitempty"`
 
+	// Description is a simple text describing the data type
+	Description string `json:"description,omitempty"`
+
+	// DropDownValues is a set of predetermined values to be used in a dropdown menu on frontend rendering
 	DropDownValues map[string]interface{}
 
+	// Parse is called to check if the input value is valid, make necessary
+	// conversions and returns a string representation of the value
 	Parse func(interface{}) (string, interface{}, errors.ICCError) `json:"-"`
 
 	legacyMode bool
@@ -57,7 +59,7 @@ func DataTypeMap() map[string]DataType {
 	return ret
 }
 
-// Primitive dataType map, contains all the default data types
+// dataTypeMap contains the "standard" primitive data types
 var dataTypeMap = map[string]DataType{
 	"string": {
 		AcceptedFormats: []string{"string"},
