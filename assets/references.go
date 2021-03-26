@@ -121,6 +121,9 @@ func (a Asset) delRefs(stub shim.ChaincodeStubInterface) errors.ICCError {
 	for _, referencedKey := range refKeys {
 		// Construct reference key
 		indexKey, err := stub.CreateCompositeKey(referencedKey.Key(), []string{assetKey})
+		if err != nil {
+			return errors.WrapErrorWithStatus(err, "could not create composite key", 400)
+		}
 		// Check if asset exists in blockchain
 		err = stub.DelState(indexKey)
 		if err != nil {
