@@ -25,8 +25,11 @@ type DataType struct {
 	Parse func(interface{}) (string, interface{}, errors.ICCError) `json:"-"`
 
 	legacyMode bool
-	KeyString  func(interface{}) (string, error)      `json:"-"` // DEPRECATED. Use Parse instead.
-	Validate   func(interface{}) (interface{}, error) `json:"-"` // DEPRECATED. Use Parse instead.
+
+	// Deprecated: Use Parse instead.
+	KeyString func(interface{}) (string, error) `json:"-"`
+	// Deprecated: Use Parse instead.
+	Validate func(interface{}) (interface{}, error) `json:"-"`
 }
 
 // IsLegacy checks if datatype uses legacy functions KeyString and Validate instead of Parse
