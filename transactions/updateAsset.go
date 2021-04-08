@@ -2,7 +2,6 @@ package transactions
 
 import (
 	"encoding/json"
-	"fmt"
 
 	"github.com/goledgerdev/cc-tools/assets"
 	"github.com/goledgerdev/cc-tools/errors"
@@ -30,7 +29,7 @@ var UpdateAsset = Transaction{
 		request := req["update"].(map[string]interface{})
 		key, err := assets.NewKey(request)
 		if err != nil {
-			return nil, errors.WrapError(err, fmt.Sprintf("argument 'update' must be valid key"))
+			return nil, errors.WrapError(err, "argument 'update' must be valid key")
 		}
 
 		// Check if asset exists

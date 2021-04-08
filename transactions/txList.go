@@ -18,9 +18,7 @@ var basicTxs = []Transaction{
 // TxList returns a copy of the txList variable
 func TxList() []Transaction {
 	listCopy := []Transaction{}
-	for _, v := range txList {
-		listCopy = append(listCopy, v)
-	}
+	listCopy = append(listCopy, txList...)
 	return listCopy
 }
 

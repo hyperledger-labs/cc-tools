@@ -31,7 +31,7 @@ var GetSchema = Transaction{
 		if ok {
 			assetTypeName, ok = assetTypeInterface.(string)
 			if !ok {
-				return nil, errors.NewCCError(fmt.Sprintf("argument 'assetType' must be a string"), 400)
+				return nil, errors.NewCCError("argument 'assetType' must be a string", 400)
 			}
 		}
 

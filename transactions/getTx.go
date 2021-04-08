@@ -31,7 +31,7 @@ var getTx = Transaction{
 		if ok {
 			txName, ok = txNameInterface.(string)
 			if !ok {
-				return nil, errors.NewCCError(fmt.Sprintf("argument 'txName' must be a string"), 400)
+				return nil, errors.NewCCError("argument 'txName' must be a string", 400)
 			}
 		}
 

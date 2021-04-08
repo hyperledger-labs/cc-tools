@@ -27,7 +27,7 @@ func (tx Transaction) GetArgs(stub shim.ChaincodeStubInterface) (map[string]inte
 	if len(args) > 0 {
 		err = json.Unmarshal([]byte(args[0]), &req)
 		if err != nil {
-			return nil, errors.WrapErrorWithStatus(err, fmt.Sprintf("failed to unmarshal request args"), 400)
+			return nil, errors.WrapErrorWithStatus(err, "failed to unmarshal request args", 400)
 		}
 	}
 
@@ -40,7 +40,7 @@ func (tx Transaction) GetArgs(stub shim.ChaincodeStubInterface) (map[string]inte
 		if transientExists && transientArgs != nil {
 			err = json.Unmarshal(transientArgs, &transientReq)
 			if err != nil {
-				return nil, errors.WrapErrorWithStatus(err, fmt.Sprintf("failed to unmarshal transient args"), 400)
+				return nil, errors.WrapErrorWithStatus(err, "failed to unmarshal transient args", 400)
 			}
 		}
 	}
@@ -100,6 +100,8 @@ func (tx Transaction) GetArgs(stub shim.ChaincodeStubInterface) (map[string]inte
 		}
 
 	}
+
+	cleanUp(reqMap)
 
 	return reqMap, nil
 }

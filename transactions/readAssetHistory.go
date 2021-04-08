@@ -52,8 +52,7 @@ var ReadAssetHistory = Transaction{
 				return nil, errors.WrapError(err, "error iterating response")
 			}
 
-			var data map[string]interface{}
-			data = make(map[string]interface{})
+			data := make(map[string]interface{})
 
 			if queryResponse.IsDelete {
 				data["_isDelete"] = queryResponse.IsDelete

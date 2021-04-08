@@ -162,8 +162,3 @@ var Search = Transaction{
 		return responseJSON, nil
 	},
 }
-
-type searchArgs struct {
-	Query      map[string]interface{} `json:"query"`
-	Collection string                 `json:"collection"`
-}
