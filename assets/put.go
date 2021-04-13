@@ -105,6 +105,12 @@ func putRecursive(stub shim.ChaincodeStubInterface, object map[string]interface{
 		}
 		if exists {
 			asset, err := objAsKey.GetRecursive(stub)
+			if err != nil {
+				return nil, errors.WrapError(err, "failed fetching sub-asset that already exists")
+			}
+			if asset == nil {
+				return nil, errors.NewCCError("existing sub-asset could not be fetched", 404)
+			}
 			return *asset, err
 		}
 	}

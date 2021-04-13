@@ -95,20 +95,20 @@ func getRecursive(stub shim.ChaincodeStubInterface, pvtCollection, key string) (
 
 	for k, v := range response {
 		var fullValue interface{}
-		var keyIsFectched bool
+		var keyIsFetched bool
 		switch prop := v.(type) {
 		case map[string]interface{}:
 			propKey, err := NewKey(prop)
 
-			keyIsFectched = false
+			keyIsFetched = false
 			for _, key := range keysPassed {
 				if key["@key"] == propKey["@key"] {
-					keyIsFectched = true
+					keyIsFetched = true
 					fullValue = propKey
 					break
 				}
 			}
-			if keyIsFectched {
+			if keyIsFetched {
 				continue
 			}
 			keysPassed = append(keysPassed, propKey)
