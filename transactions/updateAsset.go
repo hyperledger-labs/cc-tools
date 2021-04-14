@@ -33,13 +33,16 @@ var UpdateAsset = Transaction{
 		}
 
 		// Check if asset exists
-		asset, err := key.Get(stub)
+		exists, err := key.ExistsInLedger(stub)
 		if err != nil {
-			return nil, errors.WrapError(err, "failed to fetch asset from blockchain")
+			return nil, errors.WrapError(err, "failed to check asset existance in ledger")
+		}
+		if !exists {
+			return nil, errors.NewCCError("asset does not exist", 404)
 		}
 
 		// Update asset
-		response, err := asset.Update(stub, request)
+		response, err := key.Update(stub, request)
 		if err != nil {
 			return nil, errors.WrapError(err, "failed to update asset")
 		}

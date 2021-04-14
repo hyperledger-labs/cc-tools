@@ -89,6 +89,20 @@ func (k *Key) GetBytes(stub shim.ChaincodeStubInterface) ([]byte, errors.ICCErro
 	return assetBytes, nil
 }
 
+// GetMap reads the asset as bytes from ledger
+func (k *Key) GetMap(stub shim.ChaincodeStubInterface) (map[string]interface{}, errors.ICCError) {
+	var err error
+	assetBytes, err := k.GetBytes(stub)
+	if err != nil {
+		return nil, errors.WrapErrorWithStatus(err, "failed to get asset bytes", 400)
+	}
+
+	var ret map[string]interface{}
+	err = json.Unmarshal(assetBytes, &ret)
+
+	return ret, nil
+}
+
 // Type returns the AssetType configuration object for the asset
 func (k Key) Type() *AssetType {
 	// Fetch asset properties

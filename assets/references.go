@@ -9,6 +9,7 @@ import (
 )
 
 // Refs returns an array of Keys containing the reference keys for all present subAssets.
+// The referenced keys are fetched based on current asset configuration.
 func (a Asset) Refs() ([]Key, errors.ICCError) {
 	// Fetch asset properties
 	assetTypeDef := a.Type()
@@ -85,6 +86,45 @@ func (a Asset) Refs() ([]Key, errors.ICCError) {
 	return keys, nil
 }
 
+// Refs returns an array of Keys containing the reference keys for all present subAssets.
+// The referenced keys are fetched from current asset state on ledger.
+func (k Key) Refs(stub shim.ChaincodeStubInterface) ([]Key, errors.ICCError) {
+	assetMap, err := k.GetMap(stub)
+	if err != nil {
+		return nil, errors.WrapError(err, "could not get asset map from ledger")
+	}
+
+	var keys []Key
+	for _, prop := range assetMap {
+		// Convert everything to interface slice to handle every sub-asset with the same code
+		var subAssetAsInterfaceSlice []interface{}
+		switch v := prop.(type) {
+		case map[string]interface{}:
+			subAssetAsInterfaceSlice = []interface{}{v}
+		case []interface{}:
+			subAssetAsInterfaceSlice = v
+		default:
+			// Whatever is not a map[string]interface{} or a []interface{} can never be a sub-asset
+			continue
+		}
+
+		for _, elem := range subAssetAsInterfaceSlice {
+			switch v := elem.(type) {
+			case map[string]interface{}:
+				newKey, err := NewKey(v)
+				if err != nil {
+					continue
+				}
+				keys = append(keys, newKey)
+			default:
+				continue
+			}
+		}
+	}
+
+	return keys, nil
+}
+
 // validateRefs checks if subAsset references exist in blockchain.
 func (a Asset) validateRefs(stub shim.ChaincodeStubInterface) errors.ICCError {
 	// Fetch references contained in asset
@@ -107,16 +147,7 @@ func (a Asset) validateRefs(stub shim.ChaincodeStubInterface) errors.ICCError {
 	return nil
 }
 
-// delRefs deletes all the reference index for this asset from blockchain.
-func (a Asset) delRefs(stub shim.ChaincodeStubInterface) errors.ICCError {
-	// Fetch references contained in asset
-	refKeys, err := a.Refs()
-	if err != nil {
-		return errors.WrapErrorWithStatus(err, "failed to fetch references", 400)
-	}
-
-	assetKey := a.Key()
-
+func delRefs(stub shim.ChaincodeStubInterface, assetKey string, refKeys []Key) errors.ICCError {
 	// Delete reference indexes
 	for _, referencedKey := range refKeys {
 		// Construct reference key
@@ -132,6 +163,32 @@ func (a Asset) delRefs(stub shim.ChaincodeStubInterface) errors.ICCError {
 	}
 
 	return nil
+}
+
+// delRefs deletes all the reference index for this asset from blockchain.
+func (a Asset) delRefs(stub shim.ChaincodeStubInterface) errors.ICCError {
+	// Fetch references contained in asset
+	refKeys, err := a.Refs()
+	if err != nil {
+		return errors.WrapErrorWithStatus(err, "failed to fetch references", 400)
+	}
+
+	assetKey := a.Key()
+
+	return delRefs(stub, assetKey, refKeys)
+}
+
+// delRefs deletes all the reference index for this asset from blockchain.
+func (k Key) delRefs(stub shim.ChaincodeStubInterface) errors.ICCError {
+	// Fetch references contained in asset
+	refKeys, err := k.Refs(stub)
+	if err != nil {
+		return errors.WrapErrorWithStatus(err, "failed to fetch references", 400)
+	}
+
+	assetKey := k.Key()
+
+	return delRefs(stub, assetKey, refKeys)
 }
 
 // putRefs writes the asset's reference index to the blockchain.
