@@ -31,7 +31,7 @@ func TestSetProp(t *testing.T) {
 	}
 }
 
-func TestSetPropFail(t *testing.T) {
+func TestSetPropErrors(t *testing.T) {
 	assetJSON := []byte("{\"@assetType\": \"samplePerson\",\"name\": \"Maria\",\"cpf\": \"318.207.920-48\",\"readerScore\": 70}")
 	var a Asset
 	err := json.Unmarshal(assetJSON, &a)

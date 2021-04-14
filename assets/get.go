@@ -2,13 +2,10 @@ package assets
 
 import (
 	"encoding/json"
-	"reflect"
 
 	"github.com/goledgerdev/cc-tools/errors"
 	"github.com/hyperledger/fabric/core/chaincode/shim"
 )
-
-var keysPassed []Key
 
 func get(stub shim.ChaincodeStubInterface, pvtCollection, key string) (*Asset, errors.ICCError) {
 	var assetBytes []byte
@@ -56,7 +53,7 @@ func (k *Key) Get(stub shim.ChaincodeStubInterface) (*Asset, errors.ICCError) {
 
 /* GetRecursive-related code */
 
-func getRecursive(stub shim.ChaincodeStubInterface, pvtCollection, key string) (*Asset, errors.ICCError) {
+func getRecursive(stub shim.ChaincodeStubInterface, pvtCollection, key string, keysChecked []string) (*Asset, errors.ICCError) {
 	var assetBytes []byte
 	var err error
 	if pvtCollection != "" {
@@ -94,82 +91,72 @@ func getRecursive(stub shim.ChaincodeStubInterface, pvtCollection, key string) (
 	}
 
 	for k, v := range response {
-		var fullValue interface{}
-		var keyIsFetched bool
 		switch prop := v.(type) {
 		case map[string]interface{}:
 			propKey, err := NewKey(prop)
+			if err != nil {
+				return nil, errors.WrapErrorWithStatus(err, "failed to resolve asset references", 500)
+			}
 
-			keyIsFetched = false
-			for _, key := range keysPassed {
-				if key["@key"] == propKey["@key"] {
+			keyIsFetched := false
+			for _, key := range keysChecked {
+				if key == propKey.Key() {
 					keyIsFetched = true
-					fullValue = propKey
 					break
 				}
 			}
 			if keyIsFetched {
 				continue
 			}
-			keysPassed = append(keysPassed, propKey)
-
-			if err != nil {
-				return nil, errors.WrapErrorWithStatus(err, "failed to resolve asset references", 500)
-			}
+			keysChecked = append(keysChecked, propKey.Key())
 
 			var subAsset *Asset
 			if propKey.IsPrivate() {
-				subAsset, err = getRecursive(stub, propKey.TypeTag(), propKey.Key())
+				subAsset, err = getRecursive(stub, propKey.TypeTag(), propKey.Key(), keysChecked)
 			} else {
-				subAsset, err = getRecursive(stub, "", propKey.Key())
+				subAsset, err = getRecursive(stub, "", propKey.Key(), keysChecked)
 			}
 			if err != nil {
 				return nil, errors.WrapErrorWithStatus(err, "failed to get subasset", 500)
 			}
 
-			fullValue = *subAsset
+			response[k] = *subAsset
 
 		case []interface{}:
 			for idx, elem := range prop {
-				var keyIsFectched bool
-
 				if elemMap, ok := elem.(map[string]interface{}); ok {
 					elemKey, err := NewKey(elemMap)
 					if err != nil {
 						return nil, errors.WrapErrorWithStatus(err, "failed to resolve asset references", 500)
 					}
 
-					keyIsFectched = false
-					for _, key := range keysPassed {
-						if reflect.DeepEqual(key, elemKey) {
-							keyIsFectched = true
-							fullValue = elemKey
+					keyIsFetched := false
+					for _, key := range keysChecked {
+						if key == elemKey.Key() {
+							keyIsFetched = true
 							break
 						}
 					}
-					if keyIsFectched {
+					if keyIsFetched {
 						continue
 					}
+					keysChecked = append(keysChecked, elemKey.Key())
 
 					var subAsset *Asset
 					if elemKey.IsPrivate() {
-						subAsset, err = getRecursive(stub, elemKey.TypeTag(), elemKey.Key())
+						subAsset, err = getRecursive(stub, elemKey.TypeTag(), elemKey.Key(), keysChecked)
 					} else {
-						subAsset, err = getRecursive(stub, "", elemKey.Key())
+						subAsset, err = getRecursive(stub, "", elemKey.Key(), keysChecked)
 					}
 					if err != nil {
 						return nil, errors.WrapErrorWithStatus(err, "failed to get subasset", 500)
 					}
 
 					prop[idx] = *subAsset
-					keysPassed = append(keysPassed, elemKey)
 				}
 			}
-			fullValue = prop
-		default:
-			continue
+			response[k] = prop
 		}
-		response[k] = fullValue
 	}
 
 	return &response, nil
@@ -182,7 +169,7 @@ func (a *Asset) GetRecursive(stub shim.ChaincodeStubInterface) (*Asset, errors.I
 		pvtCollection = a.TypeTag()
 	}
 
-	return getRecursive(stub, pvtCollection, a.Key())
+	return getRecursive(stub, pvtCollection, a.Key(), []string{})
 }
 
 // GetRecursive reads asset from ledger and resolves all references
@@ -192,5 +179,5 @@ func (k *Key) GetRecursive(stub shim.ChaincodeStubInterface) (*Asset, errors.ICC
 		pvtCollection = k.TypeTag()
 	}
 
-	return getRecursive(stub, pvtCollection, k.Key())
+	return getRecursive(stub, pvtCollection, k.Key(), []string{})
 }
