@@ -45,6 +45,9 @@ func (tx Transaction) GetArgs(stub shim.ChaincodeStubInterface) (map[string]inte
 		}
 	}
 
+	cleanUp(req)
+	cleanUp(transientReq)
+
 	// Validate args format
 	for _, argDef := range tx.Args {
 		argKey := argDef.Tag
@@ -98,10 +101,7 @@ func (tx Transaction) GetArgs(stub shim.ChaincodeStubInterface) (map[string]inte
 			}
 			reqMap[argKey] = validArg
 		}
-
 	}
-
-	cleanUp(reqMap)
 
 	return reqMap, nil
 }
