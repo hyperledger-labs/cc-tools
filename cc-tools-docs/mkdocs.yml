@@ -1,0 +1,13 @@
+site_name: Chaincode Tools
+nav:
+    - Home: index.md
+    - What's new: whatsnew.md
+    - Release notes: releasenotes.md
+    - Tutorials: tutorials.md
+    - How-to guides: how-to-guides.md
+    - Key concepts: concepts.md
+    - Reference guides: reference.md
+theme: readthedocs
+copyright: © Copyright GoLedger 2020
+extra:
+    version: 1.0
