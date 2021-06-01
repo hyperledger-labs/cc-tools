@@ -24,7 +24,7 @@ func (a *Asset) SetProp(propTag string, value interface{}) errors.ICCError {
 	}
 
 	if propDef.IsKey {
-		return errors.NewCCError(fmt.Sprintf("SetProp on key asset property is not yet implemented"), 501) // TODO
+		return errors.NewCCError("SetProp on key asset property is not yet implemented", 501) // TODO
 	}
 
 	propType := DataTypeMap()[propDef.DataType]

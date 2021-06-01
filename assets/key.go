@@ -99,6 +99,9 @@ func (k *Key) GetMap(stub shim.ChaincodeStubInterface) (map[string]interface{}, 
 
 	var ret map[string]interface{}
 	err = json.Unmarshal(assetBytes, &ret)
+	if err != nil {
+		return nil, errors.WrapError(err, "failed to unmarshal asset")
+	}
 
 	return ret, nil
 }

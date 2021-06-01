@@ -87,7 +87,7 @@ var dataTypeMap = map[string]DataType{
 				var err error
 				dataVal, err = strconv.ParseFloat(v, 64)
 				if err != nil {
-					return "", nil, errors.WrapErrorWithStatus(err, fmt.Sprintf("asset property must be a number"), 400)
+					return "", nil, errors.WrapErrorWithStatus(err, "asset property must be a number", 400)
 				}
 			default:
 				return "", nil, errors.NewCCError("asset property must be a number", 400)
@@ -110,7 +110,7 @@ var dataTypeMap = map[string]DataType{
 				var err error
 				dataVal, err = strconv.ParseFloat(v, 64)
 				if err != nil {
-					return "", nil, errors.WrapErrorWithStatus(err, fmt.Sprintf("asset property must be an integer"), 400)
+					return "", nil, errors.WrapErrorWithStatus(err, "asset property must be an integer", 400)
 				}
 			default:
 				return "", nil, errors.NewCCError("asset property must be an integer", 400)

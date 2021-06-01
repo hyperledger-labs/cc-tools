@@ -10,7 +10,7 @@ import (
 )
 
 // Update receives a map[string]interface{} with key/vals to update the asset value in the world state.
-func (a *Asset) Update(stub shim.ChaincodeStubInterface, update map[string]interface{}) (map[string]interface{}, error) {
+func (a *Asset) Update(stub shim.ChaincodeStubInterface, update map[string]interface{}) (map[string]interface{}, errors.ICCError) {
 	// Fetch asset properties
 	assetTypeDef := a.Type()
 	if assetTypeDef == nil {
@@ -102,7 +102,7 @@ func (a *Asset) Update(stub shim.ChaincodeStubInterface, update map[string]inter
 }
 
 // Update receives a map[string]interface{} with key/vals to update the asset value in the world state.
-func (k *Key) Update(stub shim.ChaincodeStubInterface, update map[string]interface{}) (map[string]interface{}, error) {
+func (k *Key) Update(stub shim.ChaincodeStubInterface, update map[string]interface{}) (map[string]interface{}, errors.ICCError) {
 	// Fetch asset properties
 	assetTypeDef := k.Type()
 	if assetTypeDef == nil {
