@@ -111,17 +111,28 @@ func validateTxArg(argType string, arg interface{}) (interface{}, errors.ICCErro
 	var argAsInterface interface{}
 	var err error
 
-	dataTypeMap := assets.DataTypeMap()
-	dataType, dataTypeExists := dataTypeMap[argType]
-	if dataTypeExists { // if argument is a primitive data type
-		if !dataType.IsLegacy() {
-			_, argAsInterface, err = dataType.Parse(arg)
-		} else {
-			argAsInterface, err = dataType.Validate(arg)
+	// If argType has "->" it means it's an asset reference
+	if strings.HasPrefix(argType, "->") {
+		argType = strings.TrimPrefix(argType, "->")
+
+		// Handle @assetType
+		var argMap map[string]interface{}
+		argMap, ok := arg.(map[string]interface{})
+		if !ok {
+			return nil, errors.NewCCError("invalid argument format", 400)
 		}
+		assetTypeName, ok := argMap["@assetType"]
+		if ok && assetTypeName != argType { // in case an @assetType is specified, check if it is correct
+			return nil, errors.NewCCError(fmt.Sprintf("invalid @assetType '%s' (expecting '%s')", assetTypeName, argType), 400)
+		}
+		if !ok { // if @assetType is not specified, inject it
+			argMap["@assetType"] = argType
+		}
+		key, err := assets.NewKey(argMap)
 		if err != nil {
-			return nil, errors.WrapError(err, "invalid argument format")
+			return nil, errors.WrapErrorWithStatus(err, "failed constructing key", 400)
 		}
+		argAsInterface = key
 	} else {
 		switch argType {
 		case "@asset":
@@ -175,25 +186,22 @@ func validateTxArg(argType string, arg interface{}) (interface{}, errors.ICCErro
 				return nil, errors.NewCCError("invalid argument format", 400)
 			}
 			argAsInterface = argMap
-		default: // should be a specific asset key
-			// Handle @assetType
-			var argMap map[string]interface{}
-			argMap, ok := arg.(map[string]interface{})
-			if !ok {
-				return nil, errors.NewCCError("invalid argument format", 400)
+		default: // should be a specific datatype
+			dataTypeMap := assets.DataTypeMap()
+			dataType, dataTypeExists := dataTypeMap[argType]
+			if !dataTypeExists {
+				return nil, errors.NewCCError(fmt.Sprintf("invalid arg type '%s'", argType), 500)
 			}
-			assetTypeName, ok := argMap["@assetType"]
-			if ok && assetTypeName != argType { // in case an @assetType is specified, check if it is correct
-				return nil, errors.NewCCError(fmt.Sprintf("invalid @assetType '%s' (expecting '%s')", assetTypeName, argType), 400)
+
+			if !dataType.IsLegacy() {
+				_, argAsInterface, err = dataType.Parse(arg)
+			} else {
+				argAsInterface, err = dataType.Validate(arg)
 			}
-			if !ok { // if @assetType is not specified, inject it
-				argMap["@assetType"] = argType
-			}
-			key, err := assets.NewKey(argMap)
+
 			if err != nil {
-				return nil, errors.WrapErrorWithStatus(err, "failed constructing key", 400)
+				return nil, errors.WrapError(err, "invalid argument format")
 			}
-			argAsInterface = key
 		}
 	}
 
