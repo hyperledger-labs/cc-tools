@@ -193,11 +193,7 @@ func validateTxArg(argType string, arg interface{}) (interface{}, errors.ICCErro
 				return nil, errors.NewCCError(fmt.Sprintf("invalid arg type '%s'", argType), 500)
 			}
 
-			if !dataType.IsLegacy() {
-				_, argAsInterface, err = dataType.Parse(arg)
-			} else {
-				argAsInterface, err = dataType.Validate(arg)
-			}
+			_, argAsInterface, err = dataType.Parse(arg)
 
 			if err != nil {
 				return nil, errors.WrapError(err, "invalid argument format")

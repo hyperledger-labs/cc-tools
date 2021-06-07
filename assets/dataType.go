@@ -23,29 +23,13 @@ type DataType struct {
 	// Parse is called to check if the input value is valid, make necessary
 	// conversions and returns a string representation of the value
 	Parse func(interface{}) (string, interface{}, errors.ICCError) `json:"-"`
-
-	legacyMode bool
-
-	// Deprecated: Use Parse instead.
-	KeyString func(interface{}) (string, error) `json:"-"`
-	// Deprecated: Use Parse instead.
-	Validate func(interface{}) (interface{}, error) `json:"-"`
-}
-
-// IsLegacy checks if datatype uses legacy functions KeyString and Validate instead of Parse
-func (d DataType) IsLegacy() bool {
-	return d.legacyMode
 }
 
 // CustomDataTypes allows cc developer to inject custom primitive data types
 func CustomDataTypes(m map[string]DataType) error {
 	for k, v := range m {
 		if v.Parse == nil {
-			// These function signatures are deprecated and this is here for backwards compatibility only.
-			if v.KeyString == nil || v.Validate == nil {
-				return errors.NewCCError(fmt.Sprintf("invalid custom data type '%s': nil Parse function", k), 500)
-			}
-			v.legacyMode = true
+			return errors.NewCCError(fmt.Sprintf("invalid custom data type '%s': nil Parse function", k), 500)
 		}
 
 		dataTypeMap[k] = v
