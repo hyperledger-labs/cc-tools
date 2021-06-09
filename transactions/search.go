@@ -138,7 +138,7 @@ var Search = Transaction{
 				if err != nil {
 					return nil, errors.WrapError(err, "failed to resolve result")
 				}
-				data = *asset
+				data = asset
 			}
 
 			searchResult = append(searchResult, data)

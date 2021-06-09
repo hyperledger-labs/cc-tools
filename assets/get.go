@@ -53,7 +53,7 @@ func (k *Key) Get(stub *sw.StubWrapper) (*Asset, errors.ICCError) {
 
 /* GetRecursive-related code */
 
-func getRecursive(stub *sw.StubWrapper, pvtCollection, key string, keysChecked []string) (*Asset, errors.ICCError) {
+func getRecursive(stub *sw.StubWrapper, pvtCollection, key string, keysChecked []string) (map[string]interface{}, errors.ICCError) {
 	var assetBytes []byte
 	var err error
 	if pvtCollection != "" {
@@ -67,12 +67,12 @@ func getRecursive(stub *sw.StubWrapper, pvtCollection, key string, keysChecked [
 			if hash == nil {
 				return nil, errors.NewCCError("asset not found", 404)
 			}
-			response := Asset{
+			response := map[string]interface{}{
 				"@key":       key,
 				"@assetType": pvtCollection,
 				"@hash":      hash,
 			}
-			return &response, nil
+			return response, nil
 		}
 	} else {
 		assetBytes, err = stub.GetState(key)
@@ -84,7 +84,7 @@ func getRecursive(stub *sw.StubWrapper, pvtCollection, key string, keysChecked [
 		return nil, errors.NewCCError("asset not found", 404)
 	}
 
-	var response Asset
+	var response map[string]interface{}
 	err = json.Unmarshal(assetBytes, &response)
 	if err != nil {
 		return nil, errors.WrapErrorWithStatus(err, "failed to unmarshal asset from ledger", 500)
@@ -110,7 +110,7 @@ func getRecursive(stub *sw.StubWrapper, pvtCollection, key string, keysChecked [
 			}
 			keysChecked = append(keysChecked, propKey.Key())
 
-			var subAsset *Asset
+			var subAsset map[string]interface{}
 			if propKey.IsPrivate() {
 				subAsset, err = getRecursive(stub, propKey.TypeTag(), propKey.Key(), keysChecked)
 			} else {
@@ -120,7 +120,7 @@ func getRecursive(stub *sw.StubWrapper, pvtCollection, key string, keysChecked [
 				return nil, errors.WrapErrorWithStatus(err, "failed to get subasset", 500)
 			}
 
-			response[k] = *subAsset
+			response[k] = subAsset
 
 		case []interface{}:
 			for idx, elem := range prop {
@@ -142,7 +142,7 @@ func getRecursive(stub *sw.StubWrapper, pvtCollection, key string, keysChecked [
 					}
 					keysChecked = append(keysChecked, elemKey.Key())
 
-					var subAsset *Asset
+					var subAsset map[string]interface{}
 					if elemKey.IsPrivate() {
 						subAsset, err = getRecursive(stub, elemKey.TypeTag(), elemKey.Key(), keysChecked)
 					} else {
@@ -152,18 +152,18 @@ func getRecursive(stub *sw.StubWrapper, pvtCollection, key string, keysChecked [
 						return nil, errors.WrapErrorWithStatus(err, "failed to get subasset", 500)
 					}
 
-					prop[idx] = *subAsset
+					prop[idx] = subAsset
 				}
 			}
 			response[k] = prop
 		}
 	}
 
-	return &response, nil
+	return response, nil
 }
 
 // GetRecursive reads asset from ledger and resolves all references
-func (a *Asset) GetRecursive(stub *sw.StubWrapper) (*Asset, errors.ICCError) {
+func (a *Asset) GetRecursive(stub *sw.StubWrapper) (map[string]interface{}, errors.ICCError) {
 	var pvtCollection string
 	if a.IsPrivate() {
 		pvtCollection = a.TypeTag()
@@ -173,7 +173,7 @@ func (a *Asset) GetRecursive(stub *sw.StubWrapper) (*Asset, errors.ICCError) {
 }
 
 // GetRecursive reads asset from ledger and resolves all references
-func (k *Key) GetRecursive(stub *sw.StubWrapper) (*Asset, errors.ICCError) {
+func (k *Key) GetRecursive(stub *sw.StubWrapper) (map[string]interface{}, errors.ICCError) {
 	var pvtCollection string
 	if k.IsPrivate() {
 		pvtCollection = k.TypeTag()

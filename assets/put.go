@@ -111,7 +111,7 @@ func putRecursive(stub *sw.StubWrapper, object map[string]interface{}, root bool
 			if asset == nil {
 				return nil, errors.NewCCError("existing sub-asset could not be fetched", 404)
 			}
-			return *asset, err
+			return asset, err
 		}
 	}
 

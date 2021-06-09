@@ -40,13 +40,13 @@ var ReadAsset = Transaction{
 		resolve, ok := req["resolve"].(bool)
 
 		if ok && resolve {
-			var asset *assets.Asset
+			var asset map[string]interface{}
 			asset, err = key.GetRecursive(stub)
 			if err != nil {
 				return nil, errors.WrapError(err, "failed to read asset from blockchain")
 			}
 
-			assetJSON, err = json.Marshal(*asset)
+			assetJSON, err = json.Marshal(asset)
 			if err != nil {
 				return nil, errors.WrapErrorWithStatus(err, "failed to serialize asset", 500)
 			}

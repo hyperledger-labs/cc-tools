@@ -83,10 +83,10 @@ func TestGetRecursive(t *testing.T) {
 		t.FailNow()
 	}
 
-	if !reflect.DeepEqual(gotAsset.GetProp("currentTenant"), a) {
+	if !reflect.DeepEqual(gotAsset["currentTenant"], (map[string]interface{})(a)) {
 		fmt.Println("these should be deeply equal")
-		fmt.Println(a)
-		fmt.Println(gotAsset.GetProp("currentTenant"))
+		fmt.Println((map[string]interface{})(a))
+		fmt.Println(gotAsset["currentTenant"])
 		t.FailNow()
 	}
 }
@@ -133,10 +133,10 @@ func TestGetRecursiveWithPvtData(t *testing.T) {
 		t.FailNow()
 	}
 
-	if !reflect.DeepEqual(gotAsset.GetProp("secret"), a) {
+	if !reflect.DeepEqual(gotAsset["secret"], (map[string]interface{})(a)) {
 		fmt.Println("these should be deeply equal")
-		fmt.Println(a)
-		fmt.Println(gotAsset.GetProp("currentTenant"))
+		fmt.Println((map[string]interface{})(a))
+		fmt.Println(gotAsset["secret"])
 		t.FailNow()
 	}
 }
@@ -183,7 +183,7 @@ func TestGetRecursiveWithListOfPvtData(t *testing.T) {
 		t.FailNow()
 	}
 
-	secretProp := gotAsset.GetProp("secrets")
+	secretProp := gotAsset["secrets"]
 	secretList, ok := secretProp.([]interface{})
 	if !ok {
 		fmt.Println("secretList should be of type []interface{}")
@@ -194,9 +194,9 @@ func TestGetRecursiveWithListOfPvtData(t *testing.T) {
 		fmt.Println("secretList should have length equal to 1")
 	}
 
-	if !reflect.DeepEqual(secretList[0], a) {
+	if !reflect.DeepEqual(secretList[0], (map[string]interface{})(a)) {
 		fmt.Println("these should be deeply equal")
-		fmt.Println(a)
+		fmt.Println((map[string]interface{})(a))
 		fmt.Println(secretList[0])
 		t.FailNow()
 	}
