@@ -32,7 +32,7 @@ func CustomDataTypes(m map[string]DataType) error {
 			return errors.NewCCError(fmt.Sprintf("invalid custom data type '%s': nil Parse function", k), 500)
 		}
 
-		dataTypeMap[k] = v
+		dataTypeMap[k] = &v
 	}
 	return nil
 }
@@ -41,13 +41,18 @@ func CustomDataTypes(m map[string]DataType) error {
 func DataTypeMap() map[string]DataType {
 	ret := map[string]DataType{}
 	for k, v := range dataTypeMap {
-		ret[k] = v
+		ret[k] = *v
 	}
 	return ret
 }
 
+// FetchDataType returns a pointer to the DataType object or nil if asset type is not found.
+func FetchDataType(dataTypeTag string) *DataType {
+	return dataTypeMap[dataTypeTag]
+}
+
 // dataTypeMap contains the "standard" primitive data types
-var dataTypeMap = map[string]DataType{
+var dataTypeMap = map[string]*DataType{
 	"string": {
 		AcceptedFormats: []string{"string"},
 		Parse: func(data interface{}) (string, interface{}, errors.ICCError) {
