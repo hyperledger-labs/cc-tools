@@ -125,3 +125,12 @@ func (a Asset) String() string {
 	}
 	return string(ret)
 }
+
+// JSON returns the Asset in JSON format.
+func (a Asset) JSON() []byte {
+	ret, err := json.Marshal(a)
+	if err != nil {
+		return nil
+	}
+	return ret
+}

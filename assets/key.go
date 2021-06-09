@@ -141,3 +141,12 @@ func (k Key) String() string {
 	ret, _ := json.Marshal(k)
 	return string(ret)
 }
+
+// JSON returns the Asset in JSON format.
+func (k Key) JSON() []byte {
+	ret, err := json.Marshal(k)
+	if err != nil {
+		return nil
+	}
+	return ret
+}
