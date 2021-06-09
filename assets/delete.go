@@ -63,7 +63,7 @@ func (a *Asset) Delete(stub *sw.StubWrapper) ([]byte, errors.ICCError) {
 }
 
 // DeleteRecursive erases asset and recursively erases those which reference it
-func (a *Asset) DeleteRecursive(stub *sw.StubWrapper) ([]byte, errors.ICCError) {
+func (a *Asset) DeleteCascade(stub *sw.StubWrapper) ([]byte, errors.ICCError) {
 	var err error
 
 	// Check if org has write permission
@@ -72,7 +72,7 @@ func (a *Asset) DeleteRecursive(stub *sw.StubWrapper) ([]byte, errors.ICCError) 
 		return nil, errors.WrapError(err, "failed write permission check")
 	}
 
-	err = deleteRecursive(stub, a.Key())
+	deletedKeys, err := deleteRecursive(stub, a.Key(), []string{})
 	if err != nil {
 		return nil, errors.WrapError(err, "error deleting asset Recursively")
 	}
@@ -88,13 +88,11 @@ func (a *Asset) DeleteRecursive(stub *sw.StubWrapper) ([]byte, errors.ICCError) 
 	return responseJSON, nil
 }
 
-var deletedKeys []string
-
-func deleteRecursive(stub *sw.StubWrapper, key string) errors.ICCError {
+func deleteRecursive(stub *sw.StubWrapper, key string, deletedKeys []string) ([]string, errors.ICCError) {
 	deletedKeys = append(deletedKeys, key)
 	queryIt, err := stub.GetStateByPartialCompositeKey(key, []string{})
 	if err != nil {
-		return errors.WrapErrorWithStatus(err, "failed to check reference index", 500)
+		return deletedKeys, errors.WrapErrorWithStatus(err, "failed to check reference index", 500)
 	}
 	defer queryIt.Close()
 
@@ -111,9 +109,9 @@ func deleteRecursive(stub *sw.StubWrapper, key string) errors.ICCError {
 			}
 		}
 		if !isDeleted {
-			err = deleteRecursive(stub, referrerKeyString)
+			deletedKeys, err = deleteRecursive(stub, referrerKeyString, deletedKeys)
 			if err != nil {
-				return errors.WrapError(err, "error deleting referrer asset")
+				return deletedKeys, errors.WrapError(err, "error deleting referrer asset")
 			}
 		}
 	}
@@ -122,30 +120,30 @@ func deleteRecursive(stub *sw.StubWrapper, key string) errors.ICCError {
 	keyMap["@key"] = key
 	assetKey, err := NewKey(keyMap)
 	if err != nil {
-		return errors.WrapError(err, "failed to construct key")
+		return deletedKeys, errors.WrapError(err, "failed to construct key")
 	}
 
 	asset, err := assetKey.Get(stub)
 	if err != nil {
-		return errors.WrapError(err, "failed to read asset from blockchain")
+		return deletedKeys, errors.WrapError(err, "failed to read asset from blockchain")
 	}
 	// Clean up reference markers for this asset
 	err = asset.delRefs(stub)
 	if err != nil {
-		return errors.WrapError(err, "failed cleaning reference index")
+		return deletedKeys, errors.WrapError(err, "failed cleaning reference index")
 	}
 
 	if !asset.IsPrivate() {
 		err = stub.DelState(asset.Key())
 		if err != nil {
-			return errors.WrapError(err, "failed to delete state from ledger")
+			return deletedKeys, errors.WrapError(err, "failed to delete state from ledger")
 		}
 	} else {
 		err = stub.DelPrivateData(asset.TypeTag(), asset.Key())
 		if err != nil {
-			return errors.WrapError(err, "failed to delete state from private collection")
+			return deletedKeys, errors.WrapError(err, "failed to delete state from private collection")
 		}
 	}
 
-	return nil
+	return deletedKeys, nil
 }
