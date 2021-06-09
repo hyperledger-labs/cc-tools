@@ -4,6 +4,7 @@ var txList = []Transaction{}
 
 var basicTxs = []Transaction{
 	getTx,
+	GetHeader,
 	GetSchema,
 	GetDataTypes,
 }
