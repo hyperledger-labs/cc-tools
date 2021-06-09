@@ -5,7 +5,7 @@ import (
 
 	"github.com/goledgerdev/cc-tools/assets"
 	"github.com/goledgerdev/cc-tools/errors"
-	"github.com/hyperledger/fabric/core/chaincode/shim"
+	sw "github.com/goledgerdev/cc-tools/stubwrapper"
 )
 
 // ReadAsset fetches an asset from the blockchain
@@ -30,7 +30,7 @@ var ReadAsset = Transaction{
 		},
 	},
 	ReadOnly: true,
-	Routine: func(stub shim.ChaincodeStubInterface, req map[string]interface{}) ([]byte, errors.ICCError) {
+	Routine: func(stub *sw.StubWrapper, req map[string]interface{}) ([]byte, errors.ICCError) {
 		var assetJSON []byte
 		var err error
 

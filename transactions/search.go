@@ -5,6 +5,7 @@ import (
 
 	"github.com/goledgerdev/cc-tools/assets"
 	"github.com/goledgerdev/cc-tools/errors"
+	sw "github.com/goledgerdev/cc-tools/stubwrapper"
 	"github.com/hyperledger/fabric/core/chaincode/shim"
 	pb "github.com/hyperledger/fabric/protos/peer"
 )
@@ -35,7 +36,7 @@ var Search = Transaction{
 		},
 	},
 	ReadOnly: true,
-	Routine: func(stub shim.ChaincodeStubInterface, req map[string]interface{}) ([]byte, errors.ICCError) {
+	Routine: func(stub *sw.StubWrapper, req map[string]interface{}) ([]byte, errors.ICCError) {
 		var bookmark string
 		var pageSize int32
 		var privateCollection string

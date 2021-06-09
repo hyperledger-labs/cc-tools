@@ -6,6 +6,7 @@ import (
 	"reflect"
 	"testing"
 
+	sw "github.com/goledgerdev/cc-tools/stubwrapper"
 	"github.com/hyperledger/fabric/core/chaincode/shim"
 )
 
@@ -19,7 +20,10 @@ func TestPutAsset(t *testing.T) {
 	}
 	stub := shim.NewMockStub("testcc", new(testCC))
 	stub.MockTransactionStart("TestPutAsset")
-	_, err = a.put(stub)
+	sw := &sw.StubWrapper{
+		Stub: stub,
+	}
+	_, err = a.put(sw)
 	if err != nil {
 		fmt.Println(err)
 		t.FailNow()
@@ -38,7 +42,10 @@ func TestPutAssetWithSubAsset(t *testing.T) {
 		fmt.Println(err)
 		t.FailNow()
 	}
-	_, err = a.put(stub)
+	sw := &sw.StubWrapper{
+		Stub: stub,
+	}
+	_, err = a.put(sw)
 	if err != nil {
 		fmt.Println(err)
 		t.FailNow()
@@ -53,7 +60,7 @@ func TestPutAssetWithSubAsset(t *testing.T) {
 		fmt.Println(err)
 		t.FailNow()
 	}
-	_, err = b.put(stub)
+	_, err = b.put(sw)
 	if err != nil {
 		fmt.Println(err)
 		t.FailNow()
@@ -79,14 +86,17 @@ func TestPutAssetRecursive(t *testing.T) {
 		fmt.Println(err)
 		t.FailNow()
 	}
-	_, err = PutNewRecursive(stub, obj)
+	sw := &sw.StubWrapper{
+		Stub: stub,
+	}
+	_, err = PutNewRecursive(sw, obj)
 	if err != nil {
 		fmt.Println(err)
 		t.FailNow()
 	}
 	stub.MockTransactionEnd("TestPutAssetRecursive")
 
-	gotAsset, err := a.Get(stub)
+	gotAsset, err := a.Get(sw)
 	if err != nil {
 		fmt.Println(err)
 		t.FailNow()
@@ -103,7 +113,7 @@ func TestPutAssetRecursive(t *testing.T) {
 		fmt.Println(err)
 		t.FailNow()
 	}
-	gotSubAsset, err := subAssetKey.Get(stub)
+	gotSubAsset, err := subAssetKey.Get(sw)
 	if err != nil {
 		fmt.Println(err)
 		t.FailNow()

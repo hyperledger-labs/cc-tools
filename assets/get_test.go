@@ -6,6 +6,7 @@ import (
 	"reflect"
 	"testing"
 
+	sw "github.com/goledgerdev/cc-tools/stubwrapper"
 	"github.com/hyperledger/fabric/core/chaincode/shim"
 )
 
@@ -19,12 +20,15 @@ func TestGetAsset(t *testing.T) {
 	}
 	stub := shim.NewMockStub("testcc", new(testCC))
 	stub.MockTransactionStart("TestGetAsset")
-	_, err = a.put(stub)
+	sw := &sw.StubWrapper{
+		Stub: stub,
+	}
+	_, err = a.put(sw)
 	if err != nil {
 		fmt.Println(err)
 		t.FailNow()
 	}
-	gotAsset, err := a.Get(stub)
+	gotAsset, err := a.Get(sw)
 	if err != nil {
 		fmt.Println(err)
 		t.FailNow()
@@ -48,7 +52,10 @@ func TestGetRecursive(t *testing.T) {
 		fmt.Println(err)
 		t.FailNow()
 	}
-	_, err = a.put(stub)
+	sw := &sw.StubWrapper{
+		Stub: stub,
+	}
+	_, err = a.put(sw)
 	if err != nil {
 		fmt.Println(err)
 		t.FailNow()
@@ -63,14 +70,14 @@ func TestGetRecursive(t *testing.T) {
 		fmt.Println(err)
 		t.FailNow()
 	}
-	_, err = b.put(stub)
+	_, err = b.put(sw)
 	if err != nil {
 		fmt.Println(err)
 		t.FailNow()
 	}
 	stub.MockTransactionEnd("TestGetRecursive")
 
-	gotAsset, err := b.GetRecursive(stub)
+	gotAsset, err := b.GetRecursive(sw)
 	if err != nil {
 		fmt.Println(err)
 		t.FailNow()
@@ -95,7 +102,10 @@ func TestGetRecursiveWithPvtData(t *testing.T) {
 		fmt.Println(err)
 		t.FailNow()
 	}
-	_, err = a.put(stub)
+	sw := &sw.StubWrapper{
+		Stub: stub,
+	}
+	_, err = a.put(sw)
 	if err != nil {
 		fmt.Println(err)
 		t.FailNow()
@@ -110,14 +120,14 @@ func TestGetRecursiveWithPvtData(t *testing.T) {
 		fmt.Println(err)
 		t.FailNow()
 	}
-	_, err = b.put(stub)
+	_, err = b.put(sw)
 	if err != nil {
 		fmt.Println(err)
 		t.FailNow()
 	}
 	stub.MockTransactionEnd("TestGetRecursiveWithPvtData")
 
-	gotAsset, err := b.GetRecursive(stub)
+	gotAsset, err := b.GetRecursive(sw)
 	if err != nil {
 		fmt.Println(err)
 		t.FailNow()
@@ -142,7 +152,10 @@ func TestGetRecursiveWithListOfPvtData(t *testing.T) {
 		fmt.Println(err)
 		t.FailNow()
 	}
-	_, err = a.put(stub)
+	sw := &sw.StubWrapper{
+		Stub: stub,
+	}
+	_, err = a.put(sw)
 	if err != nil {
 		fmt.Println(err)
 		t.FailNow()
@@ -157,14 +170,14 @@ func TestGetRecursiveWithListOfPvtData(t *testing.T) {
 		fmt.Println(err)
 		t.FailNow()
 	}
-	_, err = b.put(stub)
+	_, err = b.put(sw)
 	if err != nil {
 		fmt.Println(err)
 		t.FailNow()
 	}
 	stub.MockTransactionEnd("TestGetRecursiveWithListOfPvtData")
 
-	gotAsset, err := b.GetRecursive(stub)
+	gotAsset, err := b.GetRecursive(sw)
 	if err != nil {
 		fmt.Println(err)
 		t.FailNow()

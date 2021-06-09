@@ -6,7 +6,7 @@ import (
 
 	"github.com/goledgerdev/cc-tools/assets"
 	"github.com/goledgerdev/cc-tools/errors"
-	"github.com/hyperledger/fabric/core/chaincode/shim"
+	sw "github.com/goledgerdev/cc-tools/stubwrapper"
 )
 
 // GetSchema returns information about a specific AssetType or a list of every configured AssetType
@@ -25,7 +25,7 @@ var GetSchema = Transaction{
 			Description: "The name of the asset type of which you want to fetch the definition. Leave empty to fetch a list of possible types.",
 		},
 	},
-	Routine: func(stub shim.ChaincodeStubInterface, req map[string]interface{}) ([]byte, errors.ICCError) {
+	Routine: func(stub *sw.StubWrapper, req map[string]interface{}) ([]byte, errors.ICCError) {
 		var assetTypeName string
 		assetTypeInterface, ok := req["assetType"]
 		if ok {

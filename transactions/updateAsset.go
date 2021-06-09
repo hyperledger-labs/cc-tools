@@ -5,7 +5,7 @@ import (
 
 	"github.com/goledgerdev/cc-tools/assets"
 	"github.com/goledgerdev/cc-tools/errors"
-	"github.com/hyperledger/fabric/core/chaincode/shim"
+	sw "github.com/goledgerdev/cc-tools/stubwrapper"
 )
 
 // UpdateAsset is the function which updates a generic asset
@@ -24,7 +24,7 @@ var UpdateAsset = Transaction{
 			Required:    true,
 		},
 	},
-	Routine: func(stub shim.ChaincodeStubInterface, req map[string]interface{}) ([]byte, errors.ICCError) {
+	Routine: func(stub *sw.StubWrapper, req map[string]interface{}) ([]byte, errors.ICCError) {
 		var err error
 		request := req["update"].(map[string]interface{})
 		key, err := assets.NewKey(request)

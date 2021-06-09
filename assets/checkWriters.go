@@ -5,14 +5,14 @@ import (
 	"regexp"
 
 	"github.com/goledgerdev/cc-tools/errors"
+	sw "github.com/goledgerdev/cc-tools/stubwrapper"
 	"github.com/hyperledger/fabric/core/chaincode/lib/cid"
-	"github.com/hyperledger/fabric/core/chaincode/shim"
 )
 
 // CheckWriters checks if tx creator is allowed to write asset.
-func (a Asset) CheckWriters(stub shim.ChaincodeStubInterface) errors.ICCError {
+func (a Asset) CheckWriters(stub *sw.StubWrapper) errors.ICCError {
 	// Get tx creator MSP ID
-	txCreator, err := cid.GetMSPID(stub)
+	txCreator, err := cid.GetMSPID(stub.Stub)
 	if err != nil {
 		return errors.WrapErrorWithStatus(err, "error getting tx creator", 500)
 	}

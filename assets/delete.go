@@ -5,12 +5,12 @@ import (
 	"strings"
 
 	"github.com/goledgerdev/cc-tools/errors"
-	"github.com/hyperledger/fabric/core/chaincode/shim"
+	sw "github.com/goledgerdev/cc-tools/stubwrapper"
 )
 
 // Delete erases asset from world state and checks for all necessary permissions.
 // An asset cannot be deleted if any other asset references it.
-func (a *Asset) Delete(stub shim.ChaincodeStubInterface) ([]byte, error) {
+func (a *Asset) Delete(stub *sw.StubWrapper) ([]byte, errors.ICCError) {
 	var err error
 
 	// Check if org has write permission
@@ -63,7 +63,7 @@ func (a *Asset) Delete(stub shim.ChaincodeStubInterface) ([]byte, error) {
 }
 
 // DeleteRecursive erases asset and recursively erases those which reference it
-func (a *Asset) DeleteRecursive(stub shim.ChaincodeStubInterface) ([]byte, error) {
+func (a *Asset) DeleteRecursive(stub *sw.StubWrapper) ([]byte, errors.ICCError) {
 	var err error
 
 	// Check if org has write permission
@@ -90,7 +90,7 @@ func (a *Asset) DeleteRecursive(stub shim.ChaincodeStubInterface) ([]byte, error
 
 var deletedKeys []string
 
-func deleteRecursive(stub shim.ChaincodeStubInterface, key string) error {
+func deleteRecursive(stub *sw.StubWrapper, key string) errors.ICCError {
 	deletedKeys = append(deletedKeys, key)
 	queryIt, err := stub.GetStateByPartialCompositeKey(key, []string{})
 	if err != nil {
@@ -113,7 +113,7 @@ func deleteRecursive(stub shim.ChaincodeStubInterface, key string) error {
 		if !isDeleted {
 			err = deleteRecursive(stub, referrerKeyString)
 			if err != nil {
-				return errors.WrapError(err, "error deleting referrer asset:")
+				return errors.WrapError(err, "error deleting referrer asset")
 			}
 		}
 	}
@@ -121,6 +121,9 @@ func deleteRecursive(stub shim.ChaincodeStubInterface, key string) error {
 	keyMap := make(map[string]interface{})
 	keyMap["@key"] = key
 	assetKey, err := NewKey(keyMap)
+	if err != nil {
+		return errors.WrapError(err, "failed to construct key")
+	}
 
 	asset, err := assetKey.Get(stub)
 	if err != nil {

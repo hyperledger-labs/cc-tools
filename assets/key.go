@@ -4,7 +4,7 @@ import (
 	"encoding/json"
 
 	"github.com/goledgerdev/cc-tools/errors"
-	"github.com/hyperledger/fabric/core/chaincode/shim"
+	sw "github.com/goledgerdev/cc-tools/stubwrapper"
 )
 
 // Key stores the information for retrieving an Asset from the ledger.
@@ -71,7 +71,7 @@ func NewKey(m map[string]interface{}) (k Key, err errors.ICCError) {
 }
 
 // GetBytes reads the asset as bytes from ledger
-func (k *Key) GetBytes(stub shim.ChaincodeStubInterface) ([]byte, errors.ICCError) {
+func (k *Key) GetBytes(stub *sw.StubWrapper) ([]byte, errors.ICCError) {
 	var assetBytes []byte
 	var err error
 	if k.IsPrivate() {
@@ -90,7 +90,7 @@ func (k *Key) GetBytes(stub shim.ChaincodeStubInterface) ([]byte, errors.ICCErro
 }
 
 // GetMap reads the asset as bytes from ledger
-func (k *Key) GetMap(stub shim.ChaincodeStubInterface) (map[string]interface{}, errors.ICCError) {
+func (k *Key) GetMap(stub *sw.StubWrapper) (map[string]interface{}, errors.ICCError) {
 	var err error
 	assetBytes, err := k.GetBytes(stub)
 	if err != nil {

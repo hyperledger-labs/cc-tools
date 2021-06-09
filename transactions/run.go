@@ -5,6 +5,7 @@ import (
 	"regexp"
 
 	"github.com/goledgerdev/cc-tools/errors"
+	sw "github.com/goledgerdev/cc-tools/stubwrapper"
 	"github.com/hyperledger/fabric/core/chaincode/lib/cid"
 	"github.com/hyperledger/fabric/core/chaincode/shim"
 )
@@ -62,5 +63,9 @@ func Run(stub shim.ChaincodeStubInterface) ([]byte, errors.ICCError) {
 		}
 	}
 
-	return tx.Routine(stub, reqMap)
+	sw := &sw.StubWrapper{
+		Stub: stub,
+	}
+
+	return tx.Routine(sw, reqMap)
 }

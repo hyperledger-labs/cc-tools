@@ -5,12 +5,12 @@ import (
 	"regexp"
 
 	"github.com/goledgerdev/cc-tools/errors"
+	sw "github.com/goledgerdev/cc-tools/stubwrapper"
 	"github.com/hyperledger/fabric/core/chaincode/lib/cid"
-	"github.com/hyperledger/fabric/core/chaincode/shim"
 )
 
 // Update receives a map[string]interface{} with key/vals to update the asset value in the world state.
-func (a *Asset) Update(stub shim.ChaincodeStubInterface, update map[string]interface{}) (map[string]interface{}, errors.ICCError) {
+func (a *Asset) Update(stub *sw.StubWrapper, update map[string]interface{}) (map[string]interface{}, errors.ICCError) {
 	// Fetch asset properties
 	assetTypeDef := a.Type()
 	if assetTypeDef == nil {
@@ -18,7 +18,7 @@ func (a *Asset) Update(stub shim.ChaincodeStubInterface, update map[string]inter
 	}
 
 	// Get tx creator MSP ID
-	txCreator, err := cid.GetMSPID(stub)
+	txCreator, err := cid.GetMSPID(stub.Stub)
 	if err != nil {
 		return nil, errors.WrapErrorWithStatus(err, "error getting tx creator", 500)
 	}
@@ -102,7 +102,7 @@ func (a *Asset) Update(stub shim.ChaincodeStubInterface, update map[string]inter
 }
 
 // Update receives a map[string]interface{} with key/vals to update the asset value in the world state.
-func (k *Key) Update(stub shim.ChaincodeStubInterface, update map[string]interface{}) (map[string]interface{}, errors.ICCError) {
+func (k *Key) Update(stub *sw.StubWrapper, update map[string]interface{}) (map[string]interface{}, errors.ICCError) {
 	// Fetch asset properties
 	assetTypeDef := k.Type()
 	if assetTypeDef == nil {
@@ -110,7 +110,7 @@ func (k *Key) Update(stub shim.ChaincodeStubInterface, update map[string]interfa
 	}
 
 	// Get tx creator MSP ID
-	txCreator, err := cid.GetMSPID(stub)
+	txCreator, err := cid.GetMSPID(stub.Stub)
 	if err != nil {
 		return nil, errors.WrapErrorWithStatus(err, "error getting tx creator", 500)
 	}

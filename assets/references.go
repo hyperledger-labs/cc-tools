@@ -1,11 +1,12 @@
 package assets
 
 import (
+	"bytes"
 	"fmt"
 	"strings"
 
 	"github.com/goledgerdev/cc-tools/errors"
-	"github.com/hyperledger/fabric/core/chaincode/shim"
+	sw "github.com/goledgerdev/cc-tools/stubwrapper"
 )
 
 // Refs returns an array of Keys containing the reference keys for all present subAssets.
@@ -88,7 +89,7 @@ func (a Asset) Refs() ([]Key, errors.ICCError) {
 
 // Refs returns an array of Keys containing the reference keys for all present subAssets.
 // The referenced keys are fetched from current asset state on ledger.
-func (k Key) Refs(stub shim.ChaincodeStubInterface) ([]Key, errors.ICCError) {
+func (k Key) Refs(stub *sw.StubWrapper) ([]Key, errors.ICCError) {
 	assetMap, err := k.GetMap(stub)
 	if err != nil {
 		return nil, errors.WrapError(err, "could not get asset map from ledger")
@@ -126,7 +127,7 @@ func (k Key) Refs(stub shim.ChaincodeStubInterface) ([]Key, errors.ICCError) {
 }
 
 // validateRefs checks if subAsset references exist in blockchain.
-func (a Asset) validateRefs(stub shim.ChaincodeStubInterface) errors.ICCError {
+func (a Asset) validateRefs(stub *sw.StubWrapper) errors.ICCError {
 	// Fetch references contained in asset
 	refKeys, err := a.Refs()
 	if err != nil {
@@ -147,7 +148,7 @@ func (a Asset) validateRefs(stub shim.ChaincodeStubInterface) errors.ICCError {
 	return nil
 }
 
-func delRefs(stub shim.ChaincodeStubInterface, assetKey string, refKeys []Key) errors.ICCError {
+func delRefs(stub *sw.StubWrapper, assetKey string, refKeys []Key) errors.ICCError {
 	// Delete reference indexes
 	for _, referencedKey := range refKeys {
 		// Construct reference key
@@ -166,7 +167,7 @@ func delRefs(stub shim.ChaincodeStubInterface, assetKey string, refKeys []Key) e
 }
 
 // delRefs deletes all the reference index for this asset from blockchain.
-func (a Asset) delRefs(stub shim.ChaincodeStubInterface) errors.ICCError {
+func (a Asset) delRefs(stub *sw.StubWrapper) errors.ICCError {
 	// Fetch references contained in asset
 	refKeys, err := a.Refs()
 	if err != nil {
@@ -179,7 +180,7 @@ func (a Asset) delRefs(stub shim.ChaincodeStubInterface) errors.ICCError {
 }
 
 // delRefs deletes all the reference index for this asset from blockchain.
-func (k Key) delRefs(stub shim.ChaincodeStubInterface) errors.ICCError {
+func (k Key) delRefs(stub *sw.StubWrapper) errors.ICCError {
 	// Fetch references contained in asset
 	refKeys, err := k.Refs(stub)
 	if err != nil {
@@ -192,7 +193,7 @@ func (k Key) delRefs(stub shim.ChaincodeStubInterface) errors.ICCError {
 }
 
 // putRefs writes the asset's reference index to the blockchain.
-func (a Asset) putRefs(stub shim.ChaincodeStubInterface) errors.ICCError {
+func (a Asset) putRefs(stub *sw.StubWrapper) errors.ICCError {
 	// Fetch references contained in asset
 	refKeys, err := a.Refs()
 	if err != nil {
@@ -218,7 +219,7 @@ func (a Asset) putRefs(stub shim.ChaincodeStubInterface) errors.ICCError {
 }
 
 // IsReferenced checks if the asset is referenced by another asset.
-func (a Asset) IsReferenced(stub shim.ChaincodeStubInterface) (bool, errors.ICCError) {
+func (a Asset) IsReferenced(stub *sw.StubWrapper) (bool, errors.ICCError) {
 	// Get asset key
 	assetKey := a.Key()
 	queryIt, err := stub.GetStateByPartialCompositeKey(assetKey, []string{})
@@ -227,8 +228,23 @@ func (a Asset) IsReferenced(stub shim.ChaincodeStubInterface) (bool, errors.ICCE
 	}
 	defer queryIt.Close()
 
-	if queryIt.HasNext() {
-		return true, nil
+	for queryIt.HasNext() {
+		ref, err := queryIt.Next()
+		if err != nil {
+			return false, errors.WrapError(err, "failed to iterate in reference index")
+		}
+
+		newIndexState, isWritten := stub.WriteSet[ref.GetKey()]
+		if !isWritten || newIndexState != nil {
+			return true, nil
+		}
 	}
+
+	for k, v := range stub.WriteSet {
+		if strings.HasPrefix(k, assetKey) && k != assetKey && bytes.Equal(v, []byte{0x00}) {
+			return true, nil
+		}
+	}
+
 	return false, nil
 }

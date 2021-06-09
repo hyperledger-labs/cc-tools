@@ -2,7 +2,7 @@ package transactions
 
 import (
 	"github.com/goledgerdev/cc-tools/errors"
-	"github.com/hyperledger/fabric/core/chaincode/shim"
+	sw "github.com/goledgerdev/cc-tools/stubwrapper"
 )
 
 // Transaction defines the object containing tx definitions
@@ -36,7 +36,7 @@ type Transaction struct {
 	MetaTx bool `json:"metaTx"`
 
 	// Routine is the function called when running the tx. It is where the tx logic can be programmed.
-	Routine func(shim.ChaincodeStubInterface, map[string]interface{}) ([]byte, errors.ICCError) `json:"-"`
+	Routine func(*sw.StubWrapper, map[string]interface{}) ([]byte, errors.ICCError) `json:"-"`
 }
 
 // ArgList defines the type for argument list in Transaction object

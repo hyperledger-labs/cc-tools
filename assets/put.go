@@ -6,12 +6,12 @@ import (
 	"strings"
 
 	"github.com/goledgerdev/cc-tools/errors"
-	"github.com/hyperledger/fabric/core/chaincode/shim"
+	sw "github.com/goledgerdev/cc-tools/stubwrapper"
 )
 
 // put writes the reference index to the ledger, then encodes the
 // asset to JSON format and puts it into the ledger.
-func (a *Asset) put(stub shim.ChaincodeStubInterface) (map[string]interface{}, errors.ICCError) {
+func (a *Asset) put(stub *sw.StubWrapper) (map[string]interface{}, errors.ICCError) {
 	var err error
 
 	// Clean asset of any nil entries
@@ -50,7 +50,7 @@ func (a *Asset) put(stub shim.ChaincodeStubInterface) (map[string]interface{}, e
 }
 
 // Put inserts asset in blockchain
-func (a *Asset) Put(stub shim.ChaincodeStubInterface) (map[string]interface{}, errors.ICCError) {
+func (a *Asset) Put(stub *sw.StubWrapper) (map[string]interface{}, errors.ICCError) {
 	// Check if org has write permission
 	err := a.CheckWriters(stub)
 	if err != nil {
@@ -71,7 +71,7 @@ func (a *Asset) Put(stub shim.ChaincodeStubInterface) (map[string]interface{}, e
 }
 
 // PutNew inserts asset in blockchain and returns error if asset exists.
-func (a *Asset) PutNew(stub shim.ChaincodeStubInterface) (map[string]interface{}, errors.ICCError) {
+func (a *Asset) PutNew(stub *sw.StubWrapper) (map[string]interface{}, errors.ICCError) {
 	// Check if asset already exists
 	exists, err := a.ExistsInLedger(stub)
 	if err != nil {
@@ -90,7 +90,7 @@ func (a *Asset) PutNew(stub shim.ChaincodeStubInterface) (map[string]interface{}
 	return res, nil
 }
 
-func putRecursive(stub shim.ChaincodeStubInterface, object map[string]interface{}, root bool) (map[string]interface{}, errors.ICCError) {
+func putRecursive(stub *sw.StubWrapper, object map[string]interface{}, root bool) (map[string]interface{}, errors.ICCError) {
 	var err error
 
 	objAsKey, err := NewKey(object)
@@ -183,14 +183,14 @@ func putRecursive(stub shim.ChaincodeStubInterface, object map[string]interface{
 }
 
 // PutRecursive inserts asset and all it's subassets in blockchain
-func PutRecursive(stub shim.ChaincodeStubInterface, object map[string]interface{}) (map[string]interface{}, errors.ICCError) {
+func PutRecursive(stub *sw.StubWrapper, object map[string]interface{}) (map[string]interface{}, errors.ICCError) {
 	return putRecursive(stub, object, true)
 }
 
 // PutNewRecursive inserts asset and all it's subassets in blockchain
 // It returns conflict error only if root asset exists.
 // If one of the subassets already exist in ledger, it is not updated.
-func PutNewRecursive(stub shim.ChaincodeStubInterface, object map[string]interface{}) (map[string]interface{}, errors.ICCError) {
+func PutNewRecursive(stub *sw.StubWrapper, object map[string]interface{}) (map[string]interface{}, errors.ICCError) {
 	objAsAsset, err := NewAsset(object)
 	if err != nil {
 		return nil, errors.WrapError(err, "unable to create asset object")

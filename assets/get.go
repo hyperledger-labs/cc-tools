@@ -4,10 +4,10 @@ import (
 	"encoding/json"
 
 	"github.com/goledgerdev/cc-tools/errors"
-	"github.com/hyperledger/fabric/core/chaincode/shim"
+	sw "github.com/goledgerdev/cc-tools/stubwrapper"
 )
 
-func get(stub shim.ChaincodeStubInterface, pvtCollection, key string) (*Asset, errors.ICCError) {
+func get(stub *sw.StubWrapper, pvtCollection, key string) (*Asset, errors.ICCError) {
 	var assetBytes []byte
 	var err error
 	if pvtCollection != "" {
@@ -32,7 +32,7 @@ func get(stub shim.ChaincodeStubInterface, pvtCollection, key string) (*Asset, e
 }
 
 // Get fetches asset entry from ledger.
-func (a *Asset) Get(stub shim.ChaincodeStubInterface) (*Asset, errors.ICCError) {
+func (a *Asset) Get(stub *sw.StubWrapper) (*Asset, errors.ICCError) {
 	var pvtCollection string
 	if a.IsPrivate() {
 		pvtCollection = a.TypeTag()
@@ -42,7 +42,7 @@ func (a *Asset) Get(stub shim.ChaincodeStubInterface) (*Asset, errors.ICCError) 
 }
 
 // Get fetches asset entry from ledger.
-func (k *Key) Get(stub shim.ChaincodeStubInterface) (*Asset, errors.ICCError) {
+func (k *Key) Get(stub *sw.StubWrapper) (*Asset, errors.ICCError) {
 	var pvtCollection string
 	if k.IsPrivate() {
 		pvtCollection = k.TypeTag()
@@ -53,7 +53,7 @@ func (k *Key) Get(stub shim.ChaincodeStubInterface) (*Asset, errors.ICCError) {
 
 /* GetRecursive-related code */
 
-func getRecursive(stub shim.ChaincodeStubInterface, pvtCollection, key string, keysChecked []string) (*Asset, errors.ICCError) {
+func getRecursive(stub *sw.StubWrapper, pvtCollection, key string, keysChecked []string) (*Asset, errors.ICCError) {
 	var assetBytes []byte
 	var err error
 	if pvtCollection != "" {
@@ -163,7 +163,7 @@ func getRecursive(stub shim.ChaincodeStubInterface, pvtCollection, key string, k
 }
 
 // GetRecursive reads asset from ledger and resolves all references
-func (a *Asset) GetRecursive(stub shim.ChaincodeStubInterface) (*Asset, errors.ICCError) {
+func (a *Asset) GetRecursive(stub *sw.StubWrapper) (*Asset, errors.ICCError) {
 	var pvtCollection string
 	if a.IsPrivate() {
 		pvtCollection = a.TypeTag()
@@ -173,7 +173,7 @@ func (a *Asset) GetRecursive(stub shim.ChaincodeStubInterface) (*Asset, errors.I
 }
 
 // GetRecursive reads asset from ledger and resolves all references
-func (k *Key) GetRecursive(stub shim.ChaincodeStubInterface) (*Asset, errors.ICCError) {
+func (k *Key) GetRecursive(stub *sw.StubWrapper) (*Asset, errors.ICCError) {
 	var pvtCollection string
 	if k.IsPrivate() {
 		pvtCollection = k.TypeTag()

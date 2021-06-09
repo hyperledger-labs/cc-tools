@@ -3,7 +3,7 @@ package transactions
 import (
 	"github.com/goledgerdev/cc-tools/assets"
 	"github.com/goledgerdev/cc-tools/errors"
-	"github.com/hyperledger/fabric/core/chaincode/shim"
+	sw "github.com/goledgerdev/cc-tools/stubwrapper"
 )
 
 // DeleteAsset deletes an asset from the blockchain
@@ -22,7 +22,7 @@ var DeleteAsset = Transaction{
 			Required:    true,
 		},
 	},
-	Routine: func(stub shim.ChaincodeStubInterface, req map[string]interface{}) ([]byte, errors.ICCError) {
+	Routine: func(stub *sw.StubWrapper, req map[string]interface{}) ([]byte, errors.ICCError) {
 		// This is safe to do because validation is done before calling routine
 		key := req["key"].(assets.Key)
 
@@ -59,7 +59,7 @@ var DeleteRecursive = Transaction{
 			Required:    true,
 		},
 	},
-	Routine: func(stub shim.ChaincodeStubInterface, req map[string]interface{}) ([]byte, errors.ICCError) {
+	Routine: func(stub *sw.StubWrapper, req map[string]interface{}) ([]byte, errors.ICCError) {
 		// This is safe to do because validation is done before calling routine
 		key := req["key"].(assets.Key)
 

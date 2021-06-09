@@ -2,11 +2,11 @@ package assets
 
 import (
 	"github.com/goledgerdev/cc-tools/errors"
-	"github.com/hyperledger/fabric/core/chaincode/shim"
+	sw "github.com/goledgerdev/cc-tools/stubwrapper"
 )
 
 // ExistsInLedger checks if asset currently has a state on the ledger.
-func (a *Asset) ExistsInLedger(stub shim.ChaincodeStubInterface) (bool, errors.ICCError) {
+func (a *Asset) ExistsInLedger(stub *sw.StubWrapper) (bool, errors.ICCError) {
 	var assetBytes []byte
 	var err error
 	if a.IsPrivate() {
@@ -25,7 +25,7 @@ func (a *Asset) ExistsInLedger(stub shim.ChaincodeStubInterface) (bool, errors.I
 }
 
 // ExistsInLedger checks if asset referenced by a key object currently has a state on the ledger.
-func (k *Key) ExistsInLedger(stub shim.ChaincodeStubInterface) (bool, errors.ICCError) {
+func (k *Key) ExistsInLedger(stub *sw.StubWrapper) (bool, errors.ICCError) {
 	var assetBytes []byte
 	var err error
 	if k.IsPrivate() {

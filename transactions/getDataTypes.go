@@ -5,7 +5,7 @@ import (
 
 	"github.com/goledgerdev/cc-tools/assets"
 	"github.com/goledgerdev/cc-tools/errors"
-	"github.com/hyperledger/fabric/core/chaincode/shim"
+	sw "github.com/goledgerdev/cc-tools/stubwrapper"
 )
 
 // GetDataTypes returns the primitive data type map
@@ -18,7 +18,7 @@ var GetDataTypes = Transaction{
 	ReadOnly: true,
 	MetaTx:   true,
 	Args:     []Argument{},
-	Routine: func(stub shim.ChaincodeStubInterface, req map[string]interface{}) ([]byte, errors.ICCError) {
+	Routine: func(stub *sw.StubWrapper, req map[string]interface{}) ([]byte, errors.ICCError) {
 		dataTypeMap := assets.DataTypeMap()
 
 		dataTypeMapBytes, err := json.Marshal(dataTypeMap)

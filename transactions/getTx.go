@@ -5,7 +5,7 @@ import (
 	"fmt"
 
 	"github.com/goledgerdev/cc-tools/errors"
-	"github.com/hyperledger/fabric/core/chaincode/shim"
+	sw "github.com/goledgerdev/cc-tools/stubwrapper"
 )
 
 // getTx returns a specific tx definition or a list of all configured txs
@@ -24,7 +24,7 @@ var getTx = Transaction{
 			Description: "The name of the transaction of which you want to fetch the definition. Leave empty to fetch a list of possible transactions.",
 		},
 	},
-	Routine: func(stub shim.ChaincodeStubInterface, req map[string]interface{}) ([]byte, errors.ICCError) {
+	Routine: func(stub *sw.StubWrapper, req map[string]interface{}) ([]byte, errors.ICCError) {
 		var txName string
 
 		txNameInterface, ok := req["txName"]

@@ -4,8 +4,8 @@ import (
 	"encoding/json"
 
 	"github.com/goledgerdev/cc-tools/errors"
+	sw "github.com/goledgerdev/cc-tools/stubwrapper"
 	"github.com/hyperledger/fabric/core/chaincode/lib/cid"
-	"github.com/hyperledger/fabric/core/chaincode/shim"
 )
 
 // Asset implements the json.Unmarshaler interface and is the base object in cc-tools network.
@@ -68,7 +68,7 @@ func NewAsset(m map[string]interface{}) (a Asset, err errors.ICCError) {
 }
 
 // InjectMetadata adds internal properties to the asset.
-func (a *Asset) injectMetadata(stub shim.ChaincodeStubInterface) errors.ICCError {
+func (a *Asset) injectMetadata(stub *sw.StubWrapper) errors.ICCError {
 	var err error
 
 	// Generate object key
@@ -78,7 +78,7 @@ func (a *Asset) injectMetadata(stub shim.ChaincodeStubInterface) errors.ICCError
 	}
 	(*a)["@key"] = key
 
-	lastTouchBy, err := cid.GetMSPID(stub)
+	lastTouchBy, err := cid.GetMSPID(stub.Stub)
 	if err != nil {
 		return errors.WrapErrorWithStatus(err, "error getting tx creator", 500)
 	}
