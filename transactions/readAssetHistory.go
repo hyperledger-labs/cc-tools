@@ -80,6 +80,11 @@ var ReadAssetHistory = Transaction{
 		} else {
 			response := make(map[string]interface{})
 			target := timeTarget.(time.Time)
+
+			// Check if time target is in the future
+			if target.After(time.Now()) {
+				return nil, errors.NewCCError("timeTarget must be in the past", 400)
+			}
 			closestTime := time.Time{}
 
 			for historyIterator.HasNext() {
