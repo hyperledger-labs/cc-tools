@@ -36,11 +36,11 @@ func StartupCheck() errors.ICCError {
 				if strings.HasPrefix(dtype, "->") {
 					dtype = strings.TrimPrefix(dtype, "->")
 					if assets.FetchAssetType(dtype) == nil {
-						return errors.NewCCError(fmt.Sprintf("invalid arg type %s", arg.DataType), 500)
+						return errors.NewCCError(fmt.Sprintf("invalid arg type %s in tx %s", arg.DataType, txName), 500)
 					}
 				} else {
 					if assets.FetchDataType(dtype) == nil {
-						return errors.NewCCError(fmt.Sprintf("invalid arg type %s", arg.DataType), 500)
+						return errors.NewCCError(fmt.Sprintf("invalid arg type %s in tx %s", arg.DataType, txName), 500)
 					}
 				}
 			}
