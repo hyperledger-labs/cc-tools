@@ -7,6 +7,9 @@ var basicTxs = []Transaction{
 	GetHeader,
 	GetSchema,
 	GetDataTypes,
+	ReadAsset,
+	ReadAssetHistory,
+	Search,
 }
 
 // TxList returns a copy of the txList variable
