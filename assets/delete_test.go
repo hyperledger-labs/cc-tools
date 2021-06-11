@@ -31,33 +31,8 @@ func TestDeleteAsset(t *testing.T) {
 	stub.MockTransactionEnd("TestDeleteAsset")
 
 	stub.MockTransactionStart("TestDeleteAsset")
-	var k Key
-	keyJSON := []byte("{\"@assetType\": \"samplePerson\",\"name\": \"Maria\",\"cpf\": \"318.207.920-48\",\"readerScore\": 70}")
-	err = json.Unmarshal(keyJSON, &k)
-	if err != nil {
-		fmt.Println(err)
-		t.FailNow()
-	}
 
-	err = k.delRefs(sw)
-	if err != nil {
-		fmt.Println(err)
-		t.FailNow()
-	}
-	if !k.IsPrivate() {
-		err = sw.DelState(k.Key())
-		if err != nil {
-			fmt.Println(err)
-			t.FailNow()
-		}
-	} else {
-		err = sw.DelPrivateData(k.TypeTag(), k.Key())
-		if err != nil {
-			fmt.Println(err)
-			t.FailNow()
-		}
-	}
-
+	a.delete(sw)
 	if err != nil {
 		fmt.Println(err)
 		t.FailNow()
@@ -67,9 +42,9 @@ func TestDeleteAsset(t *testing.T) {
 
 	stub.MockTransactionStart("TestDeleteAsset")
 
-	res, err := k.Get(sw)
+	res, err := a.Get(sw)
 	if err == nil {
-		fmt.Println("Should not be capable of getting asset", res)
+		fmt.Println("should not be capable of getting asset", res)
 		t.FailNow()
 	}
 
@@ -133,7 +108,6 @@ func TestDeleteAssetCascade(t *testing.T) {
 
 	deletedKeys := make([]string, 0)
 	err = deleteRecursive(sw, personAsset.Key(), &deletedKeys)
-
 	if err != nil {
 		fmt.Println(err)
 		t.FailNow()
@@ -144,13 +118,13 @@ func TestDeleteAssetCascade(t *testing.T) {
 
 	res, err := bookAsset.Get(sw)
 	if err == nil {
-		fmt.Println("Should not be capable of getting asset", res)
+		fmt.Println("should not be capable of getting asset", res)
 		t.FailNow()
 	}
 
 	res, err = personAsset.Get(sw)
 	if err == nil {
-		fmt.Println("Should not be capable of getting asset", res)
+		fmt.Println("should not be capable of getting asset", res)
 		t.FailNow()
 	}
 

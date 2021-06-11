@@ -8,16 +8,8 @@ import (
 	sw "github.com/goledgerdev/cc-tools/stubwrapper"
 )
 
-// Delete erases asset from world state and checks for all necessary permissions.
-// An asset cannot be deleted if any other asset references it.
-func (a *Asset) Delete(stub *sw.StubWrapper) ([]byte, errors.ICCError) {
+func (a *Asset) delete(stub *sw.StubWrapper) ([]byte, errors.ICCError) {
 	var err error
-
-	// Check if org has write permission
-	err = a.CheckWriters(stub)
-	if err != nil {
-		return nil, errors.WrapError(err, "failed write permission check")
-	}
 
 	// Check if asset is referenced in other assets to avoid data inconsistency
 	isReferenced, err := a.IsReferenced(stub)
@@ -60,6 +52,18 @@ func (a *Asset) Delete(stub *sw.StubWrapper) ([]byte, errors.ICCError) {
 	}
 
 	return assetJSON, nil
+}
+
+// Delete erases asset from world state and checks for all necessary permissions.
+// An asset cannot be deleted if any other asset references it.
+func (a *Asset) Delete(stub *sw.StubWrapper) ([]byte, errors.ICCError) {
+	// Check if org has write permission
+	err := a.CheckWriters(stub)
+	if err != nil {
+		return nil, errors.WrapError(err, "failed write permission check")
+	}
+
+	return a.delete(stub)
 }
 
 // DeleteRecursive erases asset and recursively erases those which reference it
