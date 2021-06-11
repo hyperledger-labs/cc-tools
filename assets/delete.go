@@ -66,7 +66,8 @@ func (a *Asset) Delete(stub *sw.StubWrapper) ([]byte, errors.ICCError) {
 	return a.delete(stub)
 }
 
-// DeleteRecursive erases asset and recursively erases those which reference it
+// DeleteCascade erases asset and recursively erases those which reference it.
+// This method is experimental and might not work as intended. Use with caution.
 func (a *Asset) DeleteCascade(stub *sw.StubWrapper) ([]byte, errors.ICCError) {
 	var err error
 

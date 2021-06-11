@@ -182,12 +182,14 @@ func putRecursive(stub *sw.StubWrapper, object map[string]interface{}, root bool
 	return putAsset, nil
 }
 
-// PutRecursive inserts asset and all it's subassets in blockchain
+// PutRecursive inserts asset and all it's subassets in blockchain.
+// This method is experimental and might not work as intended. Use with caution.
 func PutRecursive(stub *sw.StubWrapper, object map[string]interface{}) (map[string]interface{}, errors.ICCError) {
 	return putRecursive(stub, object, true)
 }
 
 // PutNewRecursive inserts asset and all it's subassets in blockchain
+// This method is experimental and might not work as intended. Use with caution.
 // It returns conflict error only if root asset exists.
 // If one of the subassets already exist in ledger, it is not updated.
 func PutNewRecursive(stub *sw.StubWrapper, object map[string]interface{}) (map[string]interface{}, errors.ICCError) {
