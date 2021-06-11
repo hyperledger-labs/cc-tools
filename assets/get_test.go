@@ -39,6 +39,7 @@ func TestGetAsset(t *testing.T) {
 		fmt.Println(*gotAsset)
 		t.FailNow()
 	}
+	stub.MockTransactionEnd("TestGetAsset")
 }
 
 func TestGetRecursive(t *testing.T) {
