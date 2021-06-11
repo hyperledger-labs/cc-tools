@@ -11,15 +11,6 @@ import (
 func (a *Asset) delete(stub *sw.StubWrapper) ([]byte, errors.ICCError) {
 	var err error
 
-	// Check if asset is referenced in other assets to avoid data inconsistency
-	isReferenced, err := a.IsReferenced(stub)
-	if err != nil {
-		return nil, errors.WrapError(err, "failed to check if asset if being referenced")
-	}
-	if isReferenced {
-		return nil, errors.NewCCError("another asset holds a reference to this one", 400)
-	}
-
 	// Clean up reference markers for this asset
 	err = a.delRefs(stub)
 	if err != nil {
@@ -61,6 +52,15 @@ func (a *Asset) Delete(stub *sw.StubWrapper) ([]byte, errors.ICCError) {
 	err := a.CheckWriters(stub)
 	if err != nil {
 		return nil, errors.WrapError(err, "failed write permission check")
+	}
+
+	// Check if asset is referenced in other assets to avoid data inconsistency
+	isReferenced, err := a.IsReferenced(stub)
+	if err != nil {
+		return nil, errors.WrapError(err, "failed to check if asset if being referenced")
+	}
+	if isReferenced {
+		return nil, errors.NewCCError("another asset holds a reference to this one", 400)
 	}
 
 	return a.delete(stub)
