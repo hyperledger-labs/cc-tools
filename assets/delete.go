@@ -136,22 +136,10 @@ func deleteRecursive(stub *sw.StubWrapper, key string, deletedKeys *[]string) er
 	if err != nil {
 		return errors.WrapError(err, "failed to read asset from blockchain")
 	}
-	// Clean up reference markers for this asset
-	err = asset.delRefs(stub)
-	if err != nil {
-		return errors.WrapError(err, "failed cleaning reference index")
-	}
 
-	if !asset.IsPrivate() {
-		err = stub.DelState(asset.Key())
-		if err != nil {
-			return errors.WrapError(err, "failed to delete state from ledger")
-		}
-	} else {
-		err = stub.DelPrivateData(asset.TypeTag(), asset.Key())
-		if err != nil {
-			return errors.WrapError(err, "failed to delete state from private collection")
-		}
+	_, err = asset.delete(stub)
+	if err != nil {
+		return errors.WrapError(err, "failed to delete asset")
 	}
 
 	return nil
