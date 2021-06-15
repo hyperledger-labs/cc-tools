@@ -32,7 +32,8 @@ func CustomDataTypes(m map[string]DataType) error {
 			return errors.NewCCError(fmt.Sprintf("invalid custom data type '%s': nil Parse function", k), 500)
 		}
 
-		dataTypeMap[k] = &v
+		dataType := v
+		dataTypeMap[k] = &dataType
 	}
 	return nil
 }
