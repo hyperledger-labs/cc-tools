@@ -84,6 +84,9 @@ func (a *Asset) injectMetadata(stub *sw.StubWrapper) errors.ICCError {
 	}
 	(*a)["@lastTouchBy"] = lastTouchBy
 
+	lastTx, _ := stub.Stub.GetFunctionAndParameters()
+	(*a)["@lastTx"] = lastTx
+
 	return nil
 }
 

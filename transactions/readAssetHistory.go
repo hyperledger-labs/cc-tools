@@ -60,15 +60,15 @@ var ReadAssetHistory = Transaction{
 
 				data := make(map[string]interface{})
 
-				if queryResponse.IsDelete {
-					data["_isDelete"] = queryResponse.IsDelete
-				} else {
+				if !queryResponse.IsDelete {
 					err = json.Unmarshal(queryResponse.Value, &data)
 					if err != nil {
 						return nil, errors.WrapError(err, "failed to unmarshal queryResponse's values")
 					}
 				}
-				data["_timestamp"] = time.Unix(queryResponse.Timestamp.Seconds, int64(queryResponse.Timestamp.Nanos)).Format(time.RFC3339)
+				data["_txId"] = queryResponse.TxId
+				data["_isDelete"] = queryResponse.IsDelete
+				data["_timestamp"] = queryResponse.Timestamp.AsTime().Format(time.RFC3339)
 				response = append(response, data)
 			}
 			responseJSON, err := json.Marshal(response)
@@ -78,7 +78,6 @@ var ReadAssetHistory = Transaction{
 
 			return responseJSON, nil
 		} else {
-			response := make(map[string]interface{})
 			target := timeTarget.(time.Time)
 
 			// Check if time target is in the future
@@ -87,6 +86,7 @@ var ReadAssetHistory = Transaction{
 			}
 			closestTime := time.Time{}
 
+			response := make(map[string]interface{})
 			for historyIterator.HasNext() {
 				queryResponse, err := historyIterator.Next()
 				if err != nil {
@@ -102,6 +102,7 @@ var ReadAssetHistory = Transaction{
 							return nil, errors.WrapError(err, "failed to unmarshal queryResponse's values")
 						}
 					}
+					response["_txId"] = queryResponse.TxId
 					response["_isDelete"] = queryResponse.IsDelete
 					response["_timestamp"] = timestamp.Format(time.RFC3339)
 				}
