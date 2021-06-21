@@ -9,16 +9,18 @@ import (
 )
 
 type Header struct {
-	Name    string
-	Version string
-	Colors  map[string][]string
-	Title   map[string]string
+	Name           string
+	Version        string
+	Colors         map[string][]string
+	Title          map[string]string
+	CCToolsVersion string
 }
 
 var header Header
 
 func InitHeader(h Header) {
 	header = h
+	header.CCToolsVersion = "v0.7.0-rc.3"
 }
 
 // GetHeader returns data in CCHeader
@@ -52,11 +54,12 @@ var GetHeader = Transaction{
 		}
 
 		header := map[string]interface{}{
-			"name":     header.Name,
-			"version":  header.Version,
-			"orgMSP":   orgMSP,
-			"colors":   colors,
-			"orgTitle": orgTitle,
+			"name":           header.Name,
+			"version":        header.Version,
+			"orgMSP":         orgMSP,
+			"colors":         colors,
+			"orgTitle":       orgTitle,
+			"ccToolsVersion": header.CCToolsVersion,
 		}
 		headerBytes, err := json.Marshal(header)
 		if err != nil {
