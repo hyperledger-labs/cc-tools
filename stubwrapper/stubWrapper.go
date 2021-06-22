@@ -4,6 +4,7 @@ import (
 	"github.com/goledgerdev/cc-tools/errors"
 	"github.com/hyperledger/fabric/common/util"
 	"github.com/hyperledger/fabric/core/chaincode/shim"
+	"github.com/hyperledger/fabric/core/chaincode/shim/ext/cid"
 	pb "github.com/hyperledger/fabric/protos/peer"
 )
 
@@ -176,4 +177,17 @@ func (sw *StubWrapper) GetHistoryForKey(key string) (shim.HistoryQueryIteratorIn
 		return it, errors.WrapError(err, "stub.GetHistoryForKey call error")
 	}
 	return it, nil
+}
+
+// GetMSPID wraps cid.GetMSPID allowing for automated testing
+func (sw *StubWrapper) GetMSPID() (string, errors.ICCError) {
+	mockStub, isMock := sw.Stub.(*shim.MockStub)
+	if isMock {
+		return mockStub.Name, nil
+	}
+	mspid, err := cid.GetMSPID(sw.Stub)
+	if err != nil {
+		return mspid, errors.WrapError(err, "cid.GetMSPID call error")
+	}
+	return mspid, nil
 }

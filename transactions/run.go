@@ -6,7 +6,6 @@ import (
 
 	"github.com/goledgerdev/cc-tools/errors"
 	sw "github.com/goledgerdev/cc-tools/stubwrapper"
-	"github.com/hyperledger/fabric/core/chaincode/lib/cid"
 	"github.com/hyperledger/fabric/core/chaincode/shim"
 )
 
@@ -28,10 +27,14 @@ func Run(stub shim.ChaincodeStubInterface) ([]byte, errors.ICCError) {
 		return nil, errors.WrapError(err, "unable to get args")
 	}
 
+	sw := &sw.StubWrapper{
+		Stub: stub,
+	}
+
 	// Verify callers permissions
 	if tx.Callers != nil {
 		// Get tx caller MSP ID
-		txCaller, err := cid.GetMSPID(stub)
+		txCaller, err := sw.GetMSPID()
 		if err != nil {
 			return nil, errors.WrapErrorWithStatus(err, "error getting tx caller", 500)
 		}
@@ -61,10 +64,6 @@ func Run(stub shim.ChaincodeStubInterface) ([]byte, errors.ICCError) {
 		if !callPermission {
 			return nil, errors.NewCCError(fmt.Sprintf("%s cannot call this transaction", txCaller), 403)
 		}
-	}
-
-	sw := &sw.StubWrapper{
-		Stub: stub,
 	}
 
 	return tx.Routine(sw, reqMap)

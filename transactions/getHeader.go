@@ -5,7 +5,6 @@ import (
 
 	"github.com/goledgerdev/cc-tools/errors"
 	sw "github.com/goledgerdev/cc-tools/stubwrapper"
-	"github.com/hyperledger/fabric/core/chaincode/lib/cid"
 )
 
 type Header struct {
@@ -34,9 +33,10 @@ var GetHeader = Transaction{
 	MetaTx:   true,
 	Args:     []Argument{},
 	Routine: func(stub *sw.StubWrapper, req map[string]interface{}) ([]byte, errors.ICCError) {
+		var err error
 		colorMap := header.Colors
 		nameMap := header.Title
-		orgMSP, err := cid.GetMSPID(stub.Stub)
+		orgMSP, err := stub.GetMSPID()
 		if err != nil {
 			return nil, errors.WrapError(err, "failed to get MSP ID")
 		}

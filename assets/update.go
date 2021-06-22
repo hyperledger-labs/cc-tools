@@ -6,7 +6,6 @@ import (
 
 	"github.com/goledgerdev/cc-tools/errors"
 	sw "github.com/goledgerdev/cc-tools/stubwrapper"
-	"github.com/hyperledger/fabric/core/chaincode/lib/cid"
 )
 
 // Update receives a map[string]interface{} with key/vals to update the asset value in the world state.
@@ -18,7 +17,7 @@ func (a *Asset) Update(stub *sw.StubWrapper, update map[string]interface{}) (map
 	}
 
 	// Get tx creator MSP ID
-	txCreator, err := cid.GetMSPID(stub.Stub)
+	txCreator, err := stub.GetMSPID()
 	if err != nil {
 		return nil, errors.WrapErrorWithStatus(err, "error getting tx creator", 500)
 	}
@@ -110,7 +109,7 @@ func (k *Key) Update(stub *sw.StubWrapper, update map[string]interface{}) (map[s
 	}
 
 	// Get tx creator MSP ID
-	txCreator, err := cid.GetMSPID(stub.Stub)
+	txCreator, err := stub.GetMSPID()
 	if err != nil {
 		return nil, errors.WrapErrorWithStatus(err, "error getting tx creator", 500)
 	}

@@ -5,7 +5,6 @@ import (
 
 	"github.com/goledgerdev/cc-tools/errors"
 	sw "github.com/goledgerdev/cc-tools/stubwrapper"
-	"github.com/hyperledger/fabric/core/chaincode/lib/cid"
 )
 
 // Asset implements the json.Unmarshaler interface and is the base object in cc-tools network.
@@ -78,7 +77,7 @@ func (a *Asset) injectMetadata(stub *sw.StubWrapper) errors.ICCError {
 	}
 	(*a)["@key"] = key
 
-	lastTouchBy, err := cid.GetMSPID(stub.Stub)
+	lastTouchBy, err := stub.GetMSPID()
 	if err != nil {
 		return errors.WrapErrorWithStatus(err, "error getting tx creator", 500)
 	}

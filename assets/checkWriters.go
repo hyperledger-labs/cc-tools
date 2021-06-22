@@ -6,13 +6,12 @@ import (
 
 	"github.com/goledgerdev/cc-tools/errors"
 	sw "github.com/goledgerdev/cc-tools/stubwrapper"
-	"github.com/hyperledger/fabric/core/chaincode/lib/cid"
 )
 
 // CheckWriters checks if tx creator is allowed to write asset.
 func (a Asset) CheckWriters(stub *sw.StubWrapper) errors.ICCError {
 	// Get tx creator MSP ID
-	txCreator, err := cid.GetMSPID(stub.Stub)
+	txCreator, err := stub.GetMSPID()
 	if err != nil {
 		return errors.WrapErrorWithStatus(err, "error getting tx creator", 500)
 	}

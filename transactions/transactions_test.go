@@ -9,6 +9,17 @@ import (
 )
 
 func TestMain(m *testing.M) {
+	log.SetFlags(log.Lshortfile)
+
+	InitHeader(Header{
+		Name:    header.Name,
+		Version: header.Version,
+		Colors:  header.Colors,
+		Title:   header.Title,
+	})
+
+	InitTxList(testTxList)
+
 	err := assets.CustomDataTypes(testCustomDataTypes)
 	if err != nil {
 		log.Println(err)
@@ -16,8 +27,6 @@ func TestMain(m *testing.M) {
 	}
 
 	assets.InitAssetList(testAssetList)
-
-	InitTxList(testTxList)
 
 	os.Exit(m.Run())
 }

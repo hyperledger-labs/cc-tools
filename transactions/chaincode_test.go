@@ -13,27 +13,42 @@ import (
 // testCC implements the shim.Chaincode interface
 type testCC struct{}
 
-var testTxList = []Transaction{}
+var testTxList = []Transaction{
+	CreateAsset,
+	UpdateAsset,
+	DeleteAsset,
+	getTx,
+	GetHeader,
+	GetSchema,
+	GetDataTypes,
+	ReadAsset,
+	ReadAssetHistory,
+	Search,
+}
 
 var testAssetList = []assets.AssetType{
 	{
-		Tag:         "samplePerson",
-		Label:       "Sample Person",
-		Description: "",
+		Tag:         "person",
+		Label:       "Person",
+		Description: "Personal data of someone",
 
 		Props: []assets.AssetProp{
 			{
-				Tag:      "cpf",
-				Label:    "CPF",
-				DataType: "cpf",
-				Writers:  []string{"org2MSP"},
-			},
-			{
-				Tag:      "name",
-				Label:    "Asset Name",
+				// Primary key
 				Required: true,
 				IsKey:    true,
+				Tag:      "id",
+				Label:    "CPF (Brazilian ID)",
+				DataType: "cpf",               // Datatypes are identified at datatypes folder
+				Writers:  []string{`org1MSP`}, // This means only org1 can create the asset (others can edit)
+			},
+			{
+				// Mandatory property
+				Required: true,
+				Tag:      "name",
+				Label:    "Name of the person",
 				DataType: "string",
+				// Validate funcion
 				Validate: func(name interface{}) error {
 					nameStr := name.(string)
 					if nameStr == "" {
@@ -43,98 +58,113 @@ var testAssetList = []assets.AssetType{
 				},
 			},
 			{
-				Tag:          "readerScore",
-				Label:        "Reader Score",
-				DefaultValue: 0.0,
+				// Optional property
+				Tag:      "dateOfBirth",
+				Label:    "Date of Birth",
+				DataType: "datetime",
+			},
+			{
+				// Property with default value
+				Tag:          "height",
+				Label:        "Person's height",
+				DefaultValue: 0,
 				DataType:     "number",
-				Writers:      []string{`$org\dMSP`},
-			},
-			{
-				Tag:      "secrets",
-				Label:    "Secrets",
-				DataType: "[]->sampleSecret",
-			},
-			{
-				Tag:          "active",
-				Label:        "Active",
-				DefaultValue: false,
-				DataType:     "boolean",
 			},
 		},
 	},
 	{
-		Tag:         "author",
-		Label:       "Author",
-		Description: "",
+		Tag:         "library",
+		Label:       "Library",
+		Description: "Library as a collection of books",
 
 		Props: []assets.AssetProp{
 			{
-				Tag:      "person",
-				Label:    "Person",
+				// Primary Key
+				Required: true,
 				IsKey:    true,
-				DataType: "->samplePerson",
+				Tag:      "name",
+				Label:    "Library Name",
+				DataType: "string",
+				Writers:  []string{`org3MSP`}, // This means only org3 can create the asset (others can edit)
+			},
+			{
+				// Asset reference list
+				Tag:      "books",
+				Label:    "Book Collection",
+				DataType: "[]->book",
+			},
+			{
+				// Asset reference list
+				Tag:      "entranceCode",
+				Label:    "Entrance Code for the Library",
+				DataType: "->secret",
 			},
 		},
 	},
 	{
-		Tag:         "sampleBook",
-		Label:       "Sample Book",
-		Description: "",
+		Tag:         "book",
+		Label:       "Book",
+		Description: "Book",
 
 		Props: []assets.AssetProp{
 			{
+				// Composite Key
+				Required: true,
+				IsKey:    true,
 				Tag:      "title",
 				Label:    "Book Title",
-				Required: true,
-				IsKey:    true,
 				DataType: "string",
+				Writers:  []string{`org2MSP`}, // This means only org2 can create the asset (others can edit)
 			},
 			{
+				// Composite Key
+				Required: true,
+				IsKey:    true,
 				Tag:      "author",
 				Label:    "Book Author",
-				Required: true,
-				IsKey:    true,
 				DataType: "string",
+				Writers:  []string{`org2MSP`}, // This means only org2 can create the asset (others can edit)
 			},
 			{
+				/// Reference to another asset
 				Tag:      "currentTenant",
 				Label:    "Current Tenant",
-				DataType: "->samplePerson",
+				DataType: "->person",
 			},
 			{
+				// String list
 				Tag:      "genres",
 				Label:    "Genres",
 				DataType: "[]string",
 			},
 			{
+				// Date property
 				Tag:      "published",
 				Label:    "Publishment Date",
 				DataType: "datetime",
 			},
-			{
-				Tag:      "secret",
-				Label:    "Book Secret",
-				DataType: "->sampleSecret",
-			},
 		},
 	},
 	{
-		Tag:         "sampleSecret",
-		Label:       "Sample Secret",
-		Description: "",
+		Tag:         "secret",
+		Label:       "Secret",
+		Description: "Secret between Org2 and Org3",
 
-		Readers: []string{"org1MSP"},
+		Readers: []string{"org2MSP", "org3MSP"},
 		Props: []assets.AssetProp{
 			{
+				// Primary Key
+				IsKey:    true,
 				Tag:      "secretName",
 				Label:    "Secret Name",
-				IsKey:    true,
 				DataType: "string",
+				Writers:  []string{`org2MSP`}, // This means only org2 can create the asset (org3 can edit)
 			},
 			{
+				// Mandatory Property
+				Required: true,
 				Tag:      "secret",
 				Label:    "Secret",
-				Required: true,
 				DataType: "string",
 			},
 		},
