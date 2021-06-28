@@ -1,10 +1,7 @@
 package transactions
 
 import (
-	"encoding/json"
-	"fmt"
 	"log"
-	"reflect"
 	"testing"
 
 	"github.com/hyperledger/fabric/core/chaincode/shim"
@@ -173,39 +170,4 @@ func TestTryout(t *testing.T) {
 		log.Println("deleteAsset fail")
 		t.FailNow()
 	}
-}
-
-func invokeAndVerify(stub *shim.MockStub, txName string, req, expectedRes interface{}, expectedStatus int32) error {
-	reqBytes, err := json.Marshal(req)
-	if err != nil {
-		log.Println(err)
-		return err
-	}
-
-	res := stub.MockInvoke(txName, [][]byte{
-		[]byte(txName),
-		reqBytes,
-	})
-
-	if res.GetStatus() != expectedStatus {
-		log.Println(res.Message)
-		return fmt.Errorf("expected %d got %d", expectedStatus, res.GetStatus())
-	}
-
-	var resPayload interface{}
-	err = json.Unmarshal(res.GetPayload(), &resPayload)
-	if err != nil {
-		log.Println(res.GetPayload())
-		log.Println(err)
-		return err
-	}
-
-	if !reflect.DeepEqual(resPayload, expectedRes) {
-		log.Println("these should be equal")
-		log.Printf("%#v\n", resPayload)
-		log.Printf("%#v\n", expectedRes)
-		return fmt.Errorf("unexpected response")
-	}
-
-	return nil
 }

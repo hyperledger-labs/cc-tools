@@ -51,6 +51,42 @@ func (k *Key) Get(stub *sw.StubWrapper) (*Asset, errors.ICCError) {
 	return get(stub, pvtCollection, k.Key())
 }
 
+// GetBytes reads the asset as bytes from ledger
+func (k *Key) GetBytes(stub *sw.StubWrapper) ([]byte, errors.ICCError) {
+	var assetBytes []byte
+	var err error
+	if k.IsPrivate() {
+		assetBytes, err = stub.GetPrivateData(k.TypeTag(), k.Key())
+	} else {
+		assetBytes, err = stub.GetState(k.Key())
+	}
+	if err != nil {
+		return nil, errors.WrapErrorWithStatus(err, "failed to get asset bytes", 400)
+	}
+	if assetBytes == nil {
+		return nil, errors.NewCCError("asset not found", 404)
+	}
+
+	return assetBytes, nil
+}
+
+// GetMap reads the asset as bytes from ledger
+func (k *Key) GetMap(stub *sw.StubWrapper) (map[string]interface{}, errors.ICCError) {
+	var err error
+	assetBytes, err := k.GetBytes(stub)
+	if err != nil {
+		return nil, errors.WrapErrorWithStatus(err, "failed to get asset bytes", 400)
+	}
+
+	var ret map[string]interface{}
+	err = json.Unmarshal(assetBytes, &ret)
+	if err != nil {
+		return nil, errors.WrapError(err, "failed to unmarshal asset")
+	}
+
+	return ret, nil
+}
+
 /* GetRecursive-related code */
 
 func getRecursive(stub *sw.StubWrapper, pvtCollection, key string, keysChecked []string) (map[string]interface{}, errors.ICCError) {

@@ -33,7 +33,7 @@ func TestCreateAsset(t *testing.T) {
 		t.FailNow()
 	}
 
-	res := stub.MockInvoke("CreateAsset", [][]byte{
+	res := stub.MockInvoke("createAsset", [][]byte{
 		[]byte("createAsset"),
 		reqBytes,
 	})
@@ -59,6 +59,33 @@ func TestCreateAsset(t *testing.T) {
 		log.Println("these should be equal")
 		log.Printf("%#v\n", resPayload[0])
 		log.Printf("%#v\n", expectedResponse)
+		t.FailNow()
+	}
+}
+
+func TestCreateAssetEmptyList(t *testing.T) {
+	stub := shim.NewMockStub("org1MSP", new(testCC))
+
+	req := map[string]interface{}{
+		"asset": []map[string]interface{}{},
+	}
+	reqBytes, err := json.Marshal(req)
+	if err != nil {
+		t.FailNow()
+	}
+
+	res := stub.MockInvoke("CreateAsset", [][]byte{
+		[]byte("createAsset"),
+		reqBytes,
+	})
+
+	if res.GetStatus() != 400 {
+		log.Println(res)
+		t.FailNow()
+	}
+
+	if res.GetMessage() != "unable to get args: required argument 'asset' must be non-empty" {
+		log.Printf("error message different from expected: %s", res.GetMessage())
 		t.FailNow()
 	}
 }

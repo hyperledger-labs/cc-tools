@@ -28,10 +28,6 @@ var CreateAsset = Transaction{
 		// This is safe to do because validation is done before calling routine
 		assetList := req["asset"].([]interface{})
 
-		if len(assetList) == 0 {
-			return nil, errors.NewCCError("argument 'asset' must be non-empty list", 400)
-		}
-
 		responses := []map[string]interface{}{}
 		for _, assetInterface := range assetList {
 			// This is safe to do because validation is done before calling routine

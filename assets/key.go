@@ -4,7 +4,6 @@ import (
 	"encoding/json"
 
 	"github.com/goledgerdev/cc-tools/errors"
-	sw "github.com/goledgerdev/cc-tools/stubwrapper"
 )
 
 // Key stores the information for retrieving an Asset from the ledger.
@@ -68,42 +67,6 @@ func NewKey(m map[string]interface{}) (k Key, err errors.ICCError) {
 	}
 
 	return
-}
-
-// GetBytes reads the asset as bytes from ledger
-func (k *Key) GetBytes(stub *sw.StubWrapper) ([]byte, errors.ICCError) {
-	var assetBytes []byte
-	var err error
-	if k.IsPrivate() {
-		assetBytes, err = stub.GetPrivateData(k.TypeTag(), k.Key())
-	} else {
-		assetBytes, err = stub.GetState(k.Key())
-	}
-	if err != nil {
-		return nil, errors.WrapErrorWithStatus(err, "failed to get asset bytes", 400)
-	}
-	if assetBytes == nil {
-		return nil, errors.NewCCError("asset not found", 404)
-	}
-
-	return assetBytes, nil
-}
-
-// GetMap reads the asset as bytes from ledger
-func (k *Key) GetMap(stub *sw.StubWrapper) (map[string]interface{}, errors.ICCError) {
-	var err error
-	assetBytes, err := k.GetBytes(stub)
-	if err != nil {
-		return nil, errors.WrapErrorWithStatus(err, "failed to get asset bytes", 400)
-	}
-
-	var ret map[string]interface{}
-	err = json.Unmarshal(assetBytes, &ret)
-	if err != nil {
-		return nil, errors.WrapError(err, "failed to unmarshal asset")
-	}
-
-	return ret, nil
 }
 
 // Type returns the AssetType configuration object for the asset

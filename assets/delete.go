@@ -77,12 +77,11 @@ func (a *Asset) DeleteCascade(stub *sw.StubWrapper) ([]byte, errors.ICCError) {
 		return nil, errors.WrapError(err, "failed write permission check")
 	}
 
-	deletedKeys := make([]string, 0)
+	deletedKeys := []string{a.Key()}
 	err = deleteRecursive(stub, a.Key(), &deletedKeys)
 	if err != nil {
-		return nil, errors.WrapError(err, "error deleting asset Recursively")
+		return nil, errors.WrapError(err, "error deleting asset recursively")
 	}
-
 	response := map[string]interface{}{
 		"deletedKeys": deletedKeys,
 	}
@@ -95,7 +94,6 @@ func (a *Asset) DeleteCascade(stub *sw.StubWrapper) ([]byte, errors.ICCError) {
 }
 
 func deleteRecursive(stub *sw.StubWrapper, key string, deletedKeys *[]string) errors.ICCError {
-
 	states, err := stub.GetStateByPartialCompositeKey(key, []string{})
 	if err != nil {
 		return errors.WrapErrorWithStatus(err, "failed to check reference index", 500)

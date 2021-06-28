@@ -114,7 +114,7 @@ var testAssetList = []assets.AssetType{
 				Tag:      "title",
 				Label:    "Book Title",
 				DataType: "string",
-				Writers:  []string{`org2MSP`}, // This means only org2 can create the asset (others can edit)
+				Writers:  []string{`org1MSP`, `org2MSP`},
 			},
 			{
 				// Composite Key
@@ -123,7 +123,7 @@ var testAssetList = []assets.AssetType{
 				Tag:      "author",
 				Label:    "Book Author",
 				DataType: "string",
-				Writers:  []string{`org2MSP`}, // This means only org2 can create the asset (others can edit)
+				Writers:  []string{`org1MSP`, `org2MSP`},
 			},
 			{
 				/// Reference to another asset
