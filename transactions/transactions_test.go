@@ -12,10 +12,14 @@ func TestMain(m *testing.M) {
 	log.SetFlags(log.Lshortfile)
 
 	InitHeader(Header{
-		Name:    header.Name,
-		Version: header.Version,
-		Colors:  header.Colors,
-		Title:   header.Title,
+		Name:    "CC Tools Test",
+		Version: "v0.7.0",
+		Colors: map[string][]string{
+			"@default": {"#4267B2", "#34495E", "#ECF0F1"},
+		},
+		Title: map[string]string{
+			"@default": "CC Tools Demo",
+		},
 	})
 
 	InitTxList(testTxList)

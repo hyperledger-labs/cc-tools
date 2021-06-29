@@ -18,7 +18,7 @@ type DataType struct {
 	Description string `json:"description,omitempty"`
 
 	// DropDownValues is a set of predetermined values to be used in a dropdown menu on frontend rendering
-	DropDownValues map[string]interface{}
+	DropDownValues map[string]interface{} `json:"DropDownValues"`
 
 	// Parse is called to check if the input value is valid, make necessary
 	// conversions and returns a string representation of the value
