@@ -9,7 +9,7 @@ import (
 	"github.com/hyperledger/fabric/core/chaincode/shim"
 )
 
-func TestDeleteAsset(t *testing.T) {
+func TestReadAsset(t *testing.T) {
 	stub := shim.NewMockStub("org1MSP", new(testCC))
 
 	// State setup
@@ -24,13 +24,13 @@ func TestDeleteAsset(t *testing.T) {
 	}
 	setupState, _ := json.Marshal(expectedResponse)
 
-	stub.MockTransactionStart("setupDeleteAsset")
+	stub.MockTransactionStart("setupReadAsset")
 	err := stub.PutState("person:47061146-c642-51a1-844a-bf0b17cb5e19", setupState)
 	if err != nil {
 		log.Println(err)
 		t.FailNow()
 	}
-	stub.MockTransactionEnd("setupDeleteAsset")
+	stub.MockTransactionEnd("setupReadAsset")
 
 	personKey := map[string]interface{}{
 		"@assetType": "person",
@@ -45,8 +45,8 @@ func TestDeleteAsset(t *testing.T) {
 	if err != nil {
 		t.FailNow()
 	}
-	res := stub.MockInvoke("deleteAsset", [][]byte{
-		[]byte("deleteAsset"),
+	res := stub.MockInvoke("readAsset", [][]byte{
+		[]byte("readAsset"),
 		reqBytes,
 	})
 
@@ -68,14 +68,9 @@ func TestDeleteAsset(t *testing.T) {
 		log.Printf("%#v\n", expectedResponse)
 		t.FailNow()
 	}
-
-	if !isEmpty(stub, "person:47061146-c642-51a1-844a-bf0b17cb5e19") {
-		log.Println("key was not deleted")
-		t.FailNow()
-	}
 }
 
-func TestDeleteCascade(t *testing.T) {
+func TestReadRecursive(t *testing.T) {
 	stub := shim.NewMockStub("org1MSP", new(testCC))
 
 	// State setup
@@ -105,7 +100,7 @@ func TestDeleteCascade(t *testing.T) {
 	setupPersonJSON, _ := json.Marshal(setupPerson)
 	setupBookJSON, _ := json.Marshal(setupBook)
 
-	stub.MockTransactionStart("setupDeleteCascade")
+	stub.MockTransactionStart("setupReadAsset")
 	err := stub.PutState("person:47061146-c642-51a1-844a-bf0b17cb5e19", setupPersonJSON)
 	if err != nil {
 		log.Println(err)
@@ -126,30 +121,42 @@ func TestDeleteCascade(t *testing.T) {
 		log.Println(err)
 		t.FailNow()
 	}
-	stub.MockTransactionEnd("setupDeleteCascade")
+	stub.MockTransactionEnd("setupReadAsset")
 
-	personKey := map[string]interface{}{
-		"@assetType": "person",
-		"name":       "Maria",
-		"id":         "318.207.920-48",
+	bookKey := map[string]interface{}{
+		"@assetType": "book",
+		"@key":       "book:a36a2920-c405-51c3-b584-dcd758338cb5",
 	}
 	expectedResponse := map[string]interface{}{
-		"deletedKeys": []interface{}{
-			"person:47061146-c642-51a1-844a-bf0b17cb5e19",
-			"book:a36a2920-c405-51c3-b584-dcd758338cb5",
+		"@key":         "book:a36a2920-c405-51c3-b584-dcd758338cb5",
+		"@lastTouchBy": "org2MSP",
+		"@lastTx":      "createAsset",
+		"@assetType":   "book",
+		"title":        "Meu Nome é Maria",
+		"author":       "Maria Viana",
+		"currentTenant": map[string]interface{}{
+			"@key":         "person:47061146-c642-51a1-844a-bf0b17cb5e19",
+			"@lastTouchBy": "org1MSP",
+			"@lastTx":      "createAsset",
+			"@assetType":   "person",
+			"name":         "Maria",
+			"id":           "31820792048",
+			"height":       0.0,
 		},
+		"genres":    []interface{}{"biography", "non-fiction"},
+		"published": "2019-05-06T22:12:41Z",
 	}
 
 	req := map[string]interface{}{
-		"key":     personKey,
-		"cascade": true,
+		"key":     bookKey,
+		"resolve": true,
 	}
 	reqBytes, err := json.Marshal(req)
 	if err != nil {
 		t.FailNow()
 	}
-	res := stub.MockInvoke("deleteAsset", [][]byte{
-		[]byte("deleteAsset"),
+	res := stub.MockInvoke("readAsset", [][]byte{
+		[]byte("readAsset"),
 		reqBytes,
 	})
 
@@ -169,21 +176,6 @@ func TestDeleteCascade(t *testing.T) {
 		log.Println("these should be equal")
 		log.Printf("%#v\n", resPayload)
 		log.Printf("%#v\n", expectedResponse)
-		t.FailNow()
-	}
-
-	if !isEmpty(stub, "person:47061146-c642-51a1-844a-bf0b17cb5e19") {
-		log.Println("key was not deleted")
-		t.FailNow()
-	}
-
-	if !isEmpty(stub, "book:a36a2920-c405-51c3-b584-dcd758338cb5") {
-		log.Println("key was not deleted")
-		t.FailNow()
-	}
-
-	if !isEmpty(stub, refIdx) {
-		log.Println("key was not deleted")
 		t.FailNow()
 	}
 }

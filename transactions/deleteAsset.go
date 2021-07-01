@@ -14,7 +14,7 @@ var DeleteAsset = Transaction{
 	Description: "",
 
 	MetaTx: true,
-	Args: []Argument{
+	Args: ArgList{
 		{
 			Tag:         "key",
 			Description: "Key of the asset to be deleted.",

@@ -17,7 +17,7 @@ var GetDataTypes = Transaction{
 
 	ReadOnly: true,
 	MetaTx:   true,
-	Args:     []Argument{},
+	Args:     ArgList{},
 	Routine: func(stub *sw.StubWrapper, req map[string]interface{}) ([]byte, errors.ICCError) {
 		dataTypeMap := assets.DataTypeMap()
 

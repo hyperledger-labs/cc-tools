@@ -31,7 +31,7 @@ var GetHeader = Transaction{
 
 	ReadOnly: true,
 	MetaTx:   true,
-	Args:     []Argument{},
+	Args:     ArgList{},
 	Routine: func(stub *sw.StubWrapper, req map[string]interface{}) ([]byte, errors.ICCError) {
 		var err error
 		colorMap := header.Colors

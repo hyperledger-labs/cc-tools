@@ -163,9 +163,9 @@ func validateTxArg(argType string, arg interface{}) (interface{}, errors.ICCErro
 			if !ok {
 				return nil, errors.NewCCError("invalid argument format", 400)
 			}
-			_, ok = argMap["@assetType"]
-			if !ok {
-				return nil, errors.NewCCError("missing @assetType", 400)
+			_, err := assets.NewKey(argMap)
+			if err != nil {
+				return nil, errors.WrapError(err, "argument of type '@update' must be a valid key")
 			}
 			argAsInterface = argMap
 		case "@query":

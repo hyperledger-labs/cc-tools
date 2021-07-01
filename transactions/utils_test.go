@@ -22,21 +22,23 @@ func invokeAndVerify(stub *shim.MockStub, txName string, req, expectedRes interf
 	})
 
 	if res.GetStatus() != expectedStatus {
-		log.Println(res.Message)
+		log.Println(res.GetMessage())
 		return fmt.Errorf("expected %d got %d", expectedStatus, res.GetStatus())
 	}
 
-	var resPayload interface{}
-	err = json.Unmarshal(res.GetPayload(), &resPayload)
+	var resData interface{}
+	if expectedStatus == 200 {
+		err = json.Unmarshal(res.GetPayload(), &resData)
+	} else {
+		resData = res.GetMessage()
+	}
 	if err != nil {
-		log.Println(res.GetPayload())
 		log.Println(err)
 		return err
 	}
-
-	if !reflect.DeepEqual(resPayload, expectedRes) {
+	if !reflect.DeepEqual(resData, expectedRes) {
 		log.Println("these should be equal")
-		log.Printf("%#v\n", resPayload)
+		log.Printf("%#v\n", resData)
 		log.Printf("%#v\n", expectedRes)
 		return fmt.Errorf("unexpected response")
 	}
@@ -44,15 +46,12 @@ func invokeAndVerify(stub *shim.MockStub, txName string, req, expectedRes interf
 	return nil
 }
 
-func ensureEmpty(stub *shim.MockStub, key string) error {
+func isEmpty(stub *shim.MockStub, key string) bool {
 	stub.MockTransactionStart("ensureDeletion")
 	defer stub.MockTransactionEnd("ensureDeletion")
-	state, err := stub.GetState(key)
-	if err != nil {
-		return fmt.Errorf("mock GetState error: %w", err)
-	}
+	state := stub.State[key]
 	if state != nil {
-		return fmt.Errorf("key not deleted, state is %s", string(state))
+		return false
 	}
-	return nil
+	return true
 }

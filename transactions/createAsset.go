@@ -16,7 +16,7 @@ var CreateAsset = Transaction{
 	Method:      "POST",
 
 	MetaTx: true,
-	Args: []Argument{
+	Args: ArgList{
 		{
 			Tag:         "asset",
 			Description: "List of assets to be created.",

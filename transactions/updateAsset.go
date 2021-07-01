@@ -16,7 +16,7 @@ var UpdateAsset = Transaction{
 	Method:      "PUT",
 
 	MetaTx: true,
-	Args: []Argument{
+	Args: ArgList{
 		{
 			Tag:         "update",
 			Description: "Asset key and fields to be updated.",
@@ -27,10 +27,7 @@ var UpdateAsset = Transaction{
 	Routine: func(stub *sw.StubWrapper, req map[string]interface{}) ([]byte, errors.ICCError) {
 		var err error
 		request := req["update"].(map[string]interface{})
-		key, err := assets.NewKey(request)
-		if err != nil {
-			return nil, errors.WrapError(err, "argument 'update' must be valid key")
-		}
+		key, _ := assets.NewKey(request)
 
 		// Check if asset exists
 		exists, err := key.ExistsInLedger(stub)

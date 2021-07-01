@@ -29,10 +29,7 @@ var getTx = Transaction{
 
 		txNameInterface, ok := req["txName"]
 		if ok {
-			txName, ok = txNameInterface.(string)
-			if !ok {
-				return nil, errors.NewCCError("argument 'txName' must be a string", 400)
-			}
+			txName = txNameInterface.(string)
 		}
 
 		txList := TxList()
@@ -42,7 +39,7 @@ var getTx = Transaction{
 			txDef := FetchTx(txName)
 			if txDef == nil {
 				errMsg := fmt.Sprintf("transaction named %s does not exist", txName)
-				return nil, errors.NewCCError(errMsg, 400)
+				return nil, errors.NewCCError(errMsg, 404)
 			}
 			txDefBytes, err := json.Marshal(txDef)
 			if err != nil {

@@ -18,7 +18,7 @@ var Search = Transaction{
 	Method:      "GET",
 
 	MetaTx: true,
-	Args: []Argument{
+	Args: ArgList{
 		{
 			Tag:         "query",
 			Description: "Query string according to CouchDB specification: https://docs.couchdb.org/en/stable/api/database/find.html.",

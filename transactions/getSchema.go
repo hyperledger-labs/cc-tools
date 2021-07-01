@@ -18,7 +18,7 @@ var GetSchema = Transaction{
 
 	ReadOnly: true,
 	MetaTx:   true,
-	Args: []Argument{
+	Args: ArgList{
 		{
 			Tag:         "assetType",
 			DataType:    "string",

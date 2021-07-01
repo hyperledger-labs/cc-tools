@@ -130,3 +130,29 @@ func TestGetTx(t *testing.T) {
 		t.FailNow()
 	}
 }
+
+func TestGetTx404(t *testing.T) {
+	stub := shim.NewMockStub("org1MSP", new(testCC))
+
+	req := map[string]interface{}{
+		"txName": "inexistentTx",
+	}
+
+	err := invokeAndVerify(stub, "getTx", req, "transaction named inexistentTx does not exist", 404)
+	if err != nil {
+		t.FailNow()
+	}
+}
+
+func TestGetTxInvalidArg(t *testing.T) {
+	stub := shim.NewMockStub("org1MSP", new(testCC))
+
+	req := map[string]interface{}{
+		"txName": 2,
+	}
+
+	err := invokeAndVerify(stub, "getTx", req, "unable to get args: invalid argument 'txName': invalid argument format: property must be a string", 400)
+	if err != nil {
+		t.FailNow()
+	}
+}

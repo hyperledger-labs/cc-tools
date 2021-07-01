@@ -105,3 +105,16 @@ func TestGetSchema(t *testing.T) {
 		t.FailNow()
 	}
 }
+
+func TestGetSchema404(t *testing.T) {
+	stub := shim.NewMockStub("org1MSP", new(testCC))
+
+	req := map[string]interface{}{
+		"assetType": "inexistentAsset",
+	}
+
+	err := invokeAndVerify(stub, "getSchema", req, "asset type named inexistentAsset does not exist", 404)
+	if err != nil {
+		t.FailNow()
+	}
+}

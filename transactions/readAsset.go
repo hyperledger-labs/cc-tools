@@ -16,7 +16,7 @@ var ReadAsset = Transaction{
 	Method:      "GET",
 
 	MetaTx: true,
-	Args: []Argument{
+	Args: ArgList{
 		{
 			Tag:         "key",
 			Description: "Key of the asset to be read.",
