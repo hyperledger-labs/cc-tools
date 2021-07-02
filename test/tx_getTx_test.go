@@ -1,4 +1,4 @@
-package transactions
+package test
 
 import (
 	"log"
@@ -25,41 +25,6 @@ func TestGetTx(t *testing.T) {
 			"description": "",
 			"label":       "Delete Asset",
 			"tag":         "deleteAsset",
-		},
-		map[string]interface{}{
-			"description": "",
-			"label":       "Get Tx",
-			"tag":         "getTx",
-		},
-		map[string]interface{}{
-			"description": "",
-			"label":       "Get Header",
-			"tag":         "getHeader",
-		},
-		map[string]interface{}{
-			"description": "",
-			"label":       "Get Schema",
-			"tag":         "getSchema",
-		},
-		map[string]interface{}{
-			"description": "GetDataTypes returns the primary data type map",
-			"label":       "Get DataTypes",
-			"tag":         "getDataTypes",
-		},
-		map[string]interface{}{
-			"description": "",
-			"label":       "Read Asset",
-			"tag":         "readAsset",
-		},
-		map[string]interface{}{
-			"description": "",
-			"label":       "Read Asset History",
-			"tag":         "readAssetHistory",
-		},
-		map[string]interface{}{
-			"description": "",
-			"label":       "Search World State",
-			"tag":         "search",
 		},
 		map[string]interface{}{
 			"description": "",

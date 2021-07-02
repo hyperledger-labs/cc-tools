@@ -1,4 +1,4 @@
-package transactions
+package test
 
 import (
 	"log"
@@ -84,7 +84,9 @@ func TestGetSchema(t *testing.T) {
 				"readOnly":    false,
 				"required":    false,
 				"tag":         "dateOfBirth",
-				"writers":     nil,
+				"writers": []interface{}{
+					"org1MSP",
+				},
 			},
 			map[string]interface{}{
 				"dataType":     "number",

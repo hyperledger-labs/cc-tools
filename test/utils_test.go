@@ -1,4 +1,4 @@
-package transactions
+package test
 
 import (
 	"encoding/json"
@@ -50,8 +50,5 @@ func isEmpty(stub *shim.MockStub, key string) bool {
 	stub.MockTransactionStart("ensureDeletion")
 	defer stub.MockTransactionEnd("ensureDeletion")
 	state := stub.State[key]
-	if state != nil {
-		return false
-	}
-	return true
+	return state == nil
 }

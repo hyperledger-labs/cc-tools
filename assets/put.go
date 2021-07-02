@@ -120,11 +120,7 @@ func putRecursive(stub *sw.StubWrapper, object map[string]interface{}, root bool
 		return nil, errors.WrapError(err, "unable to create asset object")
 	}
 
-	putAsset, err := objAsAsset.put(stub)
-	if err != nil {
-		return nil, errors.WrapError(err, fmt.Sprintf("failed to put asset of type %s", objAsAsset.TypeTag()))
-	}
-
+	subAssetsMap := map[string]interface{}{}
 	subAssets := objAsAsset.Type().SubAssets()
 	for _, subAsset := range subAssets {
 		isArray := false
@@ -173,10 +169,19 @@ func putRecursive(stub *sw.StubWrapper, object map[string]interface{}, root bool
 		}
 
 		if isArray {
-			putAsset[subAsset.Tag] = objArray
+			subAssetsMap[subAsset.Tag] = objArray
 		} else {
-			putAsset[subAsset.Tag] = objArray[0]
+			subAssetsMap[subAsset.Tag] = objArray[0]
 		}
+	}
+
+	putAsset, err := objAsAsset.Put(stub)
+	if err != nil {
+		return nil, errors.WrapError(err, fmt.Sprintf("failed to put asset of type %s", objAsAsset.TypeTag()))
+	}
+
+	for tag, subAsset := range subAssetsMap {
+		putAsset[tag] = subAsset
 	}
 
 	return putAsset, nil

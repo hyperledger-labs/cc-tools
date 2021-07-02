@@ -1,4 +1,4 @@
-package transactions
+package test
 
 import (
 	"fmt"
@@ -6,6 +6,7 @@ import (
 
 	"github.com/goledgerdev/cc-tools/assets"
 	"github.com/goledgerdev/cc-tools/errors"
+	tx "github.com/goledgerdev/cc-tools/transactions"
 	"github.com/hyperledger/fabric/core/chaincode/shim"
 	pb "github.com/hyperledger/fabric/protos/peer"
 )
@@ -13,17 +14,10 @@ import (
 // testCC implements the shim.Chaincode interface
 type testCC struct{}
 
-var testTxList = []Transaction{
-	CreateAsset,
-	UpdateAsset,
-	DeleteAsset,
-	getTx,
-	GetHeader,
-	GetSchema,
-	GetDataTypes,
-	ReadAsset,
-	ReadAssetHistory,
-	Search,
+var testTxList = []tx.Transaction{
+	tx.CreateAsset,
+	tx.UpdateAsset,
+	tx.DeleteAsset,
 }
 
 var testAssetList = []assets.AssetType{
@@ -39,8 +33,8 @@ var testAssetList = []assets.AssetType{
 				IsKey:    true,
 				Tag:      "id",
 				Label:    "CPF (Brazilian ID)",
-				DataType: "cpf",               // Datatypes are identified at datatypes folder
-				Writers:  []string{`org1MSP`}, // This means only org1 can create the asset (others can edit)
+				DataType: "cpf", // Datatypes are identified at datatypes folder
+				Writers:  []string{`org1MSP`},
 			},
 			{
 				// Mandatory property
@@ -62,6 +56,7 @@ var testAssetList = []assets.AssetType{
 				Tag:      "dateOfBirth",
 				Label:    "Date of Birth",
 				DataType: "datetime",
+				Writers:  []string{`org1MSP`},
 			},
 			{
 				// Property with default value
@@ -114,7 +109,7 @@ var testAssetList = []assets.AssetType{
 				Tag:      "title",
 				Label:    "Book Title",
 				DataType: "string",
-				Writers:  []string{`org1MSP`, `org2MSP`},
+				Writers:  []string{`$org\dMSP`},
 			},
 			{
 				// Composite Key
@@ -123,7 +118,7 @@ var testAssetList = []assets.AssetType{
 				Tag:      "author",
 				Label:    "Book Author",
 				DataType: "string",
-				Writers:  []string{`org1MSP`, `org2MSP`},
+				Writers:  []string{`$org\dMSP`},
 			},
 			{
 				/// Reference to another asset
@@ -195,7 +190,7 @@ var testCustomDataTypes = map[string]assets.DataType{
 // data. Note that chaincode upgrade also calls this function to reset
 // or to migrate data.
 func (t *testCC) Init(stub shim.ChaincodeStubInterface) (response pb.Response) {
-	err := StartupCheck()
+	err := tx.StartupCheck()
 	if err != nil {
 		response = err.GetErrorResponse()
 		return
@@ -226,7 +221,7 @@ func (t *testCC) Init(stub shim.ChaincodeStubInterface) (response pb.Response) {
 func (t *testCC) Invoke(stub shim.ChaincodeStubInterface) (response pb.Response) {
 	var result []byte
 
-	result, err := Run(stub)
+	result, err := tx.Run(stub)
 
 	if err != nil {
 		response = err.GetErrorResponse()

@@ -1,0 +1,6 @@
+{
+    "go.testFlags": [
+        "-coverpkg=../...",
+        "-v"
+    ]
+}

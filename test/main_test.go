@@ -1,4 +1,4 @@
-package transactions
+package test
 
 import (
 	"log"
@@ -6,12 +6,13 @@ import (
 	"testing"
 
 	"github.com/goledgerdev/cc-tools/assets"
+	tx "github.com/goledgerdev/cc-tools/transactions"
 )
 
 func TestMain(m *testing.M) {
 	log.SetFlags(log.Lshortfile)
 
-	InitHeader(Header{
+	tx.InitHeader(tx.Header{
 		Name:    "CC Tools Test",
 		Version: "v0.7.0",
 		Colors: map[string][]string{
@@ -22,7 +23,7 @@ func TestMain(m *testing.M) {
 		},
 	})
 
-	InitTxList(testTxList)
+	tx.InitTxList(testTxList)
 
 	err := assets.CustomDataTypes(testCustomDataTypes)
 	if err != nil {
@@ -32,13 +33,17 @@ func TestMain(m *testing.M) {
 
 	assets.InitAssetList(testAssetList)
 
-	os.Exit(m.Run())
-}
-
-func TestStartUp(t *testing.T) {
-	err := StartupCheck()
+	err = assets.StartupCheck()
 	if err != nil {
 		log.Println(err)
-		t.FailNow()
+		os.Exit(1)
 	}
+
+	err = tx.StartupCheck()
+	if err != nil {
+		log.Println(err)
+		os.Exit(1)
+	}
+
+	os.Exit(m.Run())
 }

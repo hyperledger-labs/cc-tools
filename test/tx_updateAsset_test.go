@@ -1,4 +1,4 @@
-package transactions
+package test
 
 import (
 	"encoding/json"
@@ -33,10 +33,11 @@ func TestUpdateAsset(t *testing.T) {
 	stub.MockTransactionEnd("setupUpdateAsset")
 
 	personUpdate := map[string]interface{}{
-		"@assetType": "person",
-		"name":       "Maria",
-		"id":         "318.207.920-48",
-		"height":     1.66,
+		"@assetType":  "person",
+		"name":        "Maria",
+		"id":          "318.207.920-48",
+		"dateOfBirth": "1999-05-06T22:12:41Z",
+		"height":      1.66,
 	}
 
 	req := map[string]interface{}{
@@ -70,6 +71,7 @@ func TestUpdateAsset(t *testing.T) {
 		"@assetType":   "person",
 		"name":         "Maria",
 		"id":           "31820792048",
+		"dateOfBirth":  "1999-05-06T22:12:41Z",
 		"height":       1.66,
 	}
 

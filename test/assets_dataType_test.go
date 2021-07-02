@@ -1,12 +1,14 @@
-package assets
+package test
 
 import (
 	"fmt"
 	"reflect"
 	"testing"
+
+	"github.com/goledgerdev/cc-tools/assets"
 )
 
-func testParseValid(t *testing.T, dtype DataType, inputVal interface{}, expectedKey string, expectedVal interface{}) {
+func testParseValid(t *testing.T, dtype assets.DataType, inputVal interface{}, expectedKey string, expectedVal interface{}) {
 	var key string
 	var val interface{}
 	var err error
@@ -25,7 +27,7 @@ func testParseValid(t *testing.T, dtype DataType, inputVal interface{}, expected
 	}
 }
 
-func testParseInvalid(t *testing.T, dtype DataType, inputVal interface{}, expectedErr int32) {
+func testParseInvalid(t *testing.T, dtype assets.DataType, inputVal interface{}, expectedErr int32) {
 	_, _, err := dtype.Parse(inputVal)
 	if err == nil {
 		fmt.Println("expected error but DataType.Parse was successful")
@@ -38,7 +40,7 @@ func testParseInvalid(t *testing.T, dtype DataType, inputVal interface{}, expect
 
 func TestDataTypeString(t *testing.T) {
 	dtypeName := "string"
-	dtype, exists := DataTypeMap()[dtypeName]
+	dtype, exists := assets.DataTypeMap()[dtypeName]
 	if !exists {
 		fmt.Printf("%s datatype not declared in DataTypeMap\n", dtypeName)
 		t.FailNow()
@@ -49,7 +51,7 @@ func TestDataTypeString(t *testing.T) {
 
 func TestDataTypeNumber(t *testing.T) {
 	dtypeName := "number"
-	dtype, exists := DataTypeMap()[dtypeName]
+	dtype, exists := assets.DataTypeMap()[dtypeName]
 	if !exists {
 		fmt.Printf("%s datatype not declared in DataTypeMap\n", dtypeName)
 		t.FailNow()
@@ -63,7 +65,7 @@ func TestDataTypeNumber(t *testing.T) {
 
 func TestDataTypeInteger(t *testing.T) {
 	dtypeName := "integer"
-	dtype, exists := DataTypeMap()[dtypeName]
+	dtype, exists := assets.DataTypeMap()[dtypeName]
 	if !exists {
 		fmt.Printf("%s datatype not declared in DataTypeMap\n", dtypeName)
 		t.FailNow()
@@ -78,7 +80,7 @@ func TestDataTypeInteger(t *testing.T) {
 
 func TestDataTypeBoolean(t *testing.T) {
 	dtypeName := "boolean"
-	dtype, exists := DataTypeMap()[dtypeName]
+	dtype, exists := assets.DataTypeMap()[dtypeName]
 	if !exists {
 		fmt.Printf("%s datatype not declared in DataTypeMap\n", dtypeName)
 		t.FailNow()
