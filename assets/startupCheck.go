@@ -58,9 +58,7 @@ func StartupCheck() errors.ICCError {
 			propLabelSet[label] = struct{}{}
 
 			dataTypeName := propDef.DataType
-			if strings.HasPrefix(dataTypeName, "[]") {
-				dataTypeName = strings.TrimPrefix(dataTypeName, "[]")
-			}
+			dataTypeName = strings.TrimPrefix(dataTypeName, "[]")
 
 			var isSubAsset = false
 			if strings.HasPrefix(dataTypeName, "->") {
