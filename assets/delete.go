@@ -11,6 +11,12 @@ import (
 func (a *Asset) delete(stub *sw.StubWrapper) ([]byte, errors.ICCError) {
 	var err error
 
+	// Check if org has write permission
+	err = a.CheckWriters(stub)
+	if err != nil {
+		return nil, errors.WrapError(err, "failed write permission check")
+	}
+
 	// Clean up reference markers for this asset
 	err = a.delRefs(stub)
 	if err != nil {
@@ -48,12 +54,6 @@ func (a *Asset) delete(stub *sw.StubWrapper) ([]byte, errors.ICCError) {
 // Delete erases asset from world state and checks for all necessary permissions.
 // An asset cannot be deleted if any other asset references it.
 func (a *Asset) Delete(stub *sw.StubWrapper) ([]byte, errors.ICCError) {
-	// Check if org has write permission
-	err := a.CheckWriters(stub)
-	if err != nil {
-		return nil, errors.WrapError(err, "failed write permission check")
-	}
-
 	// Check if asset is referenced in other assets to avoid data inconsistency
 	isReferenced, err := a.IsReferenced(stub)
 	if err != nil {
