@@ -20,7 +20,7 @@ var header Header
 
 func InitHeader(h Header) {
 	header = h
-	header.CCToolsVersion = "v0.7.0-rc.3"
+	header.CCToolsVersion = "v0.7.0"
 }
 
 // GetHeader returns data in CCHeader
