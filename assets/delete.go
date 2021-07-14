@@ -66,16 +66,32 @@ func (a *Asset) Delete(stub *sw.StubWrapper) ([]byte, errors.ICCError) {
 	return a.delete(stub)
 }
 
+// Delete erases asset from world state and checks for all necessary permissions.
+// An asset cannot be deleted if any other asset references it.
+func (k *Key) Delete(stub *sw.StubWrapper) ([]byte, errors.ICCError) {
+	a, err := k.Get(stub)
+	if err != nil {
+		return nil, errors.WrapError(err, "failed to fetch asset from ledger")
+	}
+
+	return a.Delete(stub)
+}
+
+// DeleteCascade erases asset and recursively erases those which reference it.
+// This method is experimental and might not work as intended. Use with caution.
+func (k *Key) DeleteCascade(stub *sw.StubWrapper) ([]byte, errors.ICCError) {
+	a, err := k.Get(stub)
+	if err != nil {
+		return nil, errors.WrapError(err, "failed to fetch asset from ledger")
+	}
+
+	return a.DeleteCascade(stub)
+}
+
 // DeleteCascade erases asset and recursively erases those which reference it.
 // This method is experimental and might not work as intended. Use with caution.
 func (a *Asset) DeleteCascade(stub *sw.StubWrapper) ([]byte, errors.ICCError) {
 	var err error
-
-	// Check if org has write permission
-	err = a.CheckWriters(stub)
-	if err != nil {
-		return nil, errors.WrapError(err, "failed write permission check")
-	}
 
 	deletedKeys := []string{a.Key()}
 	err = deleteRecursive(stub, a.Key(), &deletedKeys)

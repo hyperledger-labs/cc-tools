@@ -36,21 +36,14 @@ var DeleteAsset = Transaction{
 		}
 
 		var err error
-
-		// Fetch asset from blockchain
-		asset, err := key.Get(stub)
-		if err != nil {
-			return nil, errors.WrapError(err, "failed to read asset from blockchain")
-		}
-
 		var response []byte
 		if cascade {
-			response, err = asset.DeleteCascade(stub)
+			response, err = key.DeleteCascade(stub)
 			if err != nil {
 				return nil, errors.WrapError(err, "failed to delete asset recursively")
 			}
 		} else {
-			response, err = asset.Delete(stub)
+			response, err = key.Delete(stub)
 			if err != nil {
 				return nil, errors.WrapError(err, "failed to delete asset")
 			}
