@@ -3,14 +3,14 @@ package assets
 import (
 	"github.com/goledgerdev/cc-tools/errors"
 	sw "github.com/goledgerdev/cc-tools/stubwrapper"
-	"github.com/hyperledger/fabric/core/chaincode/shim"
+	"github.com/hyperledger/fabric-chaincode-go/shimtest"
 )
 
 func existsInLedger(stub *sw.StubWrapper, isPrivate bool, typeTag, key string) (bool, errors.ICCError) {
 	var assetBytes []byte
 	var err error
 	if isPrivate {
-		_, isMock := stub.Stub.(*shim.MockStub)
+		_, isMock := stub.Stub.(*shimtest.MockStub)
 		if isMock {
 			assetBytes, err = stub.GetPrivateData(typeTag, key)
 		} else {

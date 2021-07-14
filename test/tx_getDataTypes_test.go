@@ -4,11 +4,11 @@ import (
 	"log"
 	"testing"
 
-	"github.com/hyperledger/fabric/core/chaincode/shim"
+	"github.com/hyperledger/fabric-chaincode-go/shimtest"
 )
 
 func TestGetDataTypes(t *testing.T) {
-	stub := shim.NewMockStub("testcc", new(testCC))
+	stub := shimtest.NewMockStub("testcc", new(testCC))
 
 	expectedResponse := map[string]interface{}{
 		"boolean": map[string]interface{}{

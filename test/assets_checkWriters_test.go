@@ -7,11 +7,11 @@ import (
 
 	"github.com/goledgerdev/cc-tools/assets"
 	sw "github.com/goledgerdev/cc-tools/stubwrapper"
-	"github.com/hyperledger/fabric/core/chaincode/shim"
+	"github.com/hyperledger/fabric-chaincode-go/shimtest"
 )
 
 func TestCheckWriters(t *testing.T) {
-	stub := shim.NewMockStub("org1MSP", new(testCC))
+	stub := shimtest.NewMockStub("org1MSP", new(testCC))
 	sw := &sw.StubWrapper{
 		Stub: stub,
 	}

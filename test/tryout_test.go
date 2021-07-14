@@ -4,12 +4,12 @@ import (
 	"log"
 	"testing"
 
-	"github.com/hyperledger/fabric/core/chaincode/shim"
+	"github.com/hyperledger/fabric-chaincode-go/shimtest"
 )
 
 func TestTryout(t *testing.T) {
 	var err error
-	stub := shim.NewMockStub("org1MSP", new(testCC))
+	stub := shimtest.NewMockStub("org1MSP", new(testCC))
 
 	// Create Asset
 	reqPerson := map[string]interface{}{

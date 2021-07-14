@@ -3,7 +3,7 @@ package errors
 import (
 	"errors"
 
-	"github.com/hyperledger/fabric/protos/peer"
+	"github.com/hyperledger/fabric-protos-go/peer"
 )
 
 // ICCError Interface implements an error interface.

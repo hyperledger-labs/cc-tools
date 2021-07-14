@@ -4,11 +4,11 @@ import (
 	"log"
 	"testing"
 
-	"github.com/hyperledger/fabric/core/chaincode/shim"
+	"github.com/hyperledger/fabric-chaincode-go/shimtest"
 )
 
 func TestGetSchema(t *testing.T) {
-	stub := shim.NewMockStub("org1MSP", new(testCC))
+	stub := shimtest.NewMockStub("org1MSP", new(testCC))
 
 	expectedResponse := []interface{}{
 		map[string]interface{}{
@@ -109,7 +109,7 @@ func TestGetSchema(t *testing.T) {
 }
 
 func TestGetSchema404(t *testing.T) {
-	stub := shim.NewMockStub("org1MSP", new(testCC))
+	stub := shimtest.NewMockStub("org1MSP", new(testCC))
 
 	req := map[string]interface{}{
 		"assetType": "inexistentAsset",

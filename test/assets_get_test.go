@@ -8,11 +8,11 @@ import (
 
 	"github.com/goledgerdev/cc-tools/assets"
 	sw "github.com/goledgerdev/cc-tools/stubwrapper"
-	"github.com/hyperledger/fabric/core/chaincode/shim"
+	"github.com/hyperledger/fabric-chaincode-go/shimtest"
 )
 
 func TestGetAsset(t *testing.T) {
-	stub := shim.NewMockStub("org1MSP", new(testCC))
+	stub := shimtest.NewMockStub("org1MSP", new(testCC))
 
 	// State setup
 	expectedResponse := assets.Asset{
@@ -51,7 +51,7 @@ func TestGetAsset(t *testing.T) {
 }
 
 func TestGetRecursive(t *testing.T) {
-	stub := shim.NewMockStub("org1MSP", new(testCC))
+	stub := shimtest.NewMockStub("org1MSP", new(testCC))
 
 	// State setup
 	setupPerson := map[string]interface{}{
@@ -134,7 +134,7 @@ func TestGetRecursive(t *testing.T) {
 }
 
 func TestGetRecursiveWithPvtData(t *testing.T) {
-	stub := shim.NewMockStub("org1MSP", new(testCC))
+	stub := shimtest.NewMockStub("org1MSP", new(testCC))
 
 	// State setup
 	setupSecret := map[string]interface{}{
