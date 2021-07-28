@@ -10,6 +10,11 @@ import (
 func get(stub *sw.StubWrapper, pvtCollection, key string) (*Asset, errors.ICCError) {
 	var assetBytes []byte
 	var err error
+
+	if key == "" {
+		return nil, errors.NewCCError("key cannot be empty", 500)
+	}
+
 	if pvtCollection != "" {
 		assetBytes, err = stub.GetPrivateData(pvtCollection, key)
 	} else {

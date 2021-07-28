@@ -208,3 +208,22 @@ func TestGetRecursiveWithPvtData(t *testing.T) {
 	}
 	stub.MockTransactionEnd("TestGetAsset")
 }
+
+func TestGetAssetNoKey(t *testing.T) {
+	stub := shimtest.NewMockStub("org1MSP", new(testCC))
+
+	personKey := assets.Key{
+		"@assetType": "person",
+		// "@key":       "person:47061146-c642-51a1-844a-bf0b17cb5e19",
+	}
+
+	stub.MockTransactionStart("TestGetAssetNoKey")
+	sw := &sw.StubWrapper{
+		Stub: stub,
+	}
+	_, err := personKey.Get(sw)
+	if err.Status() != 500 || err.Message() != "key cannot be empty" {
+		t.FailNow()
+	}
+	stub.MockTransactionEnd("TestGetAssetNoKey")
+}

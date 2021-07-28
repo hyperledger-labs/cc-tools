@@ -81,6 +81,7 @@ func TestPutAssetWithSubAsset(t *testing.T) {
 	}
 	book := assets.Asset{
 		"@assetType": "book",
+		"@key":       "book:a36a2920-c405-51c3-b584-dcd758338cb5",
 		"title":      "Meu Nome é Maria",
 		"author":     "Maria Viana",
 		"currentTenant": map[string]interface{}{

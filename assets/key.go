@@ -95,7 +95,7 @@ func (k Key) TypeTag() string {
 
 // Key returns the asset's unique identifying key in the ledger.
 func (k Key) Key() string {
-	assetKey := k["@key"].(string)
+	assetKey, _ := k["@key"].(string)
 	return assetKey
 }
 
