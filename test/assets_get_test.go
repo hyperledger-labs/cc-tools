@@ -24,8 +24,10 @@ func TestGetAsset(t *testing.T) {
 		"id":           "31820792048",
 		"height":       0.0,
 	}
+	stub.MockTransactionStart("setupGetAsset")
 	setupState, _ := json.Marshal(expectedResponse)
-	stub.State["person:47061146-c642-51a1-844a-bf0b17cb5e19"] = setupState
+	stub.PutState("person:47061146-c642-51a1-844a-bf0b17cb5e19", setupState)
+	stub.MockTransactionEnd("setupGetAsset")
 
 	personKey := assets.Key{
 		"@assetType": "person",
@@ -37,6 +39,47 @@ func TestGetAsset(t *testing.T) {
 		Stub: stub,
 	}
 	gotAsset, err := personKey.Get(sw)
+	if err != nil {
+		log.Println(err)
+		t.FailNow()
+	}
+	if !reflect.DeepEqual(*gotAsset, expectedResponse) {
+		log.Println("these should be deeply equal")
+		log.Println(expectedResponse)
+		log.Println(*gotAsset)
+		t.FailNow()
+	}
+	stub.MockTransactionEnd("TestGetAsset")
+}
+
+func TestGetCommittedAsset(t *testing.T) {
+	stub := shimtest.NewMockStub("org1MSP", new(testCC))
+
+	// State setup
+	expectedResponse := assets.Asset{
+		"@key":         "person:47061146-c642-51a1-844a-bf0b17cb5e19",
+		"@lastTouchBy": "org1MSP",
+		"@lastTx":      "createAsset",
+		"@assetType":   "person",
+		"name":         "Maria",
+		"id":           "31820792048",
+		"height":       0.0,
+	}
+	stub.MockTransactionStart("setupGetAsset")
+	setupState, _ := json.Marshal(expectedResponse)
+	stub.PutState("person:47061146-c642-51a1-844a-bf0b17cb5e19", setupState)
+	stub.MockTransactionEnd("setupGetAsset")
+
+	personKey := assets.Key{
+		"@assetType": "person",
+		"@key":       "person:47061146-c642-51a1-844a-bf0b17cb5e19",
+	}
+
+	stub.MockTransactionStart("TestGetAsset")
+	sw := &sw.StubWrapper{
+		Stub: stub,
+	}
+	gotAsset, err := personKey.GetCommitted(sw)
 	if err != nil {
 		log.Println(err)
 		t.FailNow()
@@ -81,8 +124,8 @@ func TestGetRecursive(t *testing.T) {
 	setupBookJSON, _ := json.Marshal(setupBook)
 
 	stub.MockTransactionStart("setupReadAsset")
-	stub.State["person:47061146-c642-51a1-844a-bf0b17cb5e19"] = setupPersonJSON
-	stub.State["book:a36a2920-c405-51c3-b584-dcd758338cb5"] = setupBookJSON
+	stub.PutState("person:47061146-c642-51a1-844a-bf0b17cb5e19", setupPersonJSON)
+	stub.PutState("book:a36a2920-c405-51c3-b584-dcd758338cb5", setupBookJSON)
 	refIdx, err := stub.CreateCompositeKey("person:47061146-c642-51a1-844a-bf0b17cb5e19", []string{"book:a36a2920-c405-51c3-b584-dcd758338cb5"})
 	if err != nil {
 		log.Println(err)
@@ -160,9 +203,8 @@ func TestGetRecursiveWithPvtData(t *testing.T) {
 	setupLibraryJSON, _ := json.Marshal(setupLibrary)
 
 	stub.MockTransactionStart("setupReadAsset")
-	stub.PvtState["secret"] = make(map[string][]byte)
-	stub.PvtState["secret"]["secret:73a3f9a7-eb91-5f4d-b1bb-c0487e90f40b"] = setupSecretJSON
-	stub.State["library:37262f3f-5f08-5649-b488-e5abaad266e1"] = setupLibraryJSON
+	stub.PutPrivateData("secret", "secret:73a3f9a7-eb91-5f4d-b1bb-c0487e90f40b", setupSecretJSON)
+	stub.PutState("library:37262f3f-5f08-5649-b488-e5abaad266e1", setupLibraryJSON)
 	refIdx, err := stub.CreateCompositeKey("secret:73a3f9a7-eb91-5f4d-b1bb-c0487e90f40b", []string{"library:37262f3f-5f08-5649-b488-e5abaad266e1"})
 	if err != nil {
 		log.Println(err)

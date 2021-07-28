@@ -7,7 +7,7 @@ import (
 	sw "github.com/goledgerdev/cc-tools/stubwrapper"
 )
 
-func get(stub *sw.StubWrapper, pvtCollection, key string) (*Asset, errors.ICCError) {
+func get(stub *sw.StubWrapper, pvtCollection, key string, committed bool) (*Asset, errors.ICCError) {
 	var assetBytes []byte
 	var err error
 
@@ -15,10 +15,18 @@ func get(stub *sw.StubWrapper, pvtCollection, key string) (*Asset, errors.ICCErr
 		return nil, errors.NewCCError("key cannot be empty", 500)
 	}
 
-	if pvtCollection != "" {
-		assetBytes, err = stub.GetPrivateData(pvtCollection, key)
+	if committed {
+		if pvtCollection != "" {
+			assetBytes, err = stub.GetCommittedPrivateData(pvtCollection, key)
+		} else {
+			assetBytes, err = stub.GetCommittedState(key)
+		}
 	} else {
-		assetBytes, err = stub.GetState(key)
+		if pvtCollection != "" {
+			assetBytes, err = stub.GetPrivateData(pvtCollection, key)
+		} else {
+			assetBytes, err = stub.GetState(key)
+		}
 	}
 	if err != nil {
 		return nil, errors.WrapErrorWithStatus(err, "unable to get asset", 400)
@@ -36,24 +44,44 @@ func get(stub *sw.StubWrapper, pvtCollection, key string) (*Asset, errors.ICCErr
 	return &response, nil
 }
 
-// Get fetches asset entry from ledger.
+// Get fetches asset entry from write set or ledger.
 func (a *Asset) Get(stub *sw.StubWrapper) (*Asset, errors.ICCError) {
 	var pvtCollection string
 	if a.IsPrivate() {
 		pvtCollection = a.TypeTag()
 	}
 
-	return get(stub, pvtCollection, a.Key())
+	return get(stub, pvtCollection, a.Key(), false)
 }
 
-// Get fetches asset entry from ledger.
+// Get fetches asset entry from write set or ledger.
 func (k *Key) Get(stub *sw.StubWrapper) (*Asset, errors.ICCError) {
 	var pvtCollection string
 	if k.IsPrivate() {
 		pvtCollection = k.TypeTag()
 	}
 
-	return get(stub, pvtCollection, k.Key())
+	return get(stub, pvtCollection, k.Key(), false)
+}
+
+// GetCommitted fetches asset entry from ledger.
+func (a *Asset) GetCommitted(stub *sw.StubWrapper) (*Asset, errors.ICCError) {
+	var pvtCollection string
+	if a.IsPrivate() {
+		pvtCollection = a.TypeTag()
+	}
+
+	return get(stub, pvtCollection, a.Key(), true)
+}
+
+// GetCommitted fetches asset entry from ledger.
+func (k *Key) GetCommitted(stub *sw.StubWrapper) (*Asset, errors.ICCError) {
+	var pvtCollection string
+	if k.IsPrivate() {
+		pvtCollection = k.TypeTag()
+	}
+
+	return get(stub, pvtCollection, k.Key(), true)
 }
 
 // GetBytes reads the asset as bytes from ledger

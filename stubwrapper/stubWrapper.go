@@ -35,6 +35,10 @@ func (sw *StubWrapper) GetState(key string) ([]byte, errors.ICCError) {
 		return obj, nil
 	}
 
+	return sw.GetCommittedState(key)
+}
+
+func (sw *StubWrapper) GetCommittedState(key string) ([]byte, errors.ICCError) {
 	obj, err := sw.Stub.GetState(key)
 	if err != nil {
 		return nil, errors.WrapError(err, "stub.GetState call error")
@@ -80,6 +84,11 @@ func (sw *StubWrapper) GetPrivateData(collection, key string) ([]byte, errors.IC
 	if inSet {
 		return obj, nil
 	}
+
+	return sw.GetCommittedPrivateData(collection, key)
+}
+
+func (sw *StubWrapper) GetCommittedPrivateData(collection, key string) ([]byte, errors.ICCError) {
 
 	obj, err := sw.Stub.GetPrivateData(collection, key)
 	if err != nil {
