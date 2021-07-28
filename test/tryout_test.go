@@ -4,12 +4,12 @@ import (
 	"log"
 	"testing"
 
-	"github.com/hyperledger/fabric-chaincode-go/shimtest"
+	"github.com/goledgerdev/cc-tools/mock"
 )
 
 func TestTryout(t *testing.T) {
 	var err error
-	stub := shimtest.NewMockStub("org1MSP", new(testCC))
+	stub := mock.NewMockStub("org1MSP", new(testCC))
 
 	// Create Asset
 	reqPerson := map[string]interface{}{

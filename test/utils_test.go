@@ -6,10 +6,10 @@ import (
 	"log"
 	"reflect"
 
-	"github.com/hyperledger/fabric-chaincode-go/shimtest"
+	"github.com/goledgerdev/cc-tools/mock"
 )
 
-func invokeAndVerify(stub *shimtest.MockStub, txName string, req, expectedRes interface{}, expectedStatus int32) error {
+func invokeAndVerify(stub *mock.MockStub, txName string, req, expectedRes interface{}, expectedStatus int32) error {
 	reqBytes, err := json.Marshal(req)
 	if err != nil {
 		log.Println(err)
@@ -46,7 +46,7 @@ func invokeAndVerify(stub *shimtest.MockStub, txName string, req, expectedRes in
 	return nil
 }
 
-func isEmpty(stub *shimtest.MockStub, key string) bool {
+func isEmpty(stub *mock.MockStub, key string) bool {
 	stub.MockTransactionStart("ensureDeletion")
 	defer stub.MockTransactionEnd("ensureDeletion")
 	state := stub.State[key]

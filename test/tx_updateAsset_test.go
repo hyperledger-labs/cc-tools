@@ -6,11 +6,11 @@ import (
 	"reflect"
 	"testing"
 
-	"github.com/hyperledger/fabric-chaincode-go/shimtest"
+	"github.com/goledgerdev/cc-tools/mock"
 )
 
 func TestUpdateAsset(t *testing.T) {
-	stub := shimtest.NewMockStub("org1MSP", new(testCC))
+	stub := mock.NewMockStub("org1MSP", new(testCC))
 
 	// State setup
 	person := map[string]interface{}{

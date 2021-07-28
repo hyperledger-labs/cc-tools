@@ -6,11 +6,11 @@ import (
 	"reflect"
 	"testing"
 
-	"github.com/hyperledger/fabric-chaincode-go/shimtest"
+	"github.com/goledgerdev/cc-tools/mock"
 )
 
 func TestReadAsset(t *testing.T) {
-	stub := shimtest.NewMockStub("org1MSP", new(testCC))
+	stub := mock.NewMockStub("org1MSP", new(testCC))
 
 	// State setup
 	expectedResponse := map[string]interface{}{
@@ -64,7 +64,7 @@ func TestReadAsset(t *testing.T) {
 }
 
 func TestReadRecursive(t *testing.T) {
-	stub := shimtest.NewMockStub("org1MSP", new(testCC))
+	stub := mock.NewMockStub("org1MSP", new(testCC))
 
 	// State setup
 	setupPerson := map[string]interface{}{

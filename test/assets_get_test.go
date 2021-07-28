@@ -7,12 +7,12 @@ import (
 	"testing"
 
 	"github.com/goledgerdev/cc-tools/assets"
+	"github.com/goledgerdev/cc-tools/mock"
 	sw "github.com/goledgerdev/cc-tools/stubwrapper"
-	"github.com/hyperledger/fabric-chaincode-go/shimtest"
 )
 
 func TestGetAsset(t *testing.T) {
-	stub := shimtest.NewMockStub("org1MSP", new(testCC))
+	stub := mock.NewMockStub("org1MSP", new(testCC))
 
 	// State setup
 	expectedResponse := assets.Asset{
@@ -53,7 +53,7 @@ func TestGetAsset(t *testing.T) {
 }
 
 func TestGetCommittedAsset(t *testing.T) {
-	stub := shimtest.NewMockStub("org1MSP", new(testCC))
+	stub := mock.NewMockStub("org1MSP", new(testCC))
 
 	// State setup
 	expectedResponse := assets.Asset{
@@ -94,7 +94,7 @@ func TestGetCommittedAsset(t *testing.T) {
 }
 
 func TestGetRecursive(t *testing.T) {
-	stub := shimtest.NewMockStub("org1MSP", new(testCC))
+	stub := mock.NewMockStub("org1MSP", new(testCC))
 
 	// State setup
 	setupPerson := map[string]interface{}{
@@ -177,7 +177,7 @@ func TestGetRecursive(t *testing.T) {
 }
 
 func TestGetRecursiveWithPvtData(t *testing.T) {
-	stub := shimtest.NewMockStub("org1MSP", new(testCC))
+	stub := mock.NewMockStub("org1MSP", new(testCC))
 
 	// State setup
 	setupSecret := map[string]interface{}{
@@ -252,7 +252,7 @@ func TestGetRecursiveWithPvtData(t *testing.T) {
 }
 
 func TestGetAssetNoKey(t *testing.T) {
-	stub := shimtest.NewMockStub("org1MSP", new(testCC))
+	stub := mock.NewMockStub("org1MSP", new(testCC))
 
 	personKey := assets.Key{
 		"@assetType": "person",

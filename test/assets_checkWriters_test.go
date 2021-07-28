@@ -6,12 +6,12 @@ import (
 	"testing"
 
 	"github.com/goledgerdev/cc-tools/assets"
+	"github.com/goledgerdev/cc-tools/mock"
 	sw "github.com/goledgerdev/cc-tools/stubwrapper"
-	"github.com/hyperledger/fabric-chaincode-go/shimtest"
 )
 
 func TestCheckWriters(t *testing.T) {
-	stub := shimtest.NewMockStub("org1MSP", new(testCC))
+	stub := mock.NewMockStub("org1MSP", new(testCC))
 	sw := &sw.StubWrapper{
 		Stub: stub,
 	}

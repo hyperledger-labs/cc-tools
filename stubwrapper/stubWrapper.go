@@ -2,9 +2,9 @@ package stubwrapper
 
 import (
 	"github.com/goledgerdev/cc-tools/errors"
+	"github.com/goledgerdev/cc-tools/mock"
 	"github.com/hyperledger/fabric-chaincode-go/pkg/cid"
 	"github.com/hyperledger/fabric-chaincode-go/shim"
-	"github.com/hyperledger/fabric-chaincode-go/shimtest"
 	pb "github.com/hyperledger/fabric-protos-go/peer"
 	"github.com/hyperledger/fabric/common/util"
 )
@@ -191,7 +191,7 @@ func (sw *StubWrapper) GetHistoryForKey(key string) (shim.HistoryQueryIteratorIn
 
 // GetMSPID wraps cid.GetMSPID allowing for automated testing
 func (sw *StubWrapper) GetMSPID() (string, errors.ICCError) {
-	mockStub, isMock := sw.Stub.(*shimtest.MockStub)
+	mockStub, isMock := sw.Stub.(*mock.MockStub)
 	if isMock {
 		return mockStub.Name, nil
 	}

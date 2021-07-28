@@ -4,11 +4,11 @@ import (
 	"log"
 	"testing"
 
-	"github.com/hyperledger/fabric-chaincode-go/shimtest"
+	"github.com/goledgerdev/cc-tools/mock"
 )
 
 func TestGetTx(t *testing.T) {
-	stub := shimtest.NewMockStub("testcc", new(testCC))
+	stub := mock.NewMockStub("testcc", new(testCC))
 
 	expectedResponse := []interface{}{
 		map[string]interface{}{
@@ -97,7 +97,7 @@ func TestGetTx(t *testing.T) {
 }
 
 func TestGetTx404(t *testing.T) {
-	stub := shimtest.NewMockStub("org1MSP", new(testCC))
+	stub := mock.NewMockStub("org1MSP", new(testCC))
 
 	req := map[string]interface{}{
 		"txName": "inexistentTx",
@@ -110,7 +110,7 @@ func TestGetTx404(t *testing.T) {
 }
 
 func TestGetTxInvalidArg(t *testing.T) {
-	stub := shimtest.NewMockStub("org1MSP", new(testCC))
+	stub := mock.NewMockStub("org1MSP", new(testCC))
 
 	req := map[string]interface{}{
 		"txName": 2,

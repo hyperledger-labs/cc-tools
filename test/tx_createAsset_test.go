@@ -6,11 +6,11 @@ import (
 	"reflect"
 	"testing"
 
-	"github.com/hyperledger/fabric-chaincode-go/shimtest"
+	"github.com/goledgerdev/cc-tools/mock"
 )
 
 func TestCreateAsset(t *testing.T) {
-	stub := shimtest.NewMockStub("org1MSP", new(testCC))
+	stub := mock.NewMockStub("org1MSP", new(testCC))
 	person := map[string]interface{}{
 		"@assetType": "person",
 		"name":       "Maria",
@@ -79,7 +79,7 @@ func TestCreateAsset(t *testing.T) {
 }
 
 func TestCreateAssetEmptyList(t *testing.T) {
-	stub := shimtest.NewMockStub("org1MSP", new(testCC))
+	stub := mock.NewMockStub("org1MSP", new(testCC))
 
 	req := map[string]interface{}{
 		"asset": []map[string]interface{}{},
@@ -106,7 +106,7 @@ func TestCreateAssetEmptyList(t *testing.T) {
 }
 
 func TestCreatePrivate(t *testing.T) {
-	stub := shimtest.NewMockStub("org2MSP", new(testCC))
+	stub := mock.NewMockStub("org2MSP", new(testCC))
 	secret := map[string]interface{}{
 		"@assetType": "secret",
 		"secretName": "testSecret",

@@ -4,8 +4,8 @@ import (
 	"testing"
 
 	"github.com/goledgerdev/cc-tools/assets"
+	"github.com/goledgerdev/cc-tools/mock"
 	sw "github.com/goledgerdev/cc-tools/stubwrapper"
-	"github.com/hyperledger/fabric-chaincode-go/shimtest"
 )
 
 func TestExistsInLedgerNoKey(t *testing.T) {
@@ -14,7 +14,7 @@ func TestExistsInLedgerNoKey(t *testing.T) {
 		// "@key":       "person:47061146-c642-51a1-844a-bf0b17cb5e19",
 	}
 
-	stub := shimtest.NewMockStub("org1MSP", new(testCC))
+	stub := mock.NewMockStub("org1MSP", new(testCC))
 	stub.MockTransactionStart("TestExistsInLedgerNoKey")
 	sw := &sw.StubWrapper{
 		Stub: stub,
@@ -34,7 +34,7 @@ func TestExistsInLedgerNoAssetKey(t *testing.T) {
 		"id":         "31820792048",
 	}
 
-	stub := shimtest.NewMockStub("org1MSP", new(testCC))
+	stub := mock.NewMockStub("org1MSP", new(testCC))
 	stub.MockTransactionStart("TestExistsInLedgerNoAssetKey")
 	sw := &sw.StubWrapper{
 		Stub: stub,

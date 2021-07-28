@@ -4,11 +4,11 @@ import (
 	"log"
 	"testing"
 
-	"github.com/hyperledger/fabric-chaincode-go/shimtest"
+	"github.com/goledgerdev/cc-tools/mock"
 )
 
 func TestGetHeader(t *testing.T) {
-	stub := shimtest.NewMockStub("org1MSP", new(testCC))
+	stub := mock.NewMockStub("org1MSP", new(testCC))
 
 	expectedResponse := map[string]interface{}{
 		"ccToolsVersion": "v0.7.0",

@@ -8,12 +8,12 @@ import (
 	"time"
 
 	"github.com/goledgerdev/cc-tools/assets"
+	"github.com/goledgerdev/cc-tools/mock"
 	sw "github.com/goledgerdev/cc-tools/stubwrapper"
-	"github.com/hyperledger/fabric-chaincode-go/shimtest"
 )
 
 func TestPutAsset(t *testing.T) {
-	stub := shimtest.NewMockStub("org1MSP", new(testCC))
+	stub := mock.NewMockStub("org1MSP", new(testCC))
 	person := assets.Asset{
 		"@assetType": "person",
 		"name":       "Maria",
@@ -56,7 +56,7 @@ func TestPutAsset(t *testing.T) {
 }
 
 func TestPutAssetWithSubAsset(t *testing.T) {
-	stub := shimtest.NewMockStub("org1MSP", new(testCC))
+	stub := mock.NewMockStub("org1MSP", new(testCC))
 
 	// State setup
 	setupPerson := map[string]interface{}{
@@ -124,7 +124,7 @@ func TestPutAssetWithSubAsset(t *testing.T) {
 }
 
 func TestPutAssetRecursive(t *testing.T) {
-	stub := shimtest.NewMockStub("org1MSP", new(testCC))
+	stub := mock.NewMockStub("org1MSP", new(testCC))
 
 	stub.MockTransactionStart("TestPutAsset")
 	sw := &sw.StubWrapper{
