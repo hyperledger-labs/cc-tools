@@ -1,7 +1,6 @@
 package test
 
 import (
-	"fmt"
 	"log"
 	"testing"
 
@@ -26,7 +25,7 @@ func TestCheckWriters(t *testing.T) {
 
 	err := a.CheckWriters(sw)
 	if err != nil {
-		fmt.Println(err)
+		log.Println(err)
 		t.FailNow()
 	}
 
@@ -34,7 +33,7 @@ func TestCheckWriters(t *testing.T) {
 
 	err = a.CheckWriters(sw)
 	if err == nil {
-		fmt.Println("expected asset.CheckWriters to fail")
+		log.Println("expected asset.CheckWriters to fail")
 		t.FailNow()
 	}
 	if err.Status() != 403 {

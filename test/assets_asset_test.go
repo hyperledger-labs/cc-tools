@@ -2,7 +2,6 @@ package test
 
 import (
 	"encoding/json"
-	"fmt"
 	"log"
 	"reflect"
 	"testing"
@@ -22,7 +21,7 @@ func TestAssetUnmarshal(t *testing.T) {
 	var a assets.Asset
 	err := json.Unmarshal(assetJSON, &a)
 	if err != nil {
-		fmt.Println(err)
+		log.Println(err)
 		t.FailNow()
 	}
 	if !reflect.DeepEqual(a, expectedAsset) {
@@ -42,7 +41,7 @@ func TestAssetIsPrivate(t *testing.T) {
 	}
 
 	if a.IsPrivate() {
-		fmt.Println("false positive in Asset.IsPrivate")
+		log.Println("false positive in Asset.IsPrivate")
 		t.FailNow()
 	}
 
@@ -54,7 +53,7 @@ func TestAssetIsPrivate(t *testing.T) {
 	}
 
 	if !s.IsPrivate() {
-		fmt.Println("false negative in Asset.IsPrivate")
+		log.Println("false negative in Asset.IsPrivate")
 		t.FailNow()
 	}
 }
