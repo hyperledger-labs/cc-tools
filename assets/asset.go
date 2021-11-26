@@ -2,6 +2,7 @@ package assets
 
 import (
 	"encoding/json"
+	"time"
 
 	"github.com/goledgerdev/cc-tools/errors"
 	sw "github.com/goledgerdev/cc-tools/stubwrapper"
@@ -85,6 +86,12 @@ func (a *Asset) injectMetadata(stub *sw.StubWrapper) errors.ICCError {
 
 	lastTx, _ := stub.Stub.GetFunctionAndParameters()
 	(*a)["@lastTx"] = lastTx
+
+	lastUpdated, err := stub.Stub.GetTxTimestamp()
+	if err != nil {
+		return errors.WrapErrorWithStatus(err, "error getting tx timestamp", 500)
+	}
+	(*a)["@lastUpdated"] = lastUpdated.AsTime().Format(time.RFC3339)
 
 	return nil
 }

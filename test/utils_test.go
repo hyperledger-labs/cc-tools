@@ -36,6 +36,8 @@ func invokeAndVerify(stub *mock.MockStub, txName string, req, expectedRes interf
 		log.Println(err)
 		return err
 	}
+
+	resData = clearLastUpdated(resData)
 	if !reflect.DeepEqual(resData, expectedRes) {
 		log.Println("these should be equal")
 		log.Printf("%#v\n", resData)
@@ -47,8 +49,29 @@ func invokeAndVerify(stub *mock.MockStub, txName string, req, expectedRes interf
 }
 
 func isEmpty(stub *mock.MockStub, key string) bool {
-	stub.MockTransactionStart("ensureDeletion")
-	defer stub.MockTransactionEnd("ensureDeletion")
 	state := stub.State[key]
 	return state == nil
+}
+
+// This is done like this because invokeAndVerify does not allow
+// us to access tx timestamp before calling it. A refactor is
+// recommended but not urgent.
+func clearLastUpdated(in interface{}) interface{} {
+	var out interface{}
+	switch input := in.(type) {
+	case map[string]interface{}:
+		delete(input, "@lastUpdated")
+		for k := range input {
+			input[k] = clearLastUpdated(input[k])
+		}
+		out = input
+	case []interface{}:
+		for k := range input {
+			input[k] = clearLastUpdated(input[k])
+		}
+		out = input
+	default:
+		out = input
+	}
+	return out
 }
