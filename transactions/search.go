@@ -23,6 +23,7 @@ var Search = Transaction{
 			Tag:         "query",
 			Description: "Query string according to CouchDB specification: https://docs.couchdb.org/en/stable/api/database/find.html.",
 			DataType:    "@query",
+			Required:    true,
 		},
 		{
 			Tag:         "collection",
@@ -41,23 +42,10 @@ var Search = Transaction{
 		var pageSize int32
 		var privateCollection string
 
-		// Check if search is inside a private collection
-		privateCollectionInterface, ok := req["collection"]
-		if ok {
-			privateCollection, ok = privateCollectionInterface.(string)
-			if !ok {
-				return nil, errors.NewCCError("optional argument 'collection' must be a string", 400)
-			}
-		}
+		request, _ := req["query"].(map[string]interface{})
 
-		requestInterface, ok := req["query"]
-		if !ok {
-			return nil, errors.NewCCError("argument 'query' is required", 400)
-		}
-		request, ok := requestInterface.(map[string]interface{})
-		if !ok {
-			return nil, errors.NewCCError("argument 'query' must be a JSON object", 400)
-		}
+		// Check if search is inside a private collection
+		privateCollection, _ = req["collection"].(string)
 
 		// Evaluate special pagination parameters
 		bookmarkInt, bookmarkExists := request["bookmark"]
@@ -128,8 +116,8 @@ var Search = Transaction{
 				return nil, errors.WrapErrorWithStatus(err, "failed to unmarshal queryResponse values", 500)
 			}
 
-			resolve, ok := req["resolve"].(bool)
-			if ok && resolve {
+			resolve, _ := req["resolve"].(bool)
+			if resolve {
 				key, err := assets.NewKey(data)
 				if err != nil {
 					return nil, errors.WrapError(err, "failed to create key object to resolve result")
