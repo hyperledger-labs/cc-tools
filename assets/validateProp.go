@@ -2,6 +2,7 @@ package assets
 
 import (
 	"fmt"
+	"reflect"
 	"strings"
 
 	"github.com/goledgerdev/cc-tools/errors"
@@ -23,7 +24,6 @@ func validateProp(prop interface{}, propDef AssetProp) (interface{}, error) {
 	}
 
 	var retProp interface{}
-	var ok bool
 	var err error
 
 	// Handle array-like properties
@@ -31,9 +31,13 @@ func validateProp(prop interface{}, propDef AssetProp) (interface{}, error) {
 	if !isArray {
 		propAsArray = []interface{}{prop}
 	} else {
-		propAsArray, ok = prop.([]interface{})
-		if !ok {
-			return nil, errors.NewCCError(fmt.Sprintf("asset property '%s' must be an array of type '%s'", propDef.Label, propDef.DataType), 400)
+		propReflectValue := reflect.ValueOf(prop)
+		if propReflectValue.Kind() != reflect.Slice || propReflectValue.IsNil() {
+			return nil, errors.NewCCError(fmt.Sprintf("asset property '%s' must be a slice", propDef.Label), 400)
+		}
+		propAsArray = make([]interface{}, propReflectValue.Len())
+		for i := 0; i < propReflectValue.Len(); i++ {
+			propAsArray[i] = propReflectValue.Index(i).Interface()
 		}
 		retProp = []interface{}{}
 	}

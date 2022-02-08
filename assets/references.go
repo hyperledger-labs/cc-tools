@@ -126,6 +126,83 @@ func (k Key) Refs(stub *sw.StubWrapper) ([]Key, errors.ICCError) {
 	return keys, nil
 }
 
+// Referrers returns an array of Keys of all the assets pointing to asset.
+func (a Asset) Referrers(stub *sw.StubWrapper) ([]Key, errors.ICCError) {
+	assetKey := a.Key()
+	return referrers(stub, assetKey)
+}
+
+// Referrers returns an array of Keys of all the assets pointing to key.
+func (k Key) Referrers(stub *sw.StubWrapper) ([]Key, errors.ICCError) {
+	assetKey := k.Key()
+	return referrers(stub, assetKey)
+}
+
+func referrers(stub *sw.StubWrapper, assetKey string) ([]Key, errors.ICCError) {
+	queryIt, err := stub.GetStateByPartialCompositeKey(assetKey, []string{})
+	if err != nil {
+		return nil, errors.WrapErrorWithStatus(err, "failed to check reference index", 500)
+	}
+	defer queryIt.Close()
+
+	var retKeys []string
+	for queryIt.HasNext() {
+		ref, err := queryIt.Next()
+		if err != nil {
+			return nil, errors.WrapError(err, "failed to iterate in reference index")
+		}
+
+		newIndexState, isWritten := stub.WriteSet[ref.GetKey()]
+		if isWritten && newIndexState == nil {
+			continue
+		}
+
+		referredKey, keyParts, err := stub.Stub.SplitCompositeKey(ref.GetKey())
+		if err != nil {
+			return nil, errors.WrapError(err, "failed to split composite key")
+		}
+
+		if referredKey != assetKey || len(keyParts) == 0 {
+			return nil, errors.WrapError(err, fmt.Sprintf("invalid reference index %s", ref.GetKey()))
+		}
+
+		retKeys = append(retKeys, keyParts[0])
+	}
+
+	for key, val := range stub.WriteSet {
+		if len(key) > 0 && key[0] == 0x00 {
+			referredKey, keyParts, err := stub.Stub.SplitCompositeKey(key)
+			if err != nil {
+				return nil, errors.WrapError(err, "failed to split composite key")
+			}
+
+			if referredKey != assetKey || len(keyParts) == 0 || !bytes.Equal(val, []byte{0x00}) {
+				continue
+			}
+
+			isCounted := false
+			for _, countedKey := range retKeys {
+				if countedKey == keyParts[0] {
+					isCounted = true
+				}
+			}
+			if !isCounted {
+				retKeys = append(retKeys, keyParts[0])
+			}
+		}
+	}
+
+	var ret []Key
+	for _, retKey := range retKeys {
+		ret = append(ret, Key{
+			"@assetType": strings.Split(retKey, ":")[0],
+			"@key":       retKey,
+		})
+	}
+
+	return ret, nil
+}
+
 // validateRefs checks if subAsset references exist in blockchain.
 func (a Asset) validateRefs(stub *sw.StubWrapper) errors.ICCError {
 	// Fetch references contained in asset
@@ -220,8 +297,17 @@ func (a Asset) putRefs(stub *sw.StubWrapper) errors.ICCError {
 
 // IsReferenced checks if the asset is referenced by another asset.
 func (a Asset) IsReferenced(stub *sw.StubWrapper) (bool, errors.ICCError) {
-	// Get asset key
 	assetKey := a.Key()
+	return isReferenced(stub, assetKey)
+}
+
+// IsReferenced checks if the asset is referenced by another asset.
+func (k Key) IsReferenced(stub *sw.StubWrapper) (bool, errors.ICCError) {
+	assetKey := k.Key()
+	return isReferenced(stub, assetKey)
+}
+
+func isReferenced(stub *sw.StubWrapper, assetKey string) (bool, errors.ICCError) {
 	queryIt, err := stub.GetStateByPartialCompositeKey(assetKey, []string{})
 	if err != nil {
 		return false, errors.WrapErrorWithStatus(err, "failed to check reference index", 500)
@@ -240,8 +326,8 @@ func (a Asset) IsReferenced(stub *sw.StubWrapper) (bool, errors.ICCError) {
 		}
 	}
 
-	for k, v := range stub.WriteSet {
-		if strings.HasPrefix(k, assetKey) && k != assetKey && bytes.Equal(v, []byte{0x00}) {
+	for key, val := range stub.WriteSet {
+		if strings.HasPrefix(key, assetKey) && key != assetKey && bytes.Equal(val, []byte{0x00}) {
 			return true, nil
 		}
 	}

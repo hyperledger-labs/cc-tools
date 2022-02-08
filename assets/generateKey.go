@@ -94,11 +94,20 @@ func GenerateKey(asset map[string]interface{}) (string, errors.ICCError) {
 				if assetTypeDef == nil {
 					return "", errors.NewCCError(fmt.Sprintf("internal error: invalid sub asset type %s", prop.DataType), 500)
 				}
-				propMap, ok := propInterface.(map[string]interface{})
-				if !ok {
-					errMsg := fmt.Sprintf("subAsset key %s must be sent as JSON object", prop.Tag)
+
+				var propMap map[string]interface{}
+				switch t := propInterface.(type) {
+				case map[string]interface{}:
+					propMap = t
+				case Key:
+					propMap = t
+				case Asset:
+					propMap = t
+				default:
+					errMsg := fmt.Sprintf("subAsset key %s must be sent as map[string]interface{} (JSON object)", prop.Tag)
 					return "", errors.NewCCError(errMsg, 400)
 				}
+
 				propMap["@assetType"] = dataTypeName
 				subAssetKey, err := GenerateKey(propMap)
 				if err != nil {

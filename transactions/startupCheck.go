@@ -26,7 +26,13 @@ func StartupCheck() errors.ICCError {
 			}
 		}
 
+		argSet := map[string]interface{}{}
 		for _, arg := range tx.Args {
+			if _, duplicate := argSet[arg.Tag]; duplicate {
+				return errors.NewCCError(fmt.Sprintf("duplicate arg tag %s in tx %s", arg.Tag, txName), 500)
+			}
+			argSet[arg.Tag] = struct{}{}
+
 			dtype := strings.TrimPrefix(arg.DataType, "[]")
 			if dtype != "@asset" &&
 				dtype != "@key" &&

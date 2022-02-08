@@ -1,7 +1,7 @@
 package test
 
 import (
-	"fmt"
+	"log"
 	"reflect"
 	"testing"
 
@@ -14,15 +14,15 @@ func testParseValid(t *testing.T, dtype assets.DataType, inputVal interface{}, e
 	var err error
 	key, val, err = dtype.Parse(inputVal)
 	if err != nil {
-		fmt.Println(err)
+		log.Println(err)
 		t.FailNow()
 	}
 	if key != expectedKey {
-		fmt.Printf("parsing %v expected key: %q but got %q\n", inputVal, expectedKey, key)
+		log.Printf("parsing %v expected key: %q but got %q\n", inputVal, expectedKey, key)
 		t.FailNow()
 	}
 	if val != expectedVal {
-		fmt.Printf("parsing %v expected parsed val: \"%v\" of type %s but got \"%v\" of type %s\n", inputVal, expectedVal, reflect.TypeOf(expectedVal), val, reflect.TypeOf(val))
+		log.Printf("parsing %v expected parsed val: \"%v\" of type %s but got \"%v\" of type %s\n", inputVal, expectedVal, reflect.TypeOf(expectedVal), val, reflect.TypeOf(val))
 		t.FailNow()
 	}
 }
@@ -30,11 +30,11 @@ func testParseValid(t *testing.T, dtype assets.DataType, inputVal interface{}, e
 func testParseInvalid(t *testing.T, dtype assets.DataType, inputVal interface{}, expectedErr int32) {
 	_, _, err := dtype.Parse(inputVal)
 	if err == nil {
-		fmt.Println("expected error but DataType.Parse was successful")
+		log.Println("expected error but DataType.Parse was successful")
 		t.FailNow()
 	}
 	if err.Status() != expectedErr {
-		fmt.Printf("expected error code %d but got %d\n", expectedErr, err.Status())
+		log.Printf("expected error code %d but got %d\n", expectedErr, err.Status())
 	}
 }
 
@@ -42,7 +42,7 @@ func TestDataTypeString(t *testing.T) {
 	dtypeName := "string"
 	dtype, exists := assets.DataTypeMap()[dtypeName]
 	if !exists {
-		fmt.Printf("%s datatype not declared in DataTypeMap\n", dtypeName)
+		log.Printf("%s datatype not declared in DataTypeMap\n", dtypeName)
 		t.FailNow()
 	}
 	testParseValid(t, dtype, "string válida", "string válida", "string válida")
@@ -53,7 +53,7 @@ func TestDataTypeNumber(t *testing.T) {
 	dtypeName := "number"
 	dtype, exists := assets.DataTypeMap()[dtypeName]
 	if !exists {
-		fmt.Printf("%s datatype not declared in DataTypeMap\n", dtypeName)
+		log.Printf("%s datatype not declared in DataTypeMap\n", dtypeName)
 		t.FailNow()
 	}
 	testParseValid(t, dtype, 472.7, "407d8b3333333333", 472.7)
@@ -67,7 +67,7 @@ func TestDataTypeInteger(t *testing.T) {
 	dtypeName := "integer"
 	dtype, exists := assets.DataTypeMap()[dtypeName]
 	if !exists {
-		fmt.Printf("%s datatype not declared in DataTypeMap\n", dtypeName)
+		log.Printf("%s datatype not declared in DataTypeMap\n", dtypeName)
 		t.FailNow()
 	}
 	testParseValid(t, dtype, 470, "470", int64(470))
@@ -82,7 +82,7 @@ func TestDataTypeBoolean(t *testing.T) {
 	dtypeName := "boolean"
 	dtype, exists := assets.DataTypeMap()[dtypeName]
 	if !exists {
-		fmt.Printf("%s datatype not declared in DataTypeMap\n", dtypeName)
+		log.Printf("%s datatype not declared in DataTypeMap\n", dtypeName)
 		t.FailNow()
 	}
 	testParseValid(t, dtype, true, "t", true)

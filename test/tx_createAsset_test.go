@@ -5,6 +5,7 @@ import (
 	"log"
 	"reflect"
 	"testing"
+	"time"
 
 	"github.com/goledgerdev/cc-tools/mock"
 )
@@ -15,15 +16,6 @@ func TestCreateAsset(t *testing.T) {
 		"@assetType": "person",
 		"name":       "Maria",
 		"id":         "318.207.920-48",
-	}
-	expectedResponse := map[string]interface{}{
-		"@key":         "person:47061146-c642-51a1-844a-bf0b17cb5e19",
-		"@lastTouchBy": "org1MSP",
-		"@lastTx":      "createAsset",
-		"@assetType":   "person",
-		"name":         "Maria",
-		"id":           "31820792048",
-		"height":       0.0,
 	}
 	req := map[string]interface{}{
 		"asset": []map[string]interface{}{person},
@@ -37,6 +29,17 @@ func TestCreateAsset(t *testing.T) {
 		[]byte("createAsset"),
 		reqBytes,
 	})
+	lastUpdated, _ := stub.GetTxTimestamp()
+	expectedResponse := map[string]interface{}{
+		"@key":         "person:47061146-c642-51a1-844a-bf0b17cb5e19",
+		"@lastTouchBy": "org1MSP",
+		"@lastTx":      "createAsset",
+		"@lastUpdated": lastUpdated.AsTime().Format(time.RFC3339),
+		"@assetType":   "person",
+		"name":         "Maria",
+		"id":           "31820792048",
+		"height":       0.0,
+	}
 
 	if res.GetStatus() != 200 {
 		log.Println(res)
@@ -116,14 +119,6 @@ func TestCreatePrivate(t *testing.T) {
 		"@key":       "secret:73a3f9a7-eb91-5f4d-b1bb-c0487e90f40b",
 		"@assetType": "secret",
 	}
-	expectedState := map[string]interface{}{
-		"@key":         "secret:73a3f9a7-eb91-5f4d-b1bb-c0487e90f40b",
-		"@assetType":   "secret",
-		"@lastTouchBy": "org2MSP",
-		"@lastTx":      "createAsset",
-		"secretName":   "testSecret",
-		"secret":       "this is very secret",
-	}
 	req := map[string]interface{}{
 		"asset": []map[string]interface{}{secret},
 	}
@@ -136,6 +131,16 @@ func TestCreatePrivate(t *testing.T) {
 		[]byte("createAsset"),
 		reqBytes,
 	})
+	lastUpdated, _ := stub.GetTxTimestamp()
+	expectedState := map[string]interface{}{
+		"@key":         "secret:73a3f9a7-eb91-5f4d-b1bb-c0487e90f40b",
+		"@assetType":   "secret",
+		"@lastTouchBy": "org2MSP",
+		"@lastTx":      "createAsset",
+		"@lastUpdated": lastUpdated.AsTime().Format(time.RFC3339),
+		"secretName":   "testSecret",
+		"secret":       "this is very secret",
+	}
 
 	if res.GetStatus() != 200 {
 		log.Println(res)

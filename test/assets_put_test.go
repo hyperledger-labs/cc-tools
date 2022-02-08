@@ -19,15 +19,17 @@ func TestPutAsset(t *testing.T) {
 		"name":       "Maria",
 		"id":         "31820792048",
 	}
+	stub.MockTransactionStart("TestPutAsset")
+	lastUpdated, _ := stub.GetTxTimestamp()
 	expectedState := map[string]interface{}{
 		"@key":         "person:47061146-c642-51a1-844a-bf0b17cb5e19",
 		"@lastTouchBy": "org1MSP",
 		"@lastTx":      "",
+		"@lastUpdated": lastUpdated.AsTime().Format(time.RFC3339),
 		"@assetType":   "person",
 		"name":         "Maria",
 		"id":           "31820792048",
 	}
-	stub.MockTransactionStart("TestPutAsset")
 	sw := &sw.StubWrapper{
 		Stub: stub,
 	}
@@ -152,11 +154,13 @@ func TestPutAssetRecursive(t *testing.T) {
 	}
 
 	publishedTime, _ := time.Parse(time.RFC3339, "2019-05-06T22:12:41Z")
+	lastUpdated, _ := stub.GetTxTimestamp()
 	expectedBook := map[string]interface{}{
 		"@assetType":   "book",
 		"@key":         "book:a36a2920-c405-51c3-b584-dcd758338cb5",
 		"@lastTouchBy": "org1MSP",
 		"@lastTx":      "",
+		"@lastUpdated": lastUpdated.AsTime().Format(time.RFC3339),
 		"title":        "Meu Nome é Maria",
 		"author":       "Maria Viana",
 		"currentTenant": map[string]interface{}{
@@ -164,6 +168,7 @@ func TestPutAssetRecursive(t *testing.T) {
 			"@key":         "person:47061146-c642-51a1-844a-bf0b17cb5e19",
 			"@lastTouchBy": "org1MSP",
 			"@lastTx":      "",
+			"@lastUpdated": lastUpdated.AsTime().Format(time.RFC3339),
 			"name":         "Maria",
 			"id":           "31820792048",
 			"height":       1.66,
@@ -184,6 +189,7 @@ func TestPutAssetRecursive(t *testing.T) {
 		"@key":         "book:a36a2920-c405-51c3-b584-dcd758338cb5",
 		"@lastTouchBy": "org1MSP",
 		"@lastTx":      "",
+		"@lastUpdated": lastUpdated.AsTime().Format(time.RFC3339),
 		"title":        "Meu Nome é Maria",
 		"author":       "Maria Viana",
 		"currentTenant": map[string]interface{}{

@@ -94,8 +94,8 @@ func TestReadRecursive(t *testing.T) {
 	setupBookJSON, _ := json.Marshal(setupBook)
 
 	stub.MockTransactionStart("setupReadAsset")
-	stub.State["person:47061146-c642-51a1-844a-bf0b17cb5e19"] = setupPersonJSON
-	stub.State["book:a36a2920-c405-51c3-b584-dcd758338cb5"] = setupBookJSON
+	stub.PutState("person:47061146-c642-51a1-844a-bf0b17cb5e19", setupPersonJSON)
+	stub.PutState("book:a36a2920-c405-51c3-b584-dcd758338cb5", setupBookJSON)
 	refIdx, err := stub.CreateCompositeKey("person:47061146-c642-51a1-844a-bf0b17cb5e19", []string{"book:a36a2920-c405-51c3-b584-dcd758338cb5"})
 	if err != nil {
 		log.Println(err)

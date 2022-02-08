@@ -103,7 +103,7 @@ func (k *Key) GetBytes(stub *sw.StubWrapper) ([]byte, errors.ICCError) {
 	return assetBytes, nil
 }
 
-// GetMap reads the asset as bytes from ledger
+// GetMap reads the asset as map from ledger
 func (k *Key) GetMap(stub *sw.StubWrapper) (map[string]interface{}, errors.ICCError) {
 	var err error
 	assetBytes, err := k.GetBytes(stub)
