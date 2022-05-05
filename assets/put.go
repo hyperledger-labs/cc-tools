@@ -120,7 +120,6 @@ func putRecursive(stub *sw.StubWrapper, object map[string]interface{}, root bool
 				}
 
 				if v != asset[k] {
-					fmt.Println("property is different:", v, asset[k])
 					isDifferent = true
 				}
 			}
