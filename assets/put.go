@@ -111,22 +111,7 @@ func putRecursive(stub *sw.StubWrapper, object map[string]interface{}, root bool
 				return nil, errors.NewCCError("existing sub-asset could not be fetched", 404)
 			}
 
-			// if some property of the asset is different, we must update it
-			// otherwise we can return the existing asset. (we can't use DeepEqual because properties not sent should not be updated)
-			isDifferent := false
-			for k, v := range object {
-				if strings.HasPrefix(k, "@") {
-					continue
-				}
-
-				if v != asset[k] {
-					isDifferent = true
-				}
-			}
-
-			if !isDifferent {
-				return asset, nil
-			}
+			// TODO: check property by property if asset must be updated
 		}
 	}
 
