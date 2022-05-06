@@ -3,6 +3,7 @@ package assets
 import (
 	"fmt"
 	"regexp"
+	"strings"
 
 	"github.com/goledgerdev/cc-tools/errors"
 	sw "github.com/goledgerdev/cc-tools/stubwrapper"
@@ -200,4 +201,109 @@ func (k *Key) Update(stub *sw.StubWrapper, update map[string]interface{}) (map[s
 	}
 
 	return ret, nil
+}
+
+// UpdateRecursive updates asset and all its subassets in blockchain.
+// It checks if root asset and subassets exist, if not, it returns error.
+// This method is experimental and might not work as intended. Use with caution.
+func UpdateRecursive(stub *sw.StubWrapper, object map[string]interface{}) (map[string]interface{}, errors.ICCError) {
+	objAsAsset, err := NewAsset(object)
+	if err != nil {
+		return nil, errors.WrapError(err, "unable to create asset object")
+	}
+
+	exists, err := objAsAsset.ExistsInLedger(stub)
+	if err != nil {
+		return nil, errors.WrapError(err, "failed checking if asset exists")
+	}
+	if !exists {
+		return nil, errors.NewCCError("root asset not found", 404)
+	}
+
+	// Check if all assets and subassets exist in blockchain
+	err = checkUpdateRecursive(stub, objAsAsset, true)
+	if err != nil {
+		return nil, errors.WrapError(err, "failed checking update recursive")
+	}
+
+	return PutRecursive(stub, object)
+}
+
+func checkUpdateRecursive(stub *sw.StubWrapper, object map[string]interface{}, root bool) errors.ICCError {
+	var err error
+
+	objAsKey, err := NewKey(object)
+	if err != nil {
+		return errors.WrapError(err, "unable to create asset object")
+	}
+
+	if !root {
+		exists, err := objAsKey.ExistsInLedger(stub)
+		if err != nil {
+			return errors.WrapError(err, "failed checking if asset exists")
+		}
+		if !exists {
+			return errors.NewCCError("subasset not found", 404)
+		}
+
+		object, err = objAsKey.GetMap(stub)
+		if err != nil {
+			return errors.WrapError(err, "failed getting subasset")
+		}
+	}
+
+	objAsAsset, err := NewAsset(object)
+	if err != nil {
+		return errors.WrapError(err, "unable to create asset object")
+	}
+
+	subAssets := objAsAsset.Type().SubAssets()
+	for _, subAsset := range subAssets {
+		isArray := false
+		dType := subAsset.DataType
+		if strings.HasPrefix(dType, "[]") {
+			isArray = true
+			dType = strings.TrimPrefix(dType, "[]")
+		}
+
+		dType = strings.TrimPrefix(dType, "->")
+		subAssetInterface, ok := object[subAsset.Tag]
+		if !ok {
+			// if subAsset is not included, continue onwards to the next possible subAsset
+			continue
+		}
+
+		var objArray []interface{}
+		if !isArray {
+			objArray = []interface{}{subAssetInterface}
+		} else {
+			objArray, ok = subAssetInterface.([]interface{})
+			if !ok {
+				return errors.NewCCError(fmt.Sprintf("asset property %s must an array of type %s", subAsset.Label, subAsset.DataType), 400)
+			}
+		}
+
+		for _, objInterface := range objArray {
+			var obj map[string]interface{}
+			switch t := objInterface.(type) {
+			case map[string]interface{}:
+				obj = t
+			case Key:
+				obj = t
+			case Asset:
+				obj = t
+			default:
+				// If subAsset is badly formatted, this method shouldn't have been called
+				return errors.NewCCError(fmt.Sprintf("asset reference property '%s' must be an object", subAsset.Tag), 400)
+			}
+			obj["@assetType"] = dType
+			err := checkUpdateRecursive(stub, obj, false)
+			if err != nil {
+				return errors.WrapError(err, fmt.Sprintf("failed to check sub-asset %s recursively", subAsset.Tag))
+			}
+		}
+
+	}
+
+	return nil
 }
