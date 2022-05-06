@@ -66,7 +66,6 @@ func (a *Asset) Put(stub *sw.StubWrapper) (map[string]interface{}, errors.ICCErr
 	if err != nil {
 		return nil, errors.WrapError(err, "failed reference validation")
 	}
-
 	return a.put(stub)
 }
 
@@ -111,7 +110,23 @@ func putRecursive(stub *sw.StubWrapper, object map[string]interface{}, root bool
 			if asset == nil {
 				return nil, errors.NewCCError("existing sub-asset could not be fetched", 404)
 			}
-			return asset, err
+
+			// if some property of the asset is different, we must update it
+			// otherwise we can return the existing asset. (we can't use DeepEqual because properties not sent should not be updated)
+			isDifferent := false
+			for k, v := range object {
+				if strings.HasPrefix(k, "@") {
+					continue
+				}
+
+				if v != asset[k] {
+					isDifferent = true
+				}
+			}
+
+			if !isDifferent {
+				return asset, nil
+			}
 		}
 	}
 
@@ -187,13 +202,13 @@ func putRecursive(stub *sw.StubWrapper, object map[string]interface{}, root bool
 	return putAsset, nil
 }
 
-// PutRecursive inserts asset and all it's subassets in blockchain.
+// PutRecursive inserts asset and all its subassets in blockchain.
 // This method is experimental and might not work as intended. Use with caution.
 func PutRecursive(stub *sw.StubWrapper, object map[string]interface{}) (map[string]interface{}, errors.ICCError) {
 	return putRecursive(stub, object, true)
 }
 
-// PutNewRecursive inserts asset and all it's subassets in blockchain
+// PutNewRecursive inserts asset and all its subassets in blockchain
 // This method is experimental and might not work as intended. Use with caution.
 // It returns conflict error only if root asset exists.
 // If one of the subassets already exist in ledger, it is not updated.

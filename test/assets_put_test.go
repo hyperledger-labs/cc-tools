@@ -125,7 +125,7 @@ func TestPutAssetWithSubAsset(t *testing.T) {
 	}
 }
 
-func TestPutAssetRecursive(t *testing.T) {
+func TestPutNewAssetRecursive(t *testing.T) {
 	stub := mock.NewMockStub("org1MSP", new(testCC))
 
 	stub.MockTransactionStart("TestPutAsset")
@@ -198,6 +198,116 @@ func TestPutAssetRecursive(t *testing.T) {
 		},
 		"genres":    []interface{}{"biography", "non-fiction"},
 		"published": "2019-05-06T22:12:41Z",
+	}
+
+	stateJSON := stub.State["book:a36a2920-c405-51c3-b584-dcd758338cb5"]
+	var state map[string]interface{}
+	err = json.Unmarshal(stateJSON, &state)
+	if err != nil {
+		log.Println(err)
+		t.FailNow()
+	}
+
+	if !reflect.DeepEqual(expectedState, state) {
+		log.Println("these should be deeply equal")
+		log.Println(expectedState)
+		log.Println(state)
+		t.FailNow()
+	}
+}
+
+func TestUpdateRecursive(t *testing.T) {
+	stub := mock.NewMockStub("org1MSP", new(testCC))
+
+	// Create a book
+	stub.MockTransactionStart("TestPutAsset")
+	sw := &sw.StubWrapper{
+		Stub: stub,
+	}
+	book := map[string]interface{}{
+		"@assetType": "book",
+		"title":      "Meu Nome é Maria",
+		"author":     "Maria Viana",
+		"currentTenant": map[string]interface{}{
+			"@assetType": "person",
+			"name":       "Maria",
+			"id":         "31820792048",
+			"height":     1.66,
+		},
+		"genres":    []interface{}{"biography", "non-fiction"},
+		"published": "2019-05-06T22:12:41Z",
+	}
+
+	var err error
+	_, err = assets.PutNewRecursive(sw, book)
+	if err != nil {
+		log.Println(err)
+		t.FailNow()
+	}
+	stub.MockTransactionEnd("TestPutAsset")
+
+	// Update the book and the tenant
+	stub.MockTransactionStart("TestUpdateAsset")
+	book["published"] = "2022-05-06T22:12:41Z"
+	book["currentTenant"] = map[string]interface{}{
+		"@assetType": "person",
+		"name":       "Maria",
+		"id":         "31820792048",
+		"height":     1.88,
+	}
+
+	putBook, err := assets.UpdateRecursive(sw, book)
+	if err != nil {
+		log.Println(err)
+		t.FailNow()
+	}
+
+	publishedTime, _ := time.Parse(time.RFC3339, "2022-05-06T22:12:41Z")
+	lastUpdated, _ := stub.GetTxTimestamp()
+	expectedBook := map[string]interface{}{
+		"@assetType":   "book",
+		"@key":         "book:a36a2920-c405-51c3-b584-dcd758338cb5",
+		"@lastTouchBy": "org1MSP",
+		"@lastTx":      "",
+		"@lastUpdated": lastUpdated.AsTime().Format(time.RFC3339),
+		"title":        "Meu Nome é Maria",
+		"author":       "Maria Viana",
+		"currentTenant": map[string]interface{}{
+			"@assetType":   "person",
+			"@key":         "person:47061146-c642-51a1-844a-bf0b17cb5e19",
+			"@lastTouchBy": "org1MSP",
+			"@lastTx":      "",
+			"@lastUpdated": lastUpdated.AsTime().Format(time.RFC3339),
+			"name":         "Maria",
+			"id":           "31820792048",
+			"height":       1.88,
+		},
+		"genres":    []interface{}{"biography", "non-fiction"},
+		"published": publishedTime,
+	}
+
+	// Check if the book is updated
+	if !reflect.DeepEqual(expectedBook, putBook) {
+		log.Println("these should be deeply equal")
+		log.Println(expectedBook)
+		log.Println(putBook)
+		t.FailNow()
+	}
+
+	expectedState := map[string]interface{}{
+		"@assetType":   "book",
+		"@key":         "book:a36a2920-c405-51c3-b584-dcd758338cb5",
+		"@lastTouchBy": "org1MSP",
+		"@lastTx":      "",
+		"@lastUpdated": lastUpdated.AsTime().Format(time.RFC3339),
+		"title":        "Meu Nome é Maria",
+		"author":       "Maria Viana",
+		"currentTenant": map[string]interface{}{
+			"@assetType": "person",
+			"@key":       "person:47061146-c642-51a1-844a-bf0b17cb5e19",
+		},
+		"genres":    []interface{}{"biography", "non-fiction"},
+		"published": "2022-05-06T22:12:41Z",
 	}
 
 	stateJSON := stub.State["book:a36a2920-c405-51c3-b584-dcd758338cb5"]
