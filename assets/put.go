@@ -111,6 +111,13 @@ func putRecursive(stub *sw.StubWrapper, object map[string]interface{}, root bool
 				return nil, errors.NewCCError("existing sub-asset could not be fetched", 404)
 			}
 
+			// If asset key is not in object, add asset value to object (so that properties are not erased)
+			for k := range asset {
+				if _, ok := object[k]; !ok {
+					object[k] = asset[k]
+				}
+			}
+
 			// TODO: check property by property if asset must be updated
 		}
 	}
