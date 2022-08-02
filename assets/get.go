@@ -2,6 +2,7 @@ package assets
 
 import (
 	"encoding/json"
+	"log"
 
 	"github.com/goledgerdev/cc-tools/errors"
 	sw "github.com/goledgerdev/cc-tools/stubwrapper"
@@ -159,12 +160,22 @@ func getRecursive(stub *sw.StubWrapper, pvtCollection, key string, keysChecked [
 		return nil, errors.WrapErrorWithStatus(err, "failed to unmarshal asset from ledger", 500)
 	}
 
+	keysCheckedInScope := make([]string, 0)
+
 	for k, v := range response {
 		switch prop := v.(type) {
 		case map[string]interface{}:
 			propKey, err := NewKey(prop)
 			if err != nil {
 				return nil, errors.WrapErrorWithStatus(err, "failed to resolve asset references", 500)
+			}
+
+			keyIsFetchedInScope := false
+			for _, key := range keysCheckedInScope {
+				if key == propKey.Key() {
+					keyIsFetchedInScope = true
+					break
+				}
 			}
 
 			keyIsFetched := false
@@ -174,10 +185,11 @@ func getRecursive(stub *sw.StubWrapper, pvtCollection, key string, keysChecked [
 					break
 				}
 			}
-			if keyIsFetched {
+			if keyIsFetched && !keyIsFetchedInScope {
 				continue
 			}
 			keysChecked = append(keysChecked, propKey.Key())
+			keysCheckedInScope = append(keysCheckedInScope, propKey.Key())
 
 			var subAsset map[string]interface{}
 			if propKey.IsPrivate() {
@@ -227,6 +239,10 @@ func getRecursive(stub *sw.StubWrapper, pvtCollection, key string, keysChecked [
 			response[k] = prop
 		}
 	}
+
+	log.Println("\n\n")
+	log.Println(response)
+	log.Println("\n\n")
 
 	return response, nil
 }
