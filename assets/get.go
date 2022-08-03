@@ -2,7 +2,6 @@ package assets
 
 import (
 	"encoding/json"
-	"log"
 
 	"github.com/goledgerdev/cc-tools/errors"
 	sw "github.com/goledgerdev/cc-tools/stubwrapper"
@@ -248,10 +247,6 @@ func getRecursive(stub *sw.StubWrapper, pvtCollection, key string, keysChecked [
 			response[k] = prop
 		}
 	}
-
-	log.Println("\n\n")
-	log.Println(response)
-	log.Println("\n\n")
 
 	return response, nil
 }
