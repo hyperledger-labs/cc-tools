@@ -16,6 +16,9 @@ func TestCreateAsset(t *testing.T) {
 		"@assetType": "person",
 		"name":       "Maria",
 		"id":         "318.207.920-48",
+		"info": map[string]interface{}{
+			"passport": "1234",
+		},
 	}
 	req := map[string]interface{}{
 		"asset": []map[string]interface{}{person},
@@ -39,6 +42,9 @@ func TestCreateAsset(t *testing.T) {
 		"name":         "Maria",
 		"id":           "31820792048",
 		"height":       0.0,
+		"info": map[string]interface{}{
+			"passport": "1234",
+		},
 	}
 
 	if res.GetStatus() != 200 {
