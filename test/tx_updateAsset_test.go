@@ -39,6 +39,7 @@ func TestUpdateAsset(t *testing.T) {
 		"id":          "318.207.920-48",
 		"dateOfBirth": "1999-05-06T22:12:41Z",
 		"height":      1.66,
+		"info":        map[string]interface{}{},
 	}
 
 	req := map[string]interface{}{
