@@ -43,7 +43,8 @@ func TestCreateAsset(t *testing.T) {
 		"id":           "31820792048",
 		"height":       0.0,
 		"info": map[string]interface{}{
-			"passport": "1234",
+			"@assetType": "@object",
+			"passport":   "1234",
 		},
 	}
 
