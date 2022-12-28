@@ -181,6 +181,8 @@ var dataTypeMap = map[string]*DataType{
 				}
 			}
 
+			dataVal["@assetType"] = "@object"
+
 			retVal, err := json.Marshal(dataVal)
 			if err != nil {
 				return "", nil, errors.WrapErrorWithStatus(err, "failed to marshal return value", http.StatusInternalServerError)

@@ -164,6 +164,11 @@ func getRecursive(stub *sw.StubWrapper, pvtCollection, key string, keysChecked [
 	for k, v := range response {
 		switch prop := v.(type) {
 		case map[string]interface{}:
+
+			if prop["@assetType"].(string) == "@object" {
+				continue
+			}
+
 			propKey, err := NewKey(prop)
 			if err != nil {
 				return nil, errors.WrapErrorWithStatus(err, "failed to resolve asset references", 500)
@@ -205,6 +210,11 @@ func getRecursive(stub *sw.StubWrapper, pvtCollection, key string, keysChecked [
 		case []interface{}:
 			for idx, elem := range prop {
 				if elemMap, ok := elem.(map[string]interface{}); ok {
+
+					if elemMap["@assetType"].(string) == "@object" {
+						continue
+					}
+
 					elemKey, err := NewKey(elemMap)
 					if err != nil {
 						return nil, errors.WrapErrorWithStatus(err, "failed to resolve asset references", 500)
