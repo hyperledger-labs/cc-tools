@@ -30,13 +30,21 @@ var CreateAssetType = Transaction{
 
 		props := make([]assets.AssetProp, len(assetType["props"].([]interface{})))
 		for i, prop := range assetType["props"].([]interface{}) {
+			propMap := prop.(map[string]interface{})
+
+			writersArray := propMap["writers"].([]interface{})
+			writers := make([]string, len(writersArray))
+			for j, writer := range writersArray {
+				writers[j] = writer.(string)
+			}
+
 			props[i] = assets.AssetProp{
-				Tag:      prop.(map[string]interface{})["tag"].(string),
-				Label:    prop.(map[string]interface{})["label"].(string),
-				Required: prop.(map[string]interface{})["required"].(bool),
-				DataType: prop.(map[string]interface{})["dataType"].(string),
-				IsKey:    prop.(map[string]interface{})["isKey"].(bool),
-				Writers:  prop.(map[string]interface{})["writers"].([]string),
+				Tag:      propMap["tag"].(string),
+				Label:    propMap["label"].(string),
+				Required: propMap["required"].(bool),
+				DataType: propMap["dataType"].(string),
+				IsKey:    propMap["isKey"].(bool),
+				Writers:  writers,
 			}
 		}
 
