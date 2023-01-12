@@ -184,10 +184,20 @@ func BuildAssetProp(propMap map[string]interface{}) (assets.AssetProp, errors.IC
 		Required:    requiredValue.(bool),
 		IsKey:       isKeyValue.(bool),
 		ReadOnly:    readOnlyValue.(bool),
-		// DefaultValue: propMap["defaultValue"].(string),
-		DataType: dataTypeValue.(string), // TODO: VERIFY IF EXISTS
-		Writers:  writers,
+		DataType:    dataTypeValue.(string), // TODO: VERIFY IF EXISTS
+		Writers:     writers,
 		// Validate
+	}
+
+	// ********* Validate Default Value *********
+	if propMap["defaultValue"] != nil {
+		// TODO: Reorganize utils functions and return ValidateProp to protected (validateProp)
+		defaultValue, err := assets.ValidateProp(propMap["defaultValue"], assetProp)
+		if err != nil {
+			return assets.AssetProp{}, errors.WrapError(err, "invalid Default Value")
+		}
+
+		assetProp.DefaultValue = defaultValue
 	}
 
 	return assetProp, nil

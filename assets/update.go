@@ -75,7 +75,7 @@ func (a *Asset) Update(stub *sw.StubWrapper, update map[string]interface{}) (map
 		}
 
 		// Validate data types
-		propInterface, err := validateProp(propInterface, prop)
+		propInterface, err := ValidateProp(propInterface, prop)
 		if err != nil {
 			return nil, errors.WrapError(err, "error validating asset property")
 		}
@@ -172,7 +172,7 @@ func (k *Key) Update(stub *sw.StubWrapper, update map[string]interface{}) (map[s
 		}
 
 		// Validate data types
-		propInterface, err := validateProp(propInterface, prop)
+		propInterface, err := ValidateProp(propInterface, prop)
 		if err != nil {
 			return nil, errors.WrapError(err, "error validating asset property")
 		}
