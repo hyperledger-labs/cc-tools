@@ -60,7 +60,10 @@ var CreateAssetType = Transaction{
 
 func BuildAssetType(typeMap map[string]interface{}) (assets.AssetType, errors.ICCError) {
 	// *********** Build Props Array ***********
-	propsArr := typeMap["props"].([]interface{})
+	propsArr, ok := typeMap["props"].([]interface{})
+	if !ok {
+		return assets.AssetType{}, errors.NewCCError("invalid props array", http.StatusBadRequest)
+	}
 	props := make([]assets.AssetProp, len(propsArr))
 	for i, prop := range propsArr {
 		propMap := prop.(map[string]interface{})
@@ -72,15 +75,17 @@ func BuildAssetType(typeMap map[string]interface{}) (assets.AssetType, errors.IC
 	}
 
 	// *********** Build Readers Array ***********
-	readersArr := typeMap["readers"].([]interface{})
-	readers := make([]string, len(readersArr))
-	for j, reader := range readersArr {
-		readerValue, err := CheckValue(reader, false, "string", "reader")
-		if err != nil {
-			return assets.AssetType{}, errors.WrapError(err, "invalid reader value")
-		}
+	readers := make([]string, 0)
+	readersArr, ok := typeMap["readers"].([]interface{})
+	if ok {
+		for _, reader := range readersArr {
+			readerValue, err := CheckValue(reader, false, "string", "reader")
+			if err != nil {
+				return assets.AssetType{}, errors.WrapError(err, "invalid reader value")
+			}
 
-		readers[j] = readerValue.(string)
+			readers = append(readers, readerValue.(string))
+		}
 	}
 
 	// *********** Check Type Values ***********
@@ -116,15 +121,17 @@ func BuildAssetType(typeMap map[string]interface{}) (assets.AssetType, errors.IC
 
 func BuildAssetProp(propMap map[string]interface{}) (assets.AssetProp, errors.ICCError) {
 	// *********** Build Writers Array ***********
-	writersArr := propMap["writers"].([]interface{})
-	writers := make([]string, len(writersArr))
-	for j, writer := range writersArr {
-		writerValue, err := CheckValue(writer, false, "string", "writer")
-		if err != nil {
-			return assets.AssetProp{}, errors.WrapError(err, "invalid writer value")
-		}
+	writers := make([]string, 0)
+	writersArr, ok := propMap["writers"].([]interface{})
+	if ok {
+		for _, writer := range writersArr {
+			writerValue, err := CheckValue(writer, false, "string", "writer")
+			if err != nil {
+				return assets.AssetProp{}, errors.WrapError(err, "invalid writer value")
+			}
 
-		writers[j] = writerValue.(string)
+			writers = append(writers, writerValue.(string))
+		}
 	}
 
 	// *********** Check Prop Values ***********
