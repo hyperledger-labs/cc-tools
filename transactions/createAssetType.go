@@ -177,6 +177,11 @@ func BuildAssetProp(propMap map[string]interface{}) (assets.AssetProp, errors.IC
 		return assets.AssetProp{}, errors.WrapError(err, "invalid dataType value")
 	}
 
+	dataTypeObj := assets.FetchDataType(dataTypeValue.(string))
+	if dataTypeObj == nil {
+		return assets.AssetProp{}, errors.NewCCError("invalid dataType value", http.StatusBadRequest)
+	}
+
 	assetProp := assets.AssetProp{
 		Tag:         tagValue.(string),
 		Label:       labelValue.(string),
