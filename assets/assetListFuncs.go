@@ -21,3 +21,8 @@ func FetchAssetType(assetTypeTag string) *AssetType {
 func InitAssetList(l []AssetType) {
 	assetTypeList = l
 }
+
+// UpdateAssetList updates the assetTypeList variable on runtime
+func UpdateAssetList(l []AssetType) {
+	assetTypeList = append(assetTypeList, l...)
+}
