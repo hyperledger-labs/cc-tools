@@ -35,9 +35,9 @@ var CreateAssetType = Transaction{
 			for i, prop := range assetTypeMap["props"].([]interface{}) {
 				propMap := prop.(map[string]interface{})
 
-				writersArray := propMap["writers"].([]interface{})
-				writers := make([]string, len(writersArray))
-				for j, writer := range writersArray {
+				writersArr := propMap["writers"].([]interface{})
+				writers := make([]string, len(writersArr))
+				for j, writer := range writersArr {
 					writers[j] = writer.(string)
 				}
 
@@ -58,10 +58,12 @@ var CreateAssetType = Transaction{
 				Props:       props,
 			}
 
-			list = append(list, newAssetType)
+			// Verify Asset Type existance
+			assetTypeCheck := assets.FetchAssetType(newAssetType.Tag)
+			if assetTypeCheck == nil {
+				list = append(list, newAssetType)
+			}
 		}
-
-		// TODO: Check if asset type already exists
 
 		assets.UpdateAssetList(list)
 
@@ -73,3 +75,5 @@ var CreateAssetType = Transaction{
 		return resBytes, nil
 	},
 }
+
+// @object check
