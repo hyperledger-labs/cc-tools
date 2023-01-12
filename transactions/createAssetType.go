@@ -2,6 +2,8 @@ package transactions
 
 import (
 	"encoding/json"
+	"fmt"
+	"net/http"
 
 	"github.com/goledgerdev/cc-tools/assets"
 	"github.com/goledgerdev/cc-tools/errors"
@@ -31,31 +33,9 @@ var CreateAssetType = Transaction{
 		for _, assetType := range assetTypes {
 			assetTypeMap := assetType.(map[string]interface{})
 
-			props := make([]assets.AssetProp, len(assetTypeMap["props"].([]interface{})))
-			for i, prop := range assetTypeMap["props"].([]interface{}) {
-				propMap := prop.(map[string]interface{})
-
-				writersArr := propMap["writers"].([]interface{})
-				writers := make([]string, len(writersArr))
-				for j, writer := range writersArr {
-					writers[j] = writer.(string)
-				}
-
-				props[i] = assets.AssetProp{
-					Tag:      propMap["tag"].(string),
-					Label:    propMap["label"].(string),
-					Required: propMap["required"].(bool),
-					DataType: propMap["dataType"].(string),
-					IsKey:    propMap["isKey"].(bool),
-					Writers:  writers,
-				}
-			}
-
-			var newAssetType = assets.AssetType{
-				Tag:         assetTypeMap["tag"].(string),
-				Label:       assetTypeMap["label"].(string),
-				Description: assetTypeMap["description"].(string),
-				Props:       props,
+			newAssetType, err := BuildAssetType(assetTypeMap)
+			if err != nil {
+				return nil, errors.WrapError(err, "failed to build asset type")
 			}
 
 			// Verify Asset Type existance
@@ -77,3 +57,164 @@ var CreateAssetType = Transaction{
 }
 
 // @object check
+
+func BuildAssetType(typeMap map[string]interface{}) (assets.AssetType, errors.ICCError) {
+	// *********** Build Props Array ***********
+	propsArr := typeMap["props"].([]interface{})
+	props := make([]assets.AssetProp, len(propsArr))
+	for i, prop := range propsArr {
+		propMap := prop.(map[string]interface{})
+		assetProp, err := BuildAssetProp(propMap)
+		if err != nil {
+			return assets.AssetType{}, errors.WrapError(err, "failed to build asset prop")
+		}
+		props[i] = assetProp
+	}
+
+	// *********** Build Readers Array ***********
+	readersArr := typeMap["readers"].([]interface{})
+	readers := make([]string, len(readersArr))
+	for j, reader := range readersArr {
+		readerValue, err := CheckValue(reader, false, "string", "reader")
+		if err != nil {
+			return assets.AssetType{}, errors.WrapError(err, "invalid reader value")
+		}
+
+		readers[j] = readerValue.(string)
+	}
+
+	// *********** Check Type Values ***********
+	// Tag
+	tagValue, err := CheckValue(typeMap["tag"], true, "string", "tag")
+	if err != nil {
+		return assets.AssetType{}, errors.WrapError(err, "invalid tag value")
+	}
+
+	// Label
+	labelValue, err := CheckValue(typeMap["label"], true, "string", "label")
+	if err != nil {
+		return assets.AssetType{}, errors.WrapError(err, "invalid label value")
+	}
+
+	// Description
+	descriptionValue, err := CheckValue(typeMap["description"], false, "string", "description")
+	if err != nil {
+		return assets.AssetType{}, errors.WrapError(err, "invalid description value")
+	}
+
+	assetType := assets.AssetType{
+		Tag:         tagValue.(string),
+		Label:       labelValue.(string),
+		Description: descriptionValue.(string),
+		Props:       props,
+		Readers:     readers,
+		// Validate
+	}
+
+	return assetType, nil
+}
+
+func BuildAssetProp(propMap map[string]interface{}) (assets.AssetProp, errors.ICCError) {
+	// *********** Build Writers Array ***********
+	writersArr := propMap["writers"].([]interface{})
+	writers := make([]string, len(writersArr))
+	for j, writer := range writersArr {
+		writerValue, err := CheckValue(writer, false, "string", "writer")
+		if err != nil {
+			return assets.AssetProp{}, errors.WrapError(err, "invalid writer value")
+		}
+
+		writers[j] = writerValue.(string)
+	}
+
+	// *********** Check Prop Values ***********
+	// Tag
+	tagValue, err := CheckValue(propMap["tag"], true, "string", "tag")
+	if err != nil {
+		return assets.AssetProp{}, errors.WrapError(err, "invalid tag value")
+	}
+
+	// Label
+	labelValue, err := CheckValue(propMap["label"], true, "string", "label")
+	if err != nil {
+		return assets.AssetProp{}, errors.WrapError(err, "invalid label value")
+	}
+
+	// Description
+	descriptionValue, err := CheckValue(propMap["description"], false, "string", "description")
+	if err != nil {
+		return assets.AssetProp{}, errors.WrapError(err, "invalid description value")
+	}
+
+	// Required
+	requiredValue, err := CheckValue(propMap["required"], false, "boolean", "required")
+	if err != nil {
+		return assets.AssetProp{}, errors.WrapError(err, "invalid required value")
+	}
+
+	// IsKey
+	isKeyValue, err := CheckValue(propMap["isKey"], false, "boolean", "isKey")
+	if err != nil {
+		return assets.AssetProp{}, errors.WrapError(err, "invalid isKey value")
+	}
+
+	// ReadOnly
+	readOnlyValue, err := CheckValue(propMap["readOnly"], false, "boolean", "readOnly")
+	if err != nil {
+		return assets.AssetProp{}, errors.WrapError(err, "invalid readOnly value")
+	}
+
+	// DataType
+	dataTypeValue, err := CheckValue(propMap["dataType"], true, "string", "dataType")
+	if err != nil {
+		return assets.AssetProp{}, errors.WrapError(err, "invalid dataType value")
+	}
+
+	assetProp := assets.AssetProp{
+		Tag:         tagValue.(string),
+		Label:       labelValue.(string),
+		Description: descriptionValue.(string),
+		Required:    requiredValue.(bool),
+		IsKey:       isKeyValue.(bool),
+		ReadOnly:    readOnlyValue.(bool),
+		// DefaultValue: propMap["defaultValue"].(string),
+		DataType: dataTypeValue.(string), // TODO: VERIFY IF EXISTS
+		Writers:  writers,
+		// Validate
+	}
+
+	return assetProp, nil
+}
+
+func CheckValue(value interface{}, required bool, expectedType, fieldName string) (interface{}, errors.ICCError) {
+	if value == nil {
+		if required {
+			return nil, errors.NewCCError(fmt.Sprintf("required value %s missing", fieldName), http.StatusBadRequest)
+		}
+		switch expectedType {
+		case "string":
+			return "", nil
+		case "number":
+			return 0, nil
+		case "boolean":
+			return false, nil
+		}
+	}
+
+	switch expectedType {
+	case "string":
+		if _, ok := value.(string); !ok {
+			return nil, errors.NewCCError(fmt.Sprintf("value %s is not a string", fieldName), http.StatusBadRequest)
+		}
+	case "number":
+		if _, ok := value.(float64); !ok {
+			return nil, errors.NewCCError(fmt.Sprintf("value %s is not a number", fieldName), http.StatusBadRequest)
+		}
+	case "boolean":
+		if _, ok := value.(bool); !ok {
+			return nil, errors.NewCCError(fmt.Sprintf("value %s is not a boolean", fieldName), http.StatusBadRequest)
+		}
+	}
+
+	return value, nil
+}
