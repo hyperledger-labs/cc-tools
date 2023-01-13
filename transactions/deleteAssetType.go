@@ -3,6 +3,7 @@ package transactions
 import (
 	"encoding/json"
 	"fmt"
+	"net/http"
 
 	"github.com/goledgerdev/cc-tools/assets"
 	"github.com/goledgerdev/cc-tools/errors"
@@ -38,13 +39,27 @@ var DeleteAssetType = Transaction{
 				return nil, errors.WrapError(err, "no tag value in item")
 			}
 
+			forceValue, err := CheckValue(assetTypeMap["force"], false, "boolean", "force")
+			if err != nil {
+				return nil, errors.WrapError(err, "error getting force value")
+			}
+
+			forceCascadeValue, err := CheckValue(assetTypeMap["forceCascade"], false, "boolean", "forceCascade")
+			if err != nil {
+				return nil, errors.WrapError(err, "error getting force value")
+			}
+
 			// Verify Asset Type existance
 			assetTypeCheck := assets.FetchAssetType(tagValue.(string))
 			if assetTypeCheck == nil {
 				return nil, errors.WrapError(err, fmt.Sprintf("asset type '%s' not found", tagValue.(string)))
 			}
 
-			// TODO: Verify Asset Type usage
+			// Verify Asset Type usage
+			err = CheckUsedAssetTypes(stub, tagValue.(string), forceValue.(bool), forceCascadeValue.(bool))
+			if err != nil {
+				return nil, errors.WrapError(err, fmt.Sprintf("asset type '%s' is in use", tagValue.(string)))
+			}
 
 			// Delete Asset Type
 			assetTypeList = assets.RemoveAssetType(tagValue.(string), assetTypeList)
@@ -59,4 +74,54 @@ var DeleteAssetType = Transaction{
 
 		return resBytes, nil
 	},
+}
+
+func CheckUsedAssetTypes(stub *sw.StubWrapper, tag string, force, cascade bool) errors.ICCError {
+	query := fmt.Sprintf(
+		`{
+			"selector": {
+			   "@assetType": %s
+			}
+		}`,
+		tag,
+	)
+
+	resultsIterator, err := stub.GetQueryResult(query)
+	if err != nil {
+		return errors.WrapError(err, "failed to get query result")
+	}
+
+	if resultsIterator.HasNext() && !force {
+		return errors.NewCCError("asset type is in use", http.StatusBadRequest)
+	}
+
+	for resultsIterator.HasNext() {
+		queryResponse, err := resultsIterator.Next()
+		if err != nil {
+			return errors.WrapErrorWithStatus(err, "error iterating response", http.StatusInternalServerError)
+		}
+
+		var data map[string]interface{}
+
+		err = json.Unmarshal(queryResponse.Value, &data)
+		if err != nil {
+			return errors.WrapErrorWithStatus(err, "failed to unmarshal queryResponse values", http.StatusInternalServerError)
+		}
+
+		asset, err := assets.NewAsset(data)
+		if err != nil {
+			return errors.WrapError(err, "could not assemble asset type")
+		}
+
+		if cascade {
+			_, err = asset.DeleteCascade(stub)
+		} else {
+			_, err = asset.Delete(stub)
+		}
+		if err != nil {
+			return errors.WrapError(err, "could not force delete asset")
+		}
+	}
+
+	return nil
 }
