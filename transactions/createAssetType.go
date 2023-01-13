@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
+	"strings"
 
 	"github.com/goledgerdev/cc-tools/assets"
 	"github.com/goledgerdev/cc-tools/errors"
@@ -175,8 +176,8 @@ func BuildAssetProp(propMap map[string]interface{}) (assets.AssetProp, errors.IC
 		return assets.AssetProp{}, errors.WrapError(err, "invalid dataType value")
 	}
 
-	dataTypeObj := assets.FetchDataType(dataTypeValue.(string))
-	if dataTypeObj == nil {
+	err = CheckDataType(dataTypeValue.(string))
+	if err == nil {
 		return assets.AssetProp{}, errors.NewCCError("invalid dataType value", http.StatusBadRequest)
 	}
 
@@ -204,6 +205,26 @@ func BuildAssetProp(propMap map[string]interface{}) (assets.AssetProp, errors.IC
 	}
 
 	return assetProp, nil
+}
+
+func CheckDataType(dataType string) errors.ICCError {
+	trimDataType := strings.TrimPrefix(dataType, "[]")
+
+	if strings.HasPrefix(dataType, "->") {
+		trimDataType = strings.TrimPrefix(trimDataType, "->")
+
+		assetType := assets.FetchAssetType(trimDataType)
+		if assetType == nil {
+			return errors.NewCCError(fmt.Sprintf("invalid dataType value %s", dataType), http.StatusBadRequest)
+		}
+	} else {
+		dataTypeObj := assets.FetchDataType(trimDataType)
+		if dataTypeObj == nil {
+			return errors.NewCCError(fmt.Sprintf("invalid dataType value %s", dataType), http.StatusBadRequest)
+		}
+	}
+
+	return nil
 }
 
 func CheckValue(value interface{}, required bool, expectedType, fieldName string) (interface{}, errors.ICCError) {
