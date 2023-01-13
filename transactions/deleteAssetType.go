@@ -58,7 +58,7 @@ var DeleteAssetType = Transaction{
 			// Verify Asset Type usage
 			err = CheckUsedAssetTypes(stub, tagValue.(string), forceValue.(bool), forceCascadeValue.(bool))
 			if err != nil {
-				return nil, errors.WrapError(err, fmt.Sprintf("asset type '%s' is in use", tagValue.(string)))
+				return nil, errors.WrapError(err, "error checking asset type usage")
 			}
 
 			// Delete Asset Type
@@ -80,7 +80,7 @@ func CheckUsedAssetTypes(stub *sw.StubWrapper, tag string, force, cascade bool) 
 	query := fmt.Sprintf(
 		`{
 			"selector": {
-			   "@assetType": %s
+			   "@assetType": "%s"
 			}
 		}`,
 		tag,
@@ -92,7 +92,7 @@ func CheckUsedAssetTypes(stub *sw.StubWrapper, tag string, force, cascade bool) 
 	}
 
 	if resultsIterator.HasNext() && !force {
-		return errors.NewCCError("asset type is in use", http.StatusBadRequest)
+		return errors.NewCCError(fmt.Sprintf("asset type '%s' is in use", tag), http.StatusBadRequest)
 	}
 
 	for resultsIterator.HasNext() {
