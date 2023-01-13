@@ -28,10 +28,12 @@ var DeleteAssetType = Transaction{
 	},
 	Routine: func(stub *sw.StubWrapper, req map[string]interface{}) ([]byte, errors.ICCError) {
 		assetTypes := req["assetTypes"].([]interface{})
-		res := make([]map[string]interface{}, 0)
+		resArr := make([]map[string]interface{}, 0)
 		assetTypeList := assets.AssetTypeList()
 
 		for _, assetType := range assetTypes {
+			res := make(map[string]interface{})
+
 			assetTypeMap := assetType.(map[string]interface{})
 
 			tagValue, err := CheckValue(assetTypeMap["tag"], true, "string", "tag")
@@ -56,18 +58,21 @@ var DeleteAssetType = Transaction{
 			}
 
 			// Verify Asset Type usage
-			err = CheckUsedAssetTypes(stub, tagValue.(string), forceValue.(bool), forceCascadeValue.(bool))
+			res["assets"], err = CheckUsedAssetTypes(stub, tagValue.(string), forceValue.(bool), forceCascadeValue.(bool))
 			if err != nil {
 				return nil, errors.WrapError(err, "error checking asset type usage")
 			}
 
 			// Delete Asset Type
 			assetTypeList = assets.RemoveAssetType(tagValue.(string), assetTypeList)
+
+			res["assetType"] = assetTypeCheck
+			resArr = append(resArr, res)
 		}
 
 		assets.InitAssetList(assetTypeList)
 
-		resBytes, err := json.Marshal(res)
+		resBytes, err := json.Marshal(resArr)
 		if err != nil {
 			return nil, errors.WrapError(err, "failed to marshal response")
 		}
@@ -76,7 +81,7 @@ var DeleteAssetType = Transaction{
 	},
 }
 
-func CheckUsedAssetTypes(stub *sw.StubWrapper, tag string, force, cascade bool) errors.ICCError {
+func CheckUsedAssetTypes(stub *sw.StubWrapper, tag string, force, cascade bool) ([]interface{}, errors.ICCError) {
 	query := fmt.Sprintf(
 		`{
 			"selector": {
@@ -88,30 +93,33 @@ func CheckUsedAssetTypes(stub *sw.StubWrapper, tag string, force, cascade bool) 
 
 	resultsIterator, err := stub.GetQueryResult(query)
 	if err != nil {
-		return errors.WrapError(err, "failed to get query result")
+		return nil, errors.WrapError(err, "failed to get query result")
 	}
 
 	if resultsIterator.HasNext() && !force {
-		return errors.NewCCError(fmt.Sprintf("asset type '%s' is in use", tag), http.StatusBadRequest)
+		return nil, errors.NewCCError(fmt.Sprintf("asset type '%s' is in use", tag), http.StatusBadRequest)
 	}
 
+	res := make([]interface{}, 0)
 	for resultsIterator.HasNext() {
 		queryResponse, err := resultsIterator.Next()
 		if err != nil {
-			return errors.WrapErrorWithStatus(err, "error iterating response", http.StatusInternalServerError)
+			return nil, errors.WrapErrorWithStatus(err, "error iterating response", http.StatusInternalServerError)
 		}
 
 		var data map[string]interface{}
 
 		err = json.Unmarshal(queryResponse.Value, &data)
 		if err != nil {
-			return errors.WrapErrorWithStatus(err, "failed to unmarshal queryResponse values", http.StatusInternalServerError)
+			return nil, errors.WrapErrorWithStatus(err, "failed to unmarshal queryResponse values", http.StatusInternalServerError)
 		}
 
 		asset, err := assets.NewAsset(data)
 		if err != nil {
-			return errors.WrapError(err, "could not assemble asset type")
+			return nil, errors.WrapError(err, "could not assemble asset type")
 		}
+
+		res = append(res, asset)
 
 		if cascade {
 			_, err = asset.DeleteCascade(stub)
@@ -119,9 +127,9 @@ func CheckUsedAssetTypes(stub *sw.StubWrapper, tag string, force, cascade bool) 
 			_, err = asset.Delete(stub)
 		}
 		if err != nil {
-			return errors.WrapError(err, "could not force delete asset")
+			return nil, errors.WrapError(err, "could not force delete asset")
 		}
 	}
 
-	return nil
+	return res, nil
 }
