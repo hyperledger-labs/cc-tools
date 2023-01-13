@@ -177,8 +177,8 @@ func BuildAssetProp(propMap map[string]interface{}) (assets.AssetProp, errors.IC
 	}
 
 	err = CheckDataType(dataTypeValue.(string))
-	if err == nil {
-		return assets.AssetProp{}, errors.NewCCError("invalid dataType value", http.StatusBadRequest)
+	if err != nil {
+		return assets.AssetProp{}, errors.WrapError(err, "failed checking data type")
 	}
 
 	assetProp := assets.AssetProp{
@@ -210,7 +210,7 @@ func BuildAssetProp(propMap map[string]interface{}) (assets.AssetProp, errors.IC
 func CheckDataType(dataType string) errors.ICCError {
 	trimDataType := strings.TrimPrefix(dataType, "[]")
 
-	if strings.HasPrefix(dataType, "->") {
+	if strings.HasPrefix(trimDataType, "->") {
 		trimDataType = strings.TrimPrefix(trimDataType, "->")
 
 		assetType := assets.FetchAssetType(trimDataType)
