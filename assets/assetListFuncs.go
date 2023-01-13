@@ -26,3 +26,13 @@ func InitAssetList(l []AssetType) {
 func UpdateAssetList(l []AssetType) {
 	assetTypeList = append(assetTypeList, l...)
 }
+
+// RemoveAssetType removes an asset type from an assetTypeList and returns a copy of the new list
+func RemoveAssetType(tag string, assetTypeList []AssetType) []AssetType {
+	for i, assetType := range assetTypeList {
+		if assetType.Tag == tag {
+			assetTypeList = append(assetTypeList[:i], assetTypeList[i+1:]...)
+		}
+	}
+	return assetTypeList
+}

@@ -20,14 +20,14 @@ var CreateAssetType = Transaction{
 	MetaTx: true,
 	Args: ArgList{
 		{
-			Tag:         "assetType",
-			Description: "Asset Type to be created.",
+			Tag:         "assetTypes",
+			Description: "Asset Types to be created.",
 			DataType:    "[]@object",
 			Required:    true,
 		},
 	},
 	Routine: func(stub *sw.StubWrapper, req map[string]interface{}) ([]byte, errors.ICCError) {
-		assetTypes := req["assetType"].([]interface{})
+		assetTypes := req["assetTypes"].([]interface{})
 		list := make([]assets.AssetType, 0)
 
 		for _, assetType := range assetTypes {
@@ -55,8 +55,6 @@ var CreateAssetType = Transaction{
 		return resBytes, nil
 	},
 }
-
-// @object check
 
 func BuildAssetType(typeMap map[string]interface{}) (assets.AssetType, errors.ICCError) {
 	// *********** Build Props Array ***********
