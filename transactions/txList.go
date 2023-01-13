@@ -12,6 +12,7 @@ var basicTxs = []Transaction{
 	Search,
 	CreateAssetType,
 	DeleteAssetType,
+	UpdateAssetType,
 }
 
 // TxList returns a copy of the txList variable
