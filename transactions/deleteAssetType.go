@@ -46,11 +46,6 @@ var DeleteAssetType = Transaction{
 				return nil, errors.WrapError(err, "error getting force value")
 			}
 
-			forceCascadeValue, err := CheckValue(assetTypeMap["forceCascade"], false, "boolean", "forceCascade")
-			if err != nil {
-				return nil, errors.WrapError(err, "error getting force value")
-			}
-
 			// Verify Asset Type existance
 			assetTypeCheck := assets.FetchAssetType(tagValue.(string))
 			if assetTypeCheck == nil {
@@ -58,9 +53,15 @@ var DeleteAssetType = Transaction{
 			}
 
 			// Verify Asset Type usage
-			res["assets"], err = CheckUsedAssetTypes(stub, tagValue.(string), forceValue.(bool), forceCascadeValue.(bool))
+			res["assets"], err = CheckRegisteredAssets(stub, tagValue.(string), forceValue.(bool))
 			if err != nil {
 				return nil, errors.WrapError(err, "error checking asset type usage")
+			}
+
+			// Verify Asset Type references
+			err = CheckAssetTypeReferences(tagValue.(string))
+			if err != nil {
+				return nil, errors.WrapError(err, "error checking asset type references")
 			}
 
 			// Delete Asset Type
@@ -81,7 +82,7 @@ var DeleteAssetType = Transaction{
 	},
 }
 
-func CheckUsedAssetTypes(stub *sw.StubWrapper, tag string, force, cascade bool) ([]interface{}, errors.ICCError) {
+func CheckRegisteredAssets(stub *sw.StubWrapper, tag string, force bool) ([]interface{}, errors.ICCError) {
 	query := fmt.Sprintf(
 		`{
 			"selector": {
@@ -121,15 +122,26 @@ func CheckUsedAssetTypes(stub *sw.StubWrapper, tag string, force, cascade bool) 
 
 		res = append(res, asset)
 
-		if cascade {
-			_, err = asset.DeleteCascade(stub)
-		} else {
-			_, err = asset.Delete(stub)
-		}
+		_, err = asset.Delete(stub)
 		if err != nil {
 			return nil, errors.WrapError(err, "could not force delete asset")
 		}
 	}
 
 	return res, nil
+}
+
+func CheckAssetTypeReferences(tag string) errors.ICCError {
+	assetTypeList := assets.AssetTypeList()
+
+	for _, assetType := range assetTypeList {
+		subAssets := assetType.SubAssets()
+		for _, subAsset := range subAssets {
+			if subAsset.Tag == tag {
+				return errors.NewCCError(fmt.Sprintf("asset type '%s' is referenced by asset type '%s'", tag, assetType.Tag), http.StatusBadRequest)
+			}
+		}
+	}
+
+	return nil
 }
