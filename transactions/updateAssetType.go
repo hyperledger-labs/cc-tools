@@ -123,25 +123,116 @@ func handleProps(assetType assets.AssetType, propMap []interface{}) (assets.Asse
 		}
 		deleteVal := delete.(bool)
 
-		if deleteVal && hasProp {
-			// TODO: Handle required and isKey
+		if deleteVal && !hasProp {
+			return assetType, errors.WrapError(err, "attempt to delete inexistent prop")
+		} else if deleteVal && hasProp {
+			// TODO: Handle required/isKey
 			for i, prop := range propObj {
 				if prop.Tag == v["tag"].(string) {
 					propObj = append(propObj[:i], propObj[i+1:]...)
 				}
 			}
-		} else if deleteVal && !hasProp {
-			return assetType, errors.WrapError(err, "attempt to delete inexistent prop")
 		} else if !hasProp && !deleteVal {
-			// TODO: Handle required prop
+			// TODO: Handle required/isKey prop
 			newProp, err := BuildAssetProp(v)
 			if err != nil {
 				return assetType, errors.WrapError(err, "failed to build prop")
 			}
 			propObj = append(propObj, newProp)
+		} else {
+			// TODO: Handle required/isKey prop
+			for i, prop := range propObj {
+				if prop.Tag == v["tag"].(string) {
+					updatedProp, err := handlePropUpdate(prop, v)
+					if err != nil {
+						return assetType, errors.WrapError(err, "failed to update prop")
+					}
+					propObj[i] = updatedProp
+				}
+			}
 		}
 	}
 
 	assetType.Props = propObj
 	return assetType, nil
+}
+
+func handlePropUpdate(assetProps assets.AssetProp, propMap map[string]interface{}) (assets.AssetProp, errors.ICCError) {
+	// TODO: Update tag?
+	handleDefaultValue := false
+	for k, v := range propMap {
+		switch k {
+		case "label":
+			labelValue, err := CheckValue(v, true, "string", "label")
+			if err != nil {
+				return assetProps, errors.WrapError(err, "invalid label value")
+			}
+			assetProps.Label = labelValue.(string)
+		case "description":
+			descriptionValue, err := CheckValue(v, true, "string", "description")
+			if err != nil {
+				return assetProps, errors.WrapError(err, "invalid description value")
+			}
+			assetProps.Description = descriptionValue.(string)
+		case "isKey":
+			// TODO: Allow isKey to be updated?
+			isKeyValue, err := CheckValue(v, true, "boolean", "isKey")
+			if err != nil {
+				return assetProps, errors.WrapError(err, "invalid isKey value")
+			}
+			assetProps.IsKey = isKeyValue.(bool)
+		case "required":
+			requiredValue, err := CheckValue(v, true, "boolean", "required")
+			if err != nil {
+				return assetProps, errors.WrapError(err, "invalid required value")
+			}
+			assetProps.Required = requiredValue.(bool)
+		case "readOnly":
+			readOnlyValue, err := CheckValue(v, true, "boolean", "readOnly")
+			if err != nil {
+				return assetProps, errors.WrapError(err, "invalid readOnly value")
+			}
+			assetProps.ReadOnly = readOnlyValue.(bool)
+		case "defaultValue":
+			handleDefaultValue = true
+		case "dataType":
+			dataTypeValue, err := CheckValue(propMap["dataType"], true, "string", "dataType")
+			if err != nil {
+				return assets.AssetProp{}, errors.WrapError(err, "invalid dataType value")
+			}
+
+			err = CheckDataType(dataTypeValue.(string))
+			if err != nil {
+				return assets.AssetProp{}, errors.WrapError(err, "failed checking data type")
+			}
+			assetProps.DataType = dataTypeValue.(string)
+		case "writeres":
+			writers := make([]string, 0)
+			writersArr, ok := v.([]interface{})
+			if ok {
+				for _, writer := range writersArr {
+					writerValue, err := CheckValue(writer, false, "string", "writer")
+					if err != nil {
+						return assets.AssetProp{}, errors.WrapError(err, "invalid writer value")
+					}
+
+					writers = append(writers, writerValue.(string))
+				}
+			}
+			assetProps.Writers = writers
+		default:
+			continue
+		}
+	}
+
+	if handleDefaultValue {
+		defaultValue, err := assets.ValidateProp(propMap["defaultValue"], assetProps)
+		if err != nil {
+			return assets.AssetProp{}, errors.WrapError(err, "invalid Default Value")
+		}
+
+		assetProps.DefaultValue = defaultValue
+	}
+
+	return assetProps, nil
 }
