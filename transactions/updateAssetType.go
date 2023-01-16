@@ -10,7 +10,7 @@ import (
 	sw "github.com/goledgerdev/cc-tools/stubwrapper"
 )
 
-// TODO: Update tag name?
+// ? Update tag name?
 // TODO: Handle not required -> required
 
 // CreateAssetType is the transaction which creates a dynamic Asset Type
@@ -126,14 +126,18 @@ func handleProps(assetType assets.AssetType, propMap []interface{}) (assets.Asse
 		if deleteVal && !hasProp {
 			return assetType, errors.WrapError(err, "attempt to delete inexistent prop")
 		} else if deleteVal && hasProp {
-			// TODO: Handle required/isKey
+			// ? Should you be able to delete a required prop?
 			for i, prop := range propObj {
 				if prop.Tag == v["tag"].(string) {
+					if prop.IsKey {
+						return assetType, errors.NewCCError("cannot delete key prop", http.StatusBadRequest)
+					}
 					propObj = append(propObj[:i], propObj[i+1:]...)
 				}
 			}
 		} else if !hasProp && !deleteVal {
-			// TODO: Handle required/isKey prop
+			// ? Should you be able to create a isKey prop?
+			// TODO: Handle required prop
 			newProp, err := BuildAssetProp(v)
 			if err != nil {
 				return assetType, errors.WrapError(err, "failed to build prop")
@@ -158,7 +162,7 @@ func handleProps(assetType assets.AssetType, propMap []interface{}) (assets.Asse
 }
 
 func handlePropUpdate(assetProps assets.AssetProp, propMap map[string]interface{}) (assets.AssetProp, errors.ICCError) {
-	// TODO: Update tag?
+	// ? Update tag?
 	handleDefaultValue := false
 	for k, v := range propMap {
 		switch k {
