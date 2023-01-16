@@ -188,7 +188,7 @@ func BuildAssetProp(propMap map[string]interface{}) (assets.AssetProp, errors.IC
 		Required:    requiredValue.(bool),
 		IsKey:       isKeyValue.(bool),
 		ReadOnly:    readOnlyValue.(bool),
-		DataType:    dataTypeValue.(string), // TODO: VERIFY IF EXISTS
+		DataType:    dataTypeValue.(string),
 		Writers:     writers,
 		// Validate
 	}

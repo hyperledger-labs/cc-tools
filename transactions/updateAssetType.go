@@ -116,7 +116,24 @@ func handleProps(assetType assets.AssetType, propMap []interface{}) (assets.Asse
 		}
 
 		hasProp := assetType.HasProp(v["tag"].(string))
-		if !hasProp {
+
+		delete, err := CheckValue(v["delete"], false, "boolean", "delete")
+		if err != nil {
+			return assetType, errors.WrapError(err, "invalid delete info")
+		}
+		deleteVal := delete.(bool)
+
+		if deleteVal && hasProp {
+			// TODO: Handle required and isKey
+			for i, prop := range propObj {
+				if prop.Tag == v["tag"].(string) {
+					propObj = append(propObj[:i], propObj[i+1:]...)
+				}
+			}
+		} else if deleteVal && !hasProp {
+			return assetType, errors.WrapError(err, "attempt to delete inexistent prop")
+		} else if !hasProp && !deleteVal {
+			// TODO: Handle required prop
 			newProp, err := BuildAssetProp(v)
 			if err != nil {
 				return assetType, errors.WrapError(err, "failed to build prop")
