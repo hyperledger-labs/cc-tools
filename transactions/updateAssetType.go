@@ -11,7 +11,6 @@ import (
 )
 
 // ? Update tag name?
-// TODO: Handle not required -> required
 
 // UpdateAssetType is the transaction which updates a dynamic Asset Type
 var UpdateAssetType = Transaction{
@@ -145,7 +144,6 @@ func handleProps(assetType assets.AssetType, propMap []interface{}) (assets.Asse
 		if deleteVal && !hasProp {
 			return assetType, nil, errors.WrapError(err, "attempt to delete inexistent prop")
 		} else if deleteVal && hasProp {
-			// ? Should you be able to delete a required prop?
 			for i, prop := range propObj {
 				if prop.Tag == tagValue {
 					if prop.IsKey {
@@ -156,8 +154,7 @@ func handleProps(assetType assets.AssetType, propMap []interface{}) (assets.Asse
 			}
 		} else if !hasProp && !deleteVal {
 			// ? Should you be able to create a isKey prop?
-			// TODO: Handle verification if assets exists on require
-			required, err := CheckValue(v, false, "boolean", "required")
+			required, err := CheckValue(v["required"], false, "boolean", "required")
 			if err != nil {
 				return assetType, nil, errors.WrapError(err, "invalid required info")
 			}
@@ -180,9 +177,32 @@ func handleProps(assetType assets.AssetType, propMap []interface{}) (assets.Asse
 			}
 			propObj = append(propObj, newProp)
 		} else {
-			// TODO: Handle required/isKey prop
+			// ? Should you be able to update a isKey prop?
 			for i, prop := range propObj {
 				if prop.Tag == tagValue {
+					required, err := CheckValue(v["required"], false, "boolean", "required")
+					if err != nil {
+						return assetType, nil, errors.WrapError(err, "invalid required info")
+					}
+					requiredVal := required.(bool)
+
+					defaultValue, ok := v["defaultValue"]
+					if !ok {
+						defaultValue = prop.DefaultValue
+					}
+
+					if !prop.Required && requiredVal {
+						if defaultValue == nil {
+							return assetType, nil, errors.NewCCError("required prop must have a default value in case of existing assets", http.StatusBadRequest)
+						}
+
+						requiredValue := map[string]interface{}{
+							"tag":          tagValue,
+							"defaultValue": defaultValue,
+						}
+						requiredValues = append(requiredValues, requiredValue)
+					}
+
 					updatedProp, err := handlePropUpdate(prop, v)
 					if err != nil {
 						return assetType, nil, errors.WrapError(err, "failed to update prop")
