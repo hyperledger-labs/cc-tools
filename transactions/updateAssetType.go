@@ -3,6 +3,7 @@ package transactions
 import (
 	"encoding/json"
 	"fmt"
+	"net/http"
 
 	"github.com/goledgerdev/cc-tools/assets"
 	"github.com/goledgerdev/cc-tools/errors"
@@ -50,6 +51,15 @@ var UpdateAssetType = Transaction{
 
 			for key, value := range assetTypeMap {
 				switch key {
+				case "props":
+					propsArr, ok := value.([]interface{})
+					if !ok {
+						return nil, errors.NewCCError("invalid props array", http.StatusBadRequest)
+					}
+					assetTypeObj, err = handleProps(assetTypeObj, propsArr)
+					if err != nil {
+						return nil, errors.WrapError(err, "invalid props array")
+					}
 				case "label":
 					labelValue, err := CheckValue(value, true, "string", "label")
 					if err != nil {
@@ -76,7 +86,6 @@ var UpdateAssetType = Transaction{
 						}
 						assetTypeObj.Readers = readers
 					}
-				// case "props":
 				default:
 					continue
 				}
@@ -95,4 +104,27 @@ var UpdateAssetType = Transaction{
 
 		return resBytes, nil
 	},
+}
+
+func handleProps(assetType assets.AssetType, propMap []interface{}) (assets.AssetType, errors.ICCError) {
+	propObj := assetType.Props
+
+	for _, v := range propMap {
+		v, ok := v.(map[string]interface{})
+		if !ok {
+			return assetType, errors.NewCCError("invalid prop object", http.StatusBadRequest)
+		}
+
+		hasProp := assetType.HasProp(v["tag"].(string))
+		if !hasProp {
+			newProp, err := BuildAssetProp(v)
+			if err != nil {
+				return assetType, errors.WrapError(err, "failed to build prop")
+			}
+			propObj = append(propObj, newProp)
+		}
+	}
+
+	assetType.Props = propObj
+	return assetType, nil
 }
