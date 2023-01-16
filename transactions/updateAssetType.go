@@ -31,6 +31,7 @@ var UpdateAssetType = Transaction{
 	Routine: func(stub *sw.StubWrapper, req map[string]interface{}) ([]byte, errors.ICCError) {
 		assetTypes := req["assetTypes"].([]interface{})
 		resArr := make([]map[string]interface{}, 0)
+		assetTypeList := assets.AssetTypeList()
 
 		for _, assetType := range assetTypes {
 			assetTypeMap := assetType.(map[string]interface{})
@@ -41,10 +42,11 @@ var UpdateAssetType = Transaction{
 			}
 
 			// Verify Asset Type existance
-			assetTypeObj := assets.FetchAssetType(tagValue.(string))
-			if assetTypeObj == nil {
+			assetTypeCheck := assets.FetchAssetType(tagValue.(string))
+			if assetTypeCheck == nil {
 				return nil, errors.WrapError(err, fmt.Sprintf("asset type '%s' not found", tagValue.(string)))
 			}
+			assetTypeObj := *assetTypeCheck
 
 			for key, value := range assetTypeMap {
 				switch key {
@@ -79,7 +81,12 @@ var UpdateAssetType = Transaction{
 					continue
 				}
 			}
+
+			// Update Asset Type
+			assets.ReplaceAssetType(assetTypeObj, assetTypeList)
 		}
+
+		assets.InitAssetList(assetTypeList)
 
 		resBytes, err := json.Marshal(resArr)
 		if err != nil {

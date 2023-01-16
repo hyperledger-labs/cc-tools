@@ -36,3 +36,13 @@ func RemoveAssetType(tag string, assetTypeList []AssetType) []AssetType {
 	}
 	return assetTypeList
 }
+
+// ReplaceAssetType replaces an asset type from an assetTypeList with an updated version and returns a copy of the new list
+func ReplaceAssetType(assetType AssetType, assetTypeList []AssetType) []AssetType {
+	for i, v := range assetTypeList {
+		if v.Tag == assetType.Tag {
+			assetTypeList = append(append(assetTypeList[:i], assetType), assetTypeList[i+1:]...)
+		}
+	}
+	return assetTypeList
+}
