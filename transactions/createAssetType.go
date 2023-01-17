@@ -73,20 +73,6 @@ func BuildAssetType(typeMap map[string]interface{}) (assets.AssetType, errors.IC
 		props[i] = assetProp
 	}
 
-	// *********** Build Readers Array ***********
-	readers := make([]string, 0)
-	readersArr, ok := typeMap["readers"].([]interface{})
-	if ok {
-		for _, reader := range readersArr {
-			readerValue, err := CheckValue(reader, false, "string", "reader")
-			if err != nil {
-				return assets.AssetType{}, errors.WrapError(err, "invalid reader value")
-			}
-
-			readers = append(readers, readerValue.(string))
-		}
-	}
-
 	// *********** Check Type Values ***********
 	// Tag
 	tagValue, err := CheckValue(typeMap["tag"], true, "string", "tag")
@@ -111,28 +97,31 @@ func BuildAssetType(typeMap map[string]interface{}) (assets.AssetType, errors.IC
 		Label:       labelValue.(string),
 		Description: descriptionValue.(string),
 		Props:       props,
-		Readers:     readers,
 		// Validate
+	}
+
+	// *********** Build Readers Array ***********
+	readers := make([]string, 0)
+	readersArr, ok := typeMap["readers"].([]interface{})
+	if ok {
+		for _, reader := range readersArr {
+			readerValue, err := CheckValue(reader, false, "string", "reader")
+			if err != nil {
+				return assets.AssetType{}, errors.WrapError(err, "invalid reader value")
+			}
+
+			readers = append(readers, readerValue.(string))
+		}
+	}
+
+	if len(readers) > 0 {
+		assetType.Readers = readers
 	}
 
 	return assetType, nil
 }
 
 func BuildAssetProp(propMap map[string]interface{}) (assets.AssetProp, errors.ICCError) {
-	// *********** Build Writers Array ***********
-	writers := make([]string, 0)
-	writersArr, ok := propMap["writers"].([]interface{})
-	if ok {
-		for _, writer := range writersArr {
-			writerValue, err := CheckValue(writer, false, "string", "writer")
-			if err != nil {
-				return assets.AssetProp{}, errors.WrapError(err, "invalid writer value")
-			}
-
-			writers = append(writers, writerValue.(string))
-		}
-	}
-
 	// *********** Check Prop Values ***********
 	// Tag
 	tagValue, err := CheckValue(propMap["tag"], true, "string", "tag")
@@ -189,8 +178,24 @@ func BuildAssetProp(propMap map[string]interface{}) (assets.AssetProp, errors.IC
 		IsKey:       isKeyValue.(bool),
 		ReadOnly:    readOnlyValue.(bool),
 		DataType:    dataTypeValue.(string),
-		Writers:     writers,
 		// Validate
+	}
+
+	// *********** Build Writers Array ***********
+	writers := make([]string, 0)
+	writersArr, ok := propMap["writers"].([]interface{})
+	if ok {
+		for _, writer := range writersArr {
+			writerValue, err := CheckValue(writer, false, "string", "writer")
+			if err != nil {
+				return assets.AssetProp{}, errors.WrapError(err, "invalid writer value")
+			}
+
+			writers = append(writers, writerValue.(string))
+		}
+	}
+	if len(writers) > 0 {
+		assetProp.Writers = writers
 	}
 
 	// ********* Validate Default Value *********
