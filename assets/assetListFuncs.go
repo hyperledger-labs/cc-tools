@@ -72,7 +72,7 @@ func StoreAssetList(stub *sw.StubWrapper) errors.ICCError {
 		return errors.NewCCError("error marshaling asset list", http.StatusInternalServerError)
 	}
 
-	listKey, err := NewKey(map[string]interface{}{
+	listKey, err := NewAsset(map[string]interface{}{
 		"@assetType": "assetTypeListData",
 		"id":         "primary",
 	})
@@ -80,17 +80,40 @@ func StoreAssetList(stub *sw.StubWrapper) errors.ICCError {
 		return errors.NewCCError("error gettin asset list key", http.StatusInternalServerError)
 	}
 
-	listAsset, err := listKey.Get(stub)
+	exists, err := listKey.ExistsInLedger(stub)
 	if err != nil {
-		return errors.NewCCError("error getting asset list", http.StatusInternalServerError)
+		return errors.NewCCError("error checking if asset list exists", http.StatusInternalServerError)
 	}
-	listMap := (map[string]interface{})(*listAsset)
 
-	listMap["list"] = listJson
+	if exists {
+		listAsset, err := listKey.Get(stub)
+		if err != nil {
+			return errors.NewCCError("error getting asset list", http.StatusInternalServerError)
+		}
+		listMap := (map[string]interface{})(*listAsset)
 
-	_, err = listAsset.Update(stub, listMap)
-	if err != nil {
-		return errors.NewCCError("error updating asset list", http.StatusInternalServerError)
+		listMap["list"] = listJson
+
+		_, err = listAsset.Update(stub, listMap)
+		if err != nil {
+			return errors.NewCCError("error updating asset list", http.StatusInternalServerError)
+		}
+	} else {
+		listMap := map[string]interface{}{
+			"@assetType": "assetTypeListData",
+			"id":         "primary",
+			"list":       listJson,
+		}
+
+		listAsset, err := NewAsset(listMap)
+		if err != nil {
+			return errors.NewCCError("error creating asset list", http.StatusInternalServerError)
+		}
+
+		_, err = listAsset.PutNew(stub)
+		if err != nil {
+			return errors.NewCCError("error putting asset list", http.StatusInternalServerError)
+		}
 	}
 
 	return nil
