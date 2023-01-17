@@ -34,7 +34,7 @@ var UpdateAssetType = Transaction{
 
 		assetTypeList := assets.AssetTypeList()
 
-		resArr := make([]map[string]interface{}, 0)
+		resAssetArr := make([]assets.AssetType, 0)
 		requiredValues := make(map[string]interface{}, 0)
 
 		for _, assetType := range assetTypes {
@@ -102,6 +102,11 @@ var UpdateAssetType = Transaction{
 
 			// Update Asset Type
 			assets.ReplaceAssetType(assetTypeObj, assetTypeList)
+			resAssetArr = append(resAssetArr, assetTypeObj)
+		}
+
+		response := map[string]interface{}{
+			"assetTypes": resAssetArr,
 		}
 
 		assets.InitAssetList(assetTypeList)
@@ -109,11 +114,15 @@ var UpdateAssetType = Transaction{
 		for k, v := range requiredValues {
 			requiredValuesMap := v.([]map[string]interface{})
 			if len(requiredValuesMap) > 0 {
-				initilizeDefaultValues(stub, k, requiredValuesMap)
+				updatedAssets, err := initilizeDefaultValues(stub, k, requiredValuesMap)
+				if err != nil {
+					return nil, errors.WrapError(err, "failed to initialize default values")
+				}
+				response["assets"] = updatedAssets
 			}
 		}
 
-		resBytes, err := json.Marshal(resArr)
+		resBytes, err := json.Marshal(response)
 		if err != nil {
 			return nil, errors.WrapError(err, "failed to marshal response")
 		}
