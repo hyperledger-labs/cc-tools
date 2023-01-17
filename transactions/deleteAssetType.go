@@ -16,6 +16,7 @@ var DeleteAssetType = Transaction{
 	Label:       "Delete Asset Type",
 	Description: "",
 	Method:      "POST",
+	Callers:     assets.GetAssetAdminsDynamicAssetType(),
 
 	MetaTx: true,
 	Args: ArgList{

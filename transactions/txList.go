@@ -1,5 +1,7 @@
 package transactions
 
+import "github.com/goledgerdev/cc-tools/assets"
+
 var txList = []Transaction{}
 
 var basicTxs = []Transaction{
@@ -10,9 +12,12 @@ var basicTxs = []Transaction{
 	ReadAsset,
 	ReadAssetHistory,
 	Search,
+}
+
+var dynamicAssetTypesTxs = []Transaction{
 	CreateAssetType,
-	DeleteAssetType,
 	UpdateAssetType,
+	DeleteAssetType,
 }
 
 // TxList returns a copy of the txList variable
@@ -35,4 +40,7 @@ func FetchTx(txName string) *Transaction {
 // InitTxList appends GetTx to txList to avoid initialization loop
 func InitTxList(l []Transaction) {
 	txList = append(l, basicTxs...)
+	if assets.GetEnabledDynamicAssetType() {
+		txList = append(txList, dynamicAssetTypesTxs...)
+	}
 }
