@@ -41,6 +41,10 @@ func FetchTx(txName string) *Transaction {
 func InitTxList(l []Transaction) {
 	txList = append(l, basicTxs...)
 	if assets.GetEnabledDynamicAssetType() {
+		callers := assets.GetAssetAdminsDynamicAssetType()
+		for i := range dynamicAssetTypesTxs {
+			dynamicAssetTypesTxs[i].Callers = callers
+		}
 		txList = append(txList, dynamicAssetTypesTxs...)
 	}
 }

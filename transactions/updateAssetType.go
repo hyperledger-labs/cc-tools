@@ -18,7 +18,6 @@ var UpdateAssetType = Transaction{
 	Label:       "Update Asset Type",
 	Description: "",
 	Method:      "POST",
-	Callers:     assets.GetAssetAdminsDynamicAssetType(),
 
 	MetaTx: true,
 	Args: ArgList{

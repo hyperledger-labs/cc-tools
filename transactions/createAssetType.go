@@ -17,7 +17,6 @@ var CreateAssetType = Transaction{
 	Label:       "Create Asset Type",
 	Description: "",
 	Method:      "POST",
-	Callers:     assets.GetAssetAdminsDynamicAssetType(),
 
 	MetaTx: true,
 	Args: ArgList{
