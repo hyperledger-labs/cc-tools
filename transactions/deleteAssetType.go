@@ -72,7 +72,7 @@ var DeleteAssetType = Transaction{
 			resArr = append(resArr, res)
 		}
 
-		assets.InitAssetList(assetTypeList)
+		assets.ReplaceAssetList(assetTypeList)
 
 		resBytes, err := json.Marshal(resArr)
 		if err != nil {

@@ -110,7 +110,7 @@ var UpdateAssetType = Transaction{
 			"assetTypes": resAssetArr,
 		}
 
-		assets.InitAssetList(assetTypeList)
+		assets.ReplaceAssetList(assetTypeList)
 
 		for k, v := range requiredValues {
 			requiredValuesMap := v.([]map[string]interface{})
@@ -118,7 +118,7 @@ var UpdateAssetType = Transaction{
 				updatedAssets, err := initilizeDefaultValues(stub, k, requiredValuesMap)
 				if err != nil {
 					// Rollback Asset Type List
-					assets.InitAssetList(assetTypeListFallback)
+					assets.ReplaceAssetList(assetTypeListFallback)
 					return nil, errors.WrapError(err, "failed to initialize default values")
 				}
 				response["assets"] = updatedAssets

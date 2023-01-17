@@ -26,3 +26,30 @@ func GetEnabledDynamicAssetType() bool {
 func GetAssetAdminsDynamicAssetType() []string {
 	return dynamicAssetTypeConfig.AssetAdmins
 }
+
+// Get Dynamic AssetType meta type
+func GetListAssetType() AssetType {
+	var AssetTypeListData = AssetType{
+		Tag:         "assetTypeListData",
+		Label:       "AssetTypeListData",
+		Description: "AssetTypeListData",
+		Readers:     dynamicAssetTypeConfig.AssetAdmins,
+
+		Props: []AssetProp{
+			{
+				Required: true,
+				IsKey:    true,
+				Tag:      "id",
+				Label:    "ID",
+				DataType: "string",
+				Writers:  dynamicAssetTypeConfig.AssetAdmins,
+			},
+			{
+				Required: true,
+				Tag:      "list",
+				Label:    "List",
+				DataType: "@object",
+			}},
+	}
+	return AssetTypeListData
+}

@@ -1,5 +1,13 @@
 package assets
 
+import (
+	"encoding/json"
+	"net/http"
+
+	"github.com/goledgerdev/cc-tools/errors"
+	sw "github.com/goledgerdev/cc-tools/stubwrapper"
+)
+
 // AssetTypeList returns a copy of the assetTypeList variable.
 func AssetTypeList() []AssetType {
 	listCopy := make([]AssetType, len(assetTypeList))
@@ -19,6 +27,14 @@ func FetchAssetType(assetTypeTag string) *AssetType {
 
 // InitAssetList appends custom assets to assetTypeList to avoid initialization loop.
 func InitAssetList(l []AssetType) {
+	if GetEnabledDynamicAssetType() {
+		l = append(l, GetListAssetType())
+	}
+	assetTypeList = l
+}
+
+// ReplaceAssetList replace assetTypeList to for a new one
+func ReplaceAssetList(l []AssetType) {
 	assetTypeList = l
 }
 
@@ -46,4 +62,36 @@ func ReplaceAssetType(assetType AssetType, l []AssetType) []AssetType {
 		}
 	}
 	return l
+}
+
+// StoreAssetList stores the current assetList on the blockchain
+func StoreAssetList(stub *sw.StubWrapper) errors.ICCError {
+	list := AssetTypeList()
+	listJson, err := json.Marshal(list)
+	if err != nil {
+		return errors.NewCCError("error marshaling asset list", http.StatusInternalServerError)
+	}
+
+	listKey, err := NewKey(map[string]interface{}{
+		"@assetType": "assetTypeListData",
+		"id":         "primary",
+	})
+	if err != nil {
+		return errors.NewCCError("error gettin asset list key", http.StatusInternalServerError)
+	}
+
+	listAsset, err := listKey.Get(stub)
+	if err != nil {
+		return errors.NewCCError("error getting asset list", http.StatusInternalServerError)
+	}
+	listMap := (map[string]interface{})(*listAsset)
+
+	listMap["list"] = listJson
+
+	_, err = listAsset.Update(stub, listMap)
+	if err != nil {
+		return errors.NewCCError("error updating asset list", http.StatusInternalServerError)
+	}
+
+	return nil
 }
