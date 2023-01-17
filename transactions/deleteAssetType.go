@@ -28,20 +28,21 @@ var DeleteAssetType = Transaction{
 	},
 	Routine: func(stub *sw.StubWrapper, req map[string]interface{}) ([]byte, errors.ICCError) {
 		assetTypes := req["assetTypes"].([]interface{})
-		resArr := make([]map[string]interface{}, 0)
+
 		assetTypeList := assets.AssetTypeList()
 
+		resArr := make([]map[string]interface{}, 0)
 		for _, assetType := range assetTypes {
 			res := make(map[string]interface{})
 
 			assetTypeMap := assetType.(map[string]interface{})
 
-			tagValue, err := CheckValue(assetTypeMap["tag"], true, "string", "tag")
+			tagValue, err := assets.CheckValue(assetTypeMap["tag"], true, "string", "tag")
 			if err != nil {
 				return nil, errors.WrapError(err, "no tag value in item")
 			}
 
-			forceValue, err := CheckValue(assetTypeMap["force"], false, "boolean", "force")
+			forceValue, err := assets.CheckValue(assetTypeMap["force"], false, "boolean", "force")
 			if err != nil {
 				return nil, errors.WrapError(err, "error getting force value")
 			}
@@ -53,13 +54,13 @@ var DeleteAssetType = Transaction{
 			}
 
 			// Verify Asset Type usage
-			res["assets"], err = CheckRegisteredAssets(stub, tagValue.(string), forceValue.(bool))
+			res["assets"], err = handleRegisteredAssets(stub, tagValue.(string), forceValue.(bool))
 			if err != nil {
 				return nil, errors.WrapError(err, "error checking asset type usage")
 			}
 
 			// Verify Asset Type references
-			err = CheckAssetTypeReferences(tagValue.(string))
+			err = checkAssetTypeReferences(tagValue.(string))
 			if err != nil {
 				return nil, errors.WrapError(err, "error checking asset type references")
 			}
@@ -82,7 +83,7 @@ var DeleteAssetType = Transaction{
 	},
 }
 
-func CheckRegisteredAssets(stub *sw.StubWrapper, tag string, force bool) ([]interface{}, errors.ICCError) {
+func handleRegisteredAssets(stub *sw.StubWrapper, tag string, force bool) ([]interface{}, errors.ICCError) {
 	query := fmt.Sprintf(
 		`{
 			"selector": {
@@ -131,7 +132,7 @@ func CheckRegisteredAssets(stub *sw.StubWrapper, tag string, force bool) ([]inte
 	return res, nil
 }
 
-func CheckAssetTypeReferences(tag string) errors.ICCError {
+func checkAssetTypeReferences(tag string) errors.ICCError {
 	assetTypeList := assets.AssetTypeList()
 
 	for _, assetType := range assetTypeList {

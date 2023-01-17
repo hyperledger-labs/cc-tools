@@ -11,6 +11,7 @@ import (
 )
 
 // ? Update tag name?
+// ? Allow isKey prop to be updated/created/removed?
 
 // UpdateAssetType is the transaction which updates a dynamic Asset Type
 var UpdateAssetType = Transaction{
@@ -39,7 +40,7 @@ var UpdateAssetType = Transaction{
 		for _, assetType := range assetTypes {
 			assetTypeMap := assetType.(map[string]interface{})
 
-			tagValue, err := CheckValue(assetTypeMap["tag"], true, "string", "tag")
+			tagValue, err := assets.CheckValue(assetTypeMap["tag"], true, "string", "tag")
 			if err != nil {
 				return nil, errors.WrapError(err, "no tag value in item")
 			}
@@ -53,25 +54,14 @@ var UpdateAssetType = Transaction{
 
 			for key, value := range assetTypeMap {
 				switch key {
-				case "props":
-					propsArr, ok := value.([]interface{})
-					if !ok {
-						return nil, errors.NewCCError("invalid props array", http.StatusBadRequest)
-					}
-					newAssetType, newRequiredValues, err := handleProps(assetTypeObj, propsArr)
-					if err != nil {
-						return nil, errors.WrapError(err, "invalid props array")
-					}
-					requiredValues[tagValue.(string)] = newRequiredValues
-					assetTypeObj = newAssetType
 				case "label":
-					labelValue, err := CheckValue(value, true, "string", "label")
+					labelValue, err := assets.CheckValue(value, true, "string", "label")
 					if err != nil {
 						return nil, errors.WrapError(err, "invalid label value")
 					}
 					assetTypeObj.Label = labelValue.(string)
 				case "description":
-					descriptionValue, err := CheckValue(value, true, "string", "description")
+					descriptionValue, err := assets.CheckValue(value, true, "string", "description")
 					if err != nil {
 						return nil, errors.WrapError(err, "invalid description value")
 					}
@@ -81,7 +71,7 @@ var UpdateAssetType = Transaction{
 					readersArr, ok := value.([]interface{})
 					if ok {
 						for _, reader := range readersArr {
-							readerValue, err := CheckValue(reader, false, "string", "reader")
+							readerValue, err := assets.CheckValue(reader, false, "string", "reader")
 							if err != nil {
 								return nil, errors.WrapError(err, "invalid reader value")
 							}
@@ -90,6 +80,21 @@ var UpdateAssetType = Transaction{
 						}
 						assetTypeObj.Readers = readers
 					}
+				case "props":
+					propsArr, ok := value.([]interface{})
+					if !ok {
+						return nil, errors.NewCCError("invalid props array", http.StatusBadRequest)
+					}
+					emptyAssets, err := checkEmptyAssets(stub, tagValue.(string))
+					if err != nil {
+						return nil, errors.WrapError(err, "failed to check if there assets for tag")
+					}
+					newAssetType, newRequiredValues, err := handleProps(assetTypeObj, propsArr, emptyAssets)
+					if err != nil {
+						return nil, errors.WrapError(err, "invalid props array")
+					}
+					requiredValues[tagValue.(string)] = newRequiredValues
+					assetTypeObj = newAssetType
 				default:
 					continue
 				}
@@ -104,7 +109,7 @@ var UpdateAssetType = Transaction{
 		for k, v := range requiredValues {
 			requiredValuesMap := v.([]map[string]interface{})
 			if len(requiredValuesMap) > 0 {
-				InitilizeDefaultValues(stub, k, requiredValuesMap)
+				initilizeDefaultValues(stub, k, requiredValuesMap)
 			}
 		}
 
@@ -117,7 +122,7 @@ var UpdateAssetType = Transaction{
 	},
 }
 
-func handleProps(assetType assets.AssetType, propMap []interface{}) (assets.AssetType, []map[string]interface{}, errors.ICCError) {
+func handleProps(assetType assets.AssetType, propMap []interface{}, emptyAssets bool) (assets.AssetType, []map[string]interface{}, errors.ICCError) {
 	propObj := assetType.Props
 	requiredValues := make([]map[string]interface{}, 0)
 
@@ -127,23 +132,26 @@ func handleProps(assetType assets.AssetType, propMap []interface{}) (assets.Asse
 			return assetType, nil, errors.NewCCError("invalid prop object", http.StatusBadRequest)
 		}
 
-		tag, err := CheckValue(v["tag"], false, "string", "tag")
+		// Get "tag" and "delete" values
+		tag, err := assets.CheckValue(v["tag"], false, "string", "tag")
 		if err != nil {
 			return assetType, nil, errors.WrapError(err, "invalid tag value")
 		}
 		tagValue := tag.(string)
 
-		hasProp := assetType.HasProp(tagValue)
-
-		delete, err := CheckValue(v["delete"], false, "boolean", "delete")
+		delete, err := assets.CheckValue(v["delete"], false, "boolean", "delete")
 		if err != nil {
 			return assetType, nil, errors.WrapError(err, "invalid delete info")
 		}
 		deleteVal := delete.(bool)
 
+		hasProp := assetType.HasProp(tagValue)
+
 		if deleteVal && !hasProp {
+			// Deleting nexistant prop
 			return assetType, nil, errors.WrapError(err, "attempt to delete inexistent prop")
 		} else if deleteVal && hasProp {
+			// Prop deletion
 			for i, prop := range propObj {
 				if prop.Tag == tagValue {
 					if prop.IsKey {
@@ -153,15 +161,16 @@ func handleProps(assetType assets.AssetType, propMap []interface{}) (assets.Asse
 				}
 			}
 		} else if !hasProp && !deleteVal {
-			// ? Should you be able to create a isKey prop?
-			required, err := CheckValue(v["required"], false, "boolean", "required")
+			// Prop creation
+			required, err := assets.CheckValue(v["required"], false, "boolean", "required")
 			if err != nil {
 				return assetType, nil, errors.WrapError(err, "invalid required info")
 			}
 			requiredVal := required.(bool)
+
 			if requiredVal {
 				defaultValue, ok := v["defaultValue"]
-				if !ok {
+				if !ok && !emptyAssets {
 					return assetType, nil, errors.NewCCError("required prop must have a default value in case of existing assets", http.StatusBadRequest)
 				}
 
@@ -171,16 +180,18 @@ func handleProps(assetType assets.AssetType, propMap []interface{}) (assets.Asse
 				}
 				requiredValues = append(requiredValues, requiredValue)
 			}
-			newProp, err := BuildAssetProp(v)
+
+			newProp, err := assets.BuildAssetProp(v)
 			if err != nil {
 				return assetType, nil, errors.WrapError(err, "failed to build prop")
 			}
+
 			propObj = append(propObj, newProp)
 		} else {
-			// ? Should you be able to update a isKey prop?
+			// Prop update
 			for i, prop := range propObj {
 				if prop.Tag == tagValue {
-					required, err := CheckValue(v["required"], false, "boolean", "required")
+					required, err := assets.CheckValue(v["required"], false, "boolean", "required")
 					if err != nil {
 						return assetType, nil, errors.WrapError(err, "invalid required info")
 					}
@@ -192,7 +203,7 @@ func handleProps(assetType assets.AssetType, propMap []interface{}) (assets.Asse
 					}
 
 					if !prop.Required && requiredVal {
-						if defaultValue == nil {
+						if defaultValue == nil && !emptyAssets {
 							return assetType, nil, errors.NewCCError("required prop must have a default value in case of existing assets", http.StatusBadRequest)
 						}
 
@@ -203,7 +214,7 @@ func handleProps(assetType assets.AssetType, propMap []interface{}) (assets.Asse
 						requiredValues = append(requiredValues, requiredValue)
 					}
 
-					updatedProp, err := handlePropUpdate(prop, v)
+					updatedProp, err := assets.HandlePropUpdate(prop, v)
 					if err != nil {
 						return assetType, nil, errors.WrapError(err, "failed to update prop")
 					}
@@ -217,87 +228,7 @@ func handleProps(assetType assets.AssetType, propMap []interface{}) (assets.Asse
 	return assetType, requiredValues, nil
 }
 
-func handlePropUpdate(assetProps assets.AssetProp, propMap map[string]interface{}) (assets.AssetProp, errors.ICCError) {
-	// ? Update tag?
-	handleDefaultValue := false
-	for k, v := range propMap {
-		switch k {
-		case "label":
-			labelValue, err := CheckValue(v, true, "string", "label")
-			if err != nil {
-				return assetProps, errors.WrapError(err, "invalid label value")
-			}
-			assetProps.Label = labelValue.(string)
-		case "description":
-			descriptionValue, err := CheckValue(v, true, "string", "description")
-			if err != nil {
-				return assetProps, errors.WrapError(err, "invalid description value")
-			}
-			assetProps.Description = descriptionValue.(string)
-		case "isKey":
-			// TODO: Allow isKey to be updated?
-			isKeyValue, err := CheckValue(v, true, "boolean", "isKey")
-			if err != nil {
-				return assetProps, errors.WrapError(err, "invalid isKey value")
-			}
-			assetProps.IsKey = isKeyValue.(bool)
-		case "required":
-			requiredValue, err := CheckValue(v, true, "boolean", "required")
-			if err != nil {
-				return assetProps, errors.WrapError(err, "invalid required value")
-			}
-			assetProps.Required = requiredValue.(bool)
-		case "readOnly":
-			readOnlyValue, err := CheckValue(v, true, "boolean", "readOnly")
-			if err != nil {
-				return assetProps, errors.WrapError(err, "invalid readOnly value")
-			}
-			assetProps.ReadOnly = readOnlyValue.(bool)
-		case "defaultValue":
-			handleDefaultValue = true
-		case "dataType":
-			dataTypeValue, err := CheckValue(propMap["dataType"], true, "string", "dataType")
-			if err != nil {
-				return assets.AssetProp{}, errors.WrapError(err, "invalid dataType value")
-			}
-
-			err = CheckDataType(dataTypeValue.(string))
-			if err != nil {
-				return assets.AssetProp{}, errors.WrapError(err, "failed checking data type")
-			}
-			assetProps.DataType = dataTypeValue.(string)
-		case "writeres":
-			writers := make([]string, 0)
-			writersArr, ok := v.([]interface{})
-			if ok {
-				for _, writer := range writersArr {
-					writerValue, err := CheckValue(writer, false, "string", "writer")
-					if err != nil {
-						return assets.AssetProp{}, errors.WrapError(err, "invalid writer value")
-					}
-
-					writers = append(writers, writerValue.(string))
-				}
-			}
-			assetProps.Writers = writers
-		default:
-			continue
-		}
-	}
-
-	if handleDefaultValue {
-		defaultValue, err := assets.ValidateProp(propMap["defaultValue"], assetProps)
-		if err != nil {
-			return assets.AssetProp{}, errors.WrapError(err, "invalid Default Value")
-		}
-
-		assetProps.DefaultValue = defaultValue
-	}
-
-	return assetProps, nil
-}
-
-func CheckExistingAssets(stub *sw.StubWrapper, tag string) (bool, errors.ICCError) {
+func checkEmptyAssets(stub *sw.StubWrapper, tag string) (bool, errors.ICCError) {
 	query := fmt.Sprintf(
 		`{
 			"selector": {
@@ -313,13 +244,13 @@ func CheckExistingAssets(stub *sw.StubWrapper, tag string) (bool, errors.ICCErro
 	}
 
 	if resultsIterator.HasNext() {
-		return false, nil
+		return true, nil
 	}
 
-	return true, nil
+	return false, nil
 }
 
-func InitilizeDefaultValues(stub *sw.StubWrapper, assetTag string, defaultValuesMap []map[string]interface{}) ([]interface{}, errors.ICCError) {
+func initilizeDefaultValues(stub *sw.StubWrapper, assetTag string, defaultValuesMap []map[string]interface{}) ([]interface{}, errors.ICCError) {
 	query := fmt.Sprintf(
 		`{
 			"selector": {
@@ -359,7 +290,6 @@ func InitilizeDefaultValues(stub *sw.StubWrapper, assetTag string, defaultValues
 			if _, ok := assetMap[propTag]; !ok {
 				assetMap[propTag] = propMap["defaultValue"]
 			}
-
 		}
 
 		assetMap, err = asset.Update(stub, assetMap)

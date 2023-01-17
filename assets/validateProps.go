@@ -43,7 +43,7 @@ func (a Asset) ValidateProps() errors.ICCError {
 		}
 
 		// Validate data types
-		propInterface, err := ValidateProp(propInterface, prop)
+		propInterface, err := validateProp(propInterface, prop)
 		if err != nil {
 			msg := fmt.Sprintf("error validating asset '%s' property", prop.Tag)
 			return errors.WrapError(err, msg)

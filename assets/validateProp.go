@@ -9,7 +9,7 @@ import (
 )
 
 // validateProp checks if a given assetProp is valid according to the given property definition
-func ValidateProp(prop interface{}, propDef AssetProp) (interface{}, error) {
+func validateProp(prop interface{}, propDef AssetProp) (interface{}, error) {
 	var isArray bool
 	dataTypeName := propDef.DataType
 	if strings.HasPrefix(dataTypeName, "[]") {

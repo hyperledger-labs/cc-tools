@@ -27,22 +27,23 @@ func UpdateAssetList(l []AssetType) {
 	assetTypeList = append(assetTypeList, l...)
 }
 
-// RemoveAssetType removes an asset type from an assetTypeList and returns a copy of the new list
-func RemoveAssetType(tag string, assetTypeList []AssetType) []AssetType {
-	for i, assetType := range assetTypeList {
+// RemoveAssetType removes an asset type from an AssetType List and returns a copy of the new list
+func RemoveAssetType(tag string, l []AssetType) []AssetType {
+	for i, assetType := range l {
 		if assetType.Tag == tag {
-			assetTypeList = append(assetTypeList[:i], assetTypeList[i+1:]...)
+			l = append(l[:i], l[i+1:]...)
 		}
 	}
-	return assetTypeList
+	return l
 }
 
-// ReplaceAssetType replaces an asset type from an assetTypeList with an updated version and returns a copy of the new list
-func ReplaceAssetType(assetType AssetType, assetTypeList []AssetType) []AssetType {
-	for i, v := range assetTypeList {
+// ReplaceAssetType replaces an asset type from an AssetType List with an updated version and returns a copy of the new list
+// This function does not automatically update the assetTypeList variable
+func ReplaceAssetType(assetType AssetType, l []AssetType) []AssetType {
+	for i, v := range l {
 		if v.Tag == assetType.Tag {
-			assetTypeList = append(append(assetTypeList[:i], assetType), assetTypeList[i+1:]...)
+			l = append(append(l[:i], assetType), l[i+1:]...)
 		}
 	}
-	return assetTypeList
+	return l
 }

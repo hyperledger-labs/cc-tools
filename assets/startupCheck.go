@@ -83,7 +83,7 @@ func StartupCheck() errors.ICCError {
 				}
 				// Make sure default value is valid
 				if propDef.DefaultValue != nil {
-					_, err := ValidateProp(propDef.DefaultValue, propDef)
+					_, err := validateProp(propDef.DefaultValue, propDef)
 					if err != nil {
 						return errors.WrapErrorWithStatus(err, fmt.Sprintf("invalid default value in prop '%s' of asset '%s'", propDef.Label, assetType.Label), 500)
 					}
