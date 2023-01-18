@@ -41,14 +41,14 @@ func GetListAssetType() AssetType {
 				Tag:      "id",
 				Label:    "ID",
 				DataType: "string",
-				Writers:  dynamicAssetTypeConfig.AssetAdmins,
+				Writers:  dynamicAssetTypeConfig.AssetAdminsData,
 			},
 			{
 				Required: true,
 				Tag:      "list",
 				Label:    "List",
 				DataType: "@object",
-				Writers:  dynamicAssetTypeConfig.AssetAdmins,
+				Writers:  dynamicAssetTypeConfig.AssetAdminsData,
 			}},
 	}
 	return AssetTypeListData

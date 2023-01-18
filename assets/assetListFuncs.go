@@ -77,7 +77,7 @@ func StoreAssetList(stub *sw.StubWrapper) errors.ICCError {
 		"id":         "primary",
 	})
 	if err != nil {
-		return errors.NewCCError("error gettin asset list key", http.StatusInternalServerError)
+		return errors.NewCCError("error getting asset list key", http.StatusInternalServerError)
 	}
 
 	exists, err := listKey.ExistsInLedger(stub)
