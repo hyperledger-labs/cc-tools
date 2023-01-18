@@ -33,7 +33,6 @@ func GetListAssetType() AssetType {
 		Tag:         "assetTypeListData",
 		Label:       "AssetTypeListData",
 		Description: "AssetTypeListData",
-		Readers:     dynamicAssetTypeConfig.AssetAdmins,
 
 		Props: []AssetProp{
 			{
@@ -49,6 +48,7 @@ func GetListAssetType() AssetType {
 				Tag:      "list",
 				Label:    "List",
 				DataType: "@object",
+				Writers:  dynamicAssetTypeConfig.AssetAdmins,
 			}},
 	}
 	return AssetTypeListData
