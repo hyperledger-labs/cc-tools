@@ -72,7 +72,7 @@ func StoreAssetList(stub *sw.StubWrapper) errors.ICCError {
 		return errors.NewCCError("error marshaling asset list", http.StatusInternalServerError)
 	}
 
-	listKey, err := NewAsset(map[string]interface{}{
+	listKey, err := NewKey(map[string]interface{}{
 		"@assetType": "assetTypeListData",
 		"id":         "primary",
 	})
@@ -114,6 +114,42 @@ func StoreAssetList(stub *sw.StubWrapper) errors.ICCError {
 		if err != nil {
 			return errors.NewCCError("error putting asset list", http.StatusInternalServerError)
 		}
+	}
+
+	return nil
+}
+
+// RestoreAssetList restores the assetList from the blockchain
+func RestoreAssetList(stub *sw.StubWrapper) errors.ICCError {
+	listKey, err := NewKey(map[string]interface{}{
+		"@assetType": "assetTypeListData",
+		"id":         "primary",
+	})
+	if err != nil {
+		return errors.NewCCError("error gettin asset list key", http.StatusInternalServerError)
+	}
+
+	exists, err := listKey.ExistsInLedger(stub)
+	if err != nil {
+		return errors.NewCCError("error checking if asset list exists", http.StatusInternalServerError)
+	}
+
+	if exists {
+		listAsset, err := listKey.Get(stub)
+		if err != nil {
+			return errors.NewCCError("error getting asset list", http.StatusInternalServerError)
+		}
+		listMap := (map[string]interface{})(*listAsset)
+
+		listJson := listMap["list"].([]byte)
+
+		var newList []AssetType
+		nerr := json.Unmarshal(listJson, &newList)
+		if nerr != nil {
+			return errors.NewCCError("error unmarshaling asset list", http.StatusInternalServerError)
+		}
+
+		ReplaceAssetList(newList)
 	}
 
 	return nil
