@@ -18,6 +18,7 @@ var dynamicAssetTypesTxs = []Transaction{
 	CreateAssetType,
 	UpdateAssetType,
 	DeleteAssetType,
+	LoadAssetTypeList,
 }
 
 // TxList returns a copy of the txList variable

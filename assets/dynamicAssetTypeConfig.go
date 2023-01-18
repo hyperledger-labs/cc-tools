@@ -27,7 +27,7 @@ func GetAssetAdminsDynamicAssetType() []string {
 	return dynamicAssetTypeConfig.AssetAdmins
 }
 
-// Get Dynamic AssetType meta type
+// GetListAssetType returns the Dynamic AssetType meta type
 func GetListAssetType() AssetType {
 	var AssetTypeListData = AssetType{
 		Tag:         "assetTypeListData",
