@@ -77,3 +77,41 @@ func (t AssetType) GetPropDef(propTag string) *AssetProp {
 func (t AssetType) IsPrivate() bool {
 	return len(t.Readers) > 0
 }
+
+// ToMap returns a map representation of the asset type.
+func (t AssetType) ToMap() map[string]interface{} {
+	return map[string]interface{}{
+		"tag":         t.Tag,
+		"label":       t.Label,
+		"description": t.Description,
+		"props":       ArrayFromAssetPropList(t.Props),
+		"readers":     t.Readers,
+	}
+}
+
+// AssetTypeFromMap returns an asset type from a map representation.
+func AssetTypeFromMap(m map[string]interface{}) AssetType {
+	return AssetType{
+		Tag:         m["tag"].(string),
+		Label:       m["label"].(string),
+		Description: m["description"].(string),
+		Props:       AssetPropListFromArray(m["props"].([]map[string]interface{})),
+		Readers:     m["readers"].([]string),
+	}
+}
+
+// ArrayFromAssetTypeList converts an array of AssetType to an array of map[string]interface
+func ArrayFromAssetTypeList(assetTypes []AssetType) (array []map[string]interface{}) {
+	for _, assetType := range assetTypes {
+		array = append(array, assetType.ToMap())
+	}
+	return
+}
+
+// AssetTypeListFromArray converts an array of map[string]interface to an array of AssetType
+func AssetTypeListFromArray(array []map[string]interface{}) (assetTypes []AssetType) {
+	for _, m := range array {
+		assetTypes = append(assetTypes, AssetTypeFromMap(m))
+	}
+	return
+}

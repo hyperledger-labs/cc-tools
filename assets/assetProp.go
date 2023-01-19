@@ -43,3 +43,51 @@ type AssetProp struct {
 	// Validate is a function called when validating property format.
 	Validate func(interface{}) error `json:"-"`
 }
+
+// ToMap converts an AssetProp to a map[string]interface{}
+func (p AssetProp) ToMap() map[string]interface{} {
+	return map[string]interface{}{
+		"tag":          p.Tag,
+		"label":        p.Label,
+		"description":  p.Description,
+		"isKey":        p.IsKey,
+		"required":     p.Required,
+		"readOnly":     p.ReadOnly,
+		"defaultValue": p.DefaultValue,
+		"dataType":     p.DataType,
+		"writers":      p.Writers,
+	}
+}
+
+// AssetPropFromMap converts a map[string]interface{} to an AssetProp
+func AssetPropFromMap(m map[string]interface{}) AssetProp {
+	return AssetProp{
+		Tag:          m["tag"].(string),
+		Label:        m["label"].(string),
+		Description:  m["description"].(string),
+		IsKey:        m["isKey"].(bool),
+		Required:     m["required"].(bool),
+		ReadOnly:     m["readOnly"].(bool),
+		DefaultValue: m["defaultValue"],
+		DataType:     m["dataType"].(string),
+		Writers:      m["writers"].([]string),
+	}
+}
+
+// ArrayFromAssetPropList converts an array of AssetProp to an array of map[string]interface
+func ArrayFromAssetPropList(a []AssetProp) []map[string]interface{} {
+	list := []map[string]interface{}{}
+	for _, m := range a {
+		list = append(list, m.ToMap())
+	}
+	return list
+}
+
+// AssetPropListFromArray converts an array of map[string]interface to an array of AssetProp
+func AssetPropListFromArray(a []map[string]interface{}) []AssetProp {
+	list := []AssetProp{}
+	for _, m := range a {
+		list = append(list, AssetPropFromMap(m))
+	}
+	return list
+}
