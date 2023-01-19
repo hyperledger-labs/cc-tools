@@ -99,7 +99,7 @@ func AssetTypeFromMap(m map[string]interface{}) AssetType {
 		Tag:         m["tag"].(string),
 		Label:       m["label"].(string),
 		Description: m["description"].(string),
-		Props:       AssetPropListFromArray(m["props"].([]map[string]interface{})),
+		Props:       AssetPropListFromArray(m["props"].([]interface{})),
 		Readers:     m["readers"].([]string),
 		Dynamic:     m["dynamic"].(bool),
 	}
@@ -114,9 +114,9 @@ func ArrayFromAssetTypeList(assetTypes []AssetType) (array []map[string]interfac
 }
 
 // AssetTypeListFromArray converts an array of map[string]interface to an array of AssetType
-func AssetTypeListFromArray(array []map[string]interface{}) (assetTypes []AssetType) {
-	for _, m := range array {
-		assetTypes = append(assetTypes, AssetTypeFromMap(m))
+func AssetTypeListFromArray(array []interface{}) (assetTypes []AssetType) {
+	for _, v := range array {
+		assetTypes = append(assetTypes, AssetTypeFromMap(v.(map[string]interface{})))
 	}
 	return
 }

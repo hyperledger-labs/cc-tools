@@ -138,7 +138,7 @@ func RestoreAssetList(stub *sw.StubWrapper) errors.ICCError {
 		}
 		listMap := (map[string]interface{})(*listAsset)
 
-		l := AssetTypeListFromArray(listMap["list"].([]map[string]interface{}))
+		l := AssetTypeListFromArray(listMap["list"].([]interface{}))
 
 		ReplaceAssetList(l)
 	}

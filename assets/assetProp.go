@@ -84,10 +84,10 @@ func ArrayFromAssetPropList(a []AssetProp) []map[string]interface{} {
 }
 
 // AssetPropListFromArray converts an array of map[string]interface to an array of AssetProp
-func AssetPropListFromArray(a []map[string]interface{}) []AssetProp {
+func AssetPropListFromArray(a []interface{}) []AssetProp {
 	list := []AssetProp{}
 	for _, m := range a {
-		list = append(list, AssetPropFromMap(m))
+		list = append(list, AssetPropFromMap(m.(map[string]interface{})))
 	}
 	return list
 }
