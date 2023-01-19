@@ -85,7 +85,7 @@ func StoreAssetList(stub *sw.StubWrapper) errors.ICCError {
 	if exists {
 		listAsset, err := listKey.Get(stub)
 		if err != nil {
-			return errors.NewCCError("error getting asset list", http.StatusInternalServerError)
+			return errors.WrapError(err, "error getting asset list")
 		}
 		listMap := (map[string]interface{})(*listAsset)
 
@@ -93,7 +93,7 @@ func StoreAssetList(stub *sw.StubWrapper) errors.ICCError {
 
 		_, err = listAsset.Update(stub, listMap)
 		if err != nil {
-			return errors.NewCCError("error updating asset list", http.StatusInternalServerError)
+			return errors.WrapError(err, "error updating asset list")
 		}
 	} else {
 		listMap := map[string]interface{}{
@@ -104,12 +104,12 @@ func StoreAssetList(stub *sw.StubWrapper) errors.ICCError {
 
 		listAsset, err := NewAsset(listMap)
 		if err != nil {
-			return errors.NewCCError("error creating asset list", http.StatusInternalServerError)
+			return errors.WrapError(err, "error creating asset list")
 		}
 
 		_, err = listAsset.PutNew(stub)
 		if err != nil {
-			return errors.NewCCError("error putting asset list", http.StatusInternalServerError)
+			return errors.WrapError(err, "error putting asset list")
 		}
 	}
 
