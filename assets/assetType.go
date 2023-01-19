@@ -27,6 +27,9 @@ type AssetType struct {
 
 	// Validate is a function called when validating asset as a whole.
 	Validate func(Asset) error `json:"-"`
+
+	// Dynamic is a flag that indicates if the asset type is dynamic.
+	Dynamic bool `json:"dynamic,omitempty"`
 }
 
 // Keys returns a list of asset properties which are defined as primary keys. (IsKey == true)
@@ -86,6 +89,7 @@ func (t AssetType) ToMap() map[string]interface{} {
 		"description": t.Description,
 		"props":       ArrayFromAssetPropList(t.Props),
 		"readers":     t.Readers,
+		"dynamic":     t.Dynamic,
 	}
 }
 
@@ -97,6 +101,7 @@ func AssetTypeFromMap(m map[string]interface{}) AssetType {
 		Description: m["description"].(string),
 		Props:       AssetPropListFromArray(m["props"].([]map[string]interface{})),
 		Readers:     m["readers"].([]string),
+		Dynamic:     m["dynamic"].(bool),
 	}
 }
 

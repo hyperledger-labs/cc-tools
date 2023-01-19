@@ -53,6 +53,11 @@ var UpdateAssetType = Transaction{
 			}
 			assetTypeObj := *assetTypeCheck
 
+			// Verify if Asset Type allows dynamic modifications
+			if assetTypeObj.Dynamic {
+				return nil, errors.WrapError(err, fmt.Sprintf("asset type '%s' does not allows dynamic modifications", tagValue.(string)))
+			}
+
 			for key, value := range assetTypeMap {
 				switch key {
 				case "label":

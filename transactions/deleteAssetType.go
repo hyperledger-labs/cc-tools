@@ -53,6 +53,11 @@ var DeleteAssetType = Transaction{
 				return nil, errors.WrapError(err, fmt.Sprintf("asset type '%s' not found", tagValue.(string)))
 			}
 
+			// Verify if Asset Type allows dynamic modifications
+			if !assetTypeCheck.Dynamic {
+				return nil, errors.WrapError(err, fmt.Sprintf("asset type '%s' does not allows dynamic modifications", tagValue.(string)))
+			}
+
 			// Verify Asset Type usage
 			res["assets"], err = handleRegisteredAssets(stub, tagValue.(string), forceValue.(bool))
 			if err != nil {
