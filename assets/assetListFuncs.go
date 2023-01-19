@@ -140,6 +140,8 @@ func RestoreAssetList(stub *sw.StubWrapper) errors.ICCError {
 
 		l := AssetTypeListFromArray(listMap["list"].([]interface{}))
 
+		l = prepareBackupList(l)
+
 		ReplaceAssetList(l)
 	}
 
@@ -159,4 +161,28 @@ func SetEventForList(stub *sw.StubWrapper) errors.ICCError {
 	}
 
 	return nil
+}
+
+func prepareBackupList(backup []AssetType) []AssetType {
+	assetList := AssetTypeList()
+	for _, assetTypeBkp := range backup {
+		if !assetTypeBkp.Dynamic {
+			continue
+		}
+
+		exists := false
+		for i, assetType := range assetList {
+			if assetType.Tag == assetTypeBkp.Tag {
+				exists = true
+
+				assetTypeBkp.Validate = assetType.Validate
+				assetList = append(append(assetList[:i], assetType), assetList[i+1:]...)
+			}
+		}
+		if !exists {
+			assetList = append(assetList, assetTypeBkp)
+		}
+	}
+
+	return assetList
 }
