@@ -61,13 +61,7 @@ func (p AssetProp) ToMap() map[string]interface{} {
 
 // AssetPropFromMap converts a map[string]interface{} to an AssetProp
 func AssetPropFromMap(m map[string]interface{}) AssetProp {
-	writersArr := m["writers"].([]interface{})
-	writers := []string{}
-	for _, w := range writersArr {
-		writers = append(writers, w.(string))
-	}
-
-	return AssetProp{
+	res := AssetProp{
 		Tag:          m["tag"].(string),
 		Label:        m["label"].(string),
 		Description:  m["description"].(string),
@@ -76,8 +70,20 @@ func AssetPropFromMap(m map[string]interface{}) AssetProp {
 		ReadOnly:     m["readOnly"].(bool),
 		DefaultValue: m["defaultValue"],
 		DataType:     m["dataType"].(string),
-		Writers:      writers,
 	}
+
+	writers := make([]string, 0)
+	writersArr, ok := m["writers"].([]interface{})
+	if ok {
+		for _, w := range writersArr {
+			writers = append(writers, w.(string))
+		}
+	}
+	if len(writers) > 0 {
+		res.Writers = writers
+	}
+
+	return res
 }
 
 // ArrayFromAssetPropList converts an array of AssetProp to an array of map[string]interface
