@@ -95,7 +95,7 @@ func (t AssetType) ToMap() map[string]interface{} {
 
 // AssetTypeFromMap returns an asset type from a map representation.
 func AssetTypeFromMap(m map[string]interface{}) AssetType {
-	readersArr := m["writers"].([]interface{})
+	readersArr := m["readers"].([]interface{})
 	readers := []string{}
 	for _, r := range readersArr {
 		readers = append(readers, r.(string))
