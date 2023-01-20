@@ -43,7 +43,7 @@ func UpdateAssetList(l []AssetType) {
 	assetTypeList = append(assetTypeList, l...)
 }
 
-// RemoveAssetType removes an asset type from an AssetType List and returns a copy of the new list
+// RemoveAssetType removes an asset type from an AssetType List and returns the new list
 func RemoveAssetType(tag string, l []AssetType) []AssetType {
 	for i, assetType := range l {
 		if assetType.Tag == tag {
@@ -53,7 +53,7 @@ func RemoveAssetType(tag string, l []AssetType) []AssetType {
 	return l
 }
 
-// ReplaceAssetType replaces an asset type from an AssetType List with an updated version and returns a copy of the new list
+// ReplaceAssetType replaces an asset type from an AssetType List with an updated version and returns the new list
 // This function does not automatically update the assetTypeList variable
 func ReplaceAssetType(assetType AssetType, l []AssetType) []AssetType {
 	for i, v := range l {
@@ -117,7 +117,7 @@ func StoreAssetList(stub *sw.StubWrapper) errors.ICCError {
 }
 
 // RestoreAssetList restores the assetList from the blockchain
-func RestoreAssetList(stub *sw.StubWrapper) errors.ICCError {
+func RestoreAssetList(stub *sw.StubWrapper, init bool) errors.ICCError {
 	listKey, err := NewKey(map[string]interface{}{
 		"@assetType": "assetTypeListData",
 		"id":         "primary",
@@ -140,7 +140,7 @@ func RestoreAssetList(stub *sw.StubWrapper) errors.ICCError {
 
 		l := AssetTypeListFromArray(listMap["list"].([]interface{}))
 
-		l = prepareBackupList(l)
+		l = getRestoredList(l, init)
 
 		ReplaceAssetList(l)
 	}
@@ -163,24 +163,37 @@ func SetEventForList(stub *sw.StubWrapper) errors.ICCError {
 	return nil
 }
 
-func prepareBackupList(backup []AssetType) []AssetType {
+func getRestoredList(storedList []AssetType, init bool) []AssetType {
 	assetList := AssetTypeList()
-	for _, assetTypeBkp := range backup {
-		if !assetTypeBkp.Dynamic {
+	deleteds := AssetTypeList()
+
+	for _, assetTypeStored := range storedList {
+		if !assetTypeStored.Dynamic {
 			continue
 		}
 
 		exists := false
 		for i, assetType := range assetList {
-			if assetType.Tag == assetTypeBkp.Tag {
+			if assetType.Tag == assetTypeStored.Tag {
 				exists = true
 
-				assetTypeBkp.Validate = assetType.Validate
+				assetTypeStored.Validate = assetType.Validate
 				assetList = append(append(assetList[:i], assetType), assetList[i+1:]...)
+				deleteds = append(deleteds[:i], deleteds[i+1:]...)
 			}
 		}
 		if !exists {
-			assetList = append(assetList, assetTypeBkp)
+			assetList = append(assetList, assetTypeStored)
+		}
+	}
+
+	if !init {
+		for _, assetType := range deleteds {
+			if assetType.Dynamic {
+				continue
+			}
+
+			assetList = RemoveAssetType(assetType.Tag, assetList)
 		}
 	}
 

@@ -21,7 +21,7 @@ var LoadAssetTypeList = Transaction{
 	Args:   ArgList{},
 	Routine: func(stub *sw.StubWrapper, req map[string]interface{}) ([]byte, errors.ICCError) {
 
-		err := assets.RestoreAssetList(stub)
+		err := assets.RestoreAssetList(stub, false)
 		if err != nil {
 			return nil, errors.WrapError(err, "failed to restore asset list")
 		}
