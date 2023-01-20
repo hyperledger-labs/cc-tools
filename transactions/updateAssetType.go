@@ -130,8 +130,13 @@ var UpdateAssetType = Transaction{
 			}
 		}
 
-		resBytes, err := json.Marshal(response)
+		err := assets.SetEventForList(stub)
 		if err != nil {
+			return nil, errors.WrapError(err, "failed to set event for asset list")
+		}
+
+		resBytes, nerr := json.Marshal(response)
+		if nerr != nil {
 			return nil, errors.WrapError(err, "failed to marshal response")
 		}
 

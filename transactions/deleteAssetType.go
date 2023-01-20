@@ -79,8 +79,13 @@ var DeleteAssetType = Transaction{
 
 		assets.ReplaceAssetList(assetTypeList)
 
-		resBytes, err := json.Marshal(resArr)
+		err := assets.SetEventForList(stub)
 		if err != nil {
+			return nil, errors.WrapError(err, "failed to set event for asset list")
+		}
+
+		resBytes, nerr := json.Marshal(resArr)
+		if nerr != nil {
 			return nil, errors.WrapError(err, "failed to marshal response")
 		}
 
