@@ -188,12 +188,12 @@ func getRestoredList(storedList []AssetType, init bool) []AssetType {
 	}
 
 	if !init {
-		for _, assetType := range deleteds {
-			if assetType.Dynamic {
+		for _, deleted := range deleteds {
+			if !deleted.Dynamic {
 				continue
 			}
 
-			assetList = RemoveAssetType(assetType.Tag, assetList)
+			assetList = RemoveAssetType(deleted.Tag, assetList)
 		}
 	}
 
