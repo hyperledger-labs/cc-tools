@@ -44,7 +44,9 @@ func InitTxList(l []Transaction) {
 	if assets.GetEnabledDynamicAssetType() {
 		callers := assets.GetAssetAdminsDynamicAssetType()
 		for i := range dynamicAssetTypesTxs {
-			dynamicAssetTypesTxs[i].Callers = callers
+			if dynamicAssetTypesTxs[i].Tag != "loadAssetTypeList" {
+				dynamicAssetTypesTxs[i].Callers = callers
+			}
 		}
 		txList = append(txList, dynamicAssetTypesTxs...)
 	}
