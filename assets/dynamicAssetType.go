@@ -12,7 +12,4 @@ type DynamicAssetType struct {
 	// eg. []string{`$org\dMSP`} and cc-tools will
 	// check for a match with regular expression `org\dMSP`
 	AssetAdmins []string `json:"assetAdmins"`
-
-	// ? How to mix both?
-	AssetAdminsData []string `json:"assetAdminsData"`
 }
