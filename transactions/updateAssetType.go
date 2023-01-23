@@ -130,7 +130,12 @@ var UpdateAssetType = Transaction{
 			}
 		}
 
-		err := assets.SetEventForList(stub)
+		err := assets.StoreAssetList(stub)
+		if err != nil {
+			return nil, errors.WrapError(err, "failed to store asset list")
+		}
+
+		err = assets.SetEventForList(stub)
 		if err != nil {
 			return nil, errors.WrapError(err, "failed to set event for asset list")
 		}
