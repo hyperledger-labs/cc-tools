@@ -1,7 +1,6 @@
 package assets
 
 import (
-	"encoding/json"
 	"net/http"
 
 	"github.com/goledgerdev/cc-tools/errors"
@@ -187,19 +186,4 @@ func getRestoredList(storedList []AssetType, init bool) []AssetType {
 	}
 
 	return assetList
-}
-
-func SetEventForList(stub *sw.StubWrapper) errors.ICCError {
-	list := AssetTypeList()
-	listJson, err := json.Marshal(list)
-	if err != nil {
-		return errors.NewCCError("error marshaling asset list", http.StatusInternalServerError)
-	}
-
-	err = stub.Stub.SetEvent("assetListChange", listJson)
-	if err != nil {
-		return errors.NewCCError("error setting event for asset list", http.StatusInternalServerError)
-	}
-
-	return nil
 }
