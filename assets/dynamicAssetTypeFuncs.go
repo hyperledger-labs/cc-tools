@@ -115,12 +115,6 @@ func HandlePropUpdate(assetProps AssetProp, propMap map[string]interface{}) (Ass
 				return assetProps, errors.WrapError(err, "invalid description value")
 			}
 			assetProps.Description = descriptionValue.(string)
-		case "isKey":
-			isKeyValue, err := CheckValue(v, true, "boolean", "isKey")
-			if err != nil {
-				return assetProps, errors.WrapError(err, "invalid isKey value")
-			}
-			assetProps.IsKey = isKeyValue.(bool)
 		case "required":
 			requiredValue, err := CheckValue(v, true, "boolean", "required")
 			if err != nil {
@@ -133,16 +127,6 @@ func HandlePropUpdate(assetProps AssetProp, propMap map[string]interface{}) (Ass
 				return assetProps, errors.WrapError(err, "invalid readOnly value")
 			}
 			assetProps.ReadOnly = readOnlyValue.(bool)
-		case "dataType":
-			dataTypeValue, err := CheckValue(propMap["dataType"], true, "string", "dataType")
-			if err != nil {
-				return AssetProp{}, errors.WrapError(err, "invalid dataType value")
-			}
-			err = CheckDataType(dataTypeValue.(string))
-			if err != nil {
-				return AssetProp{}, errors.WrapError(err, "failed checking data type")
-			}
-			assetProps.DataType = dataTypeValue.(string)
 		case "writeres":
 			writers := make([]string, 0)
 			writersArr, ok := v.([]interface{})
@@ -177,6 +161,7 @@ func HandlePropUpdate(assetProps AssetProp, propMap map[string]interface{}) (Ass
 func CheckDataType(dataType string) errors.ICCError {
 	trimDataType := strings.TrimPrefix(dataType, "[]")
 
+	// ? How to handle array of assets types?
 	if strings.HasPrefix(trimDataType, "->") {
 		trimDataType = strings.TrimPrefix(trimDataType, "->")
 

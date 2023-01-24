@@ -109,7 +109,6 @@ func buildAssetType(typeMap map[string]interface{}) (assets.AssetType, errors.IC
 		Description: descriptionValue.(string),
 		Props:       props,
 		Dynamic:     true,
-		// Validate
 	}
 
 	// Readers

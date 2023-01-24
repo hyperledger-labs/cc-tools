@@ -11,6 +11,7 @@ import (
 )
 
 // ? Update tag name?
+// ? Allow dataType to be updated?
 // ? Allow isKey prop to be updated/created/removed?
 
 // UpdateAssetType is the transaction which updates a dynamic Asset Type
