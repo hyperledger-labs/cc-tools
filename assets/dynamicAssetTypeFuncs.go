@@ -127,7 +127,7 @@ func HandlePropUpdate(assetProps AssetProp, propMap map[string]interface{}) (Ass
 				return assetProps, errors.WrapError(err, "invalid readOnly value")
 			}
 			assetProps.ReadOnly = readOnlyValue.(bool)
-		case "writeres":
+		case "writers":
 			writers := make([]string, 0)
 			writersArr, ok := v.([]interface{})
 			if ok {
