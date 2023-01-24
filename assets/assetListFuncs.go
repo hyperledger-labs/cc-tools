@@ -57,7 +57,7 @@ func RemoveAssetType(tag string, l []AssetType) []AssetType {
 func ReplaceAssetType(assetType AssetType, l []AssetType) []AssetType {
 	for i, v := range l {
 		if v.Tag == assetType.Tag {
-			l = append(append(l[:i], assetType), l[i+1:]...)
+			l[i] = assetType
 		}
 	}
 	return l
@@ -147,6 +147,7 @@ func RestoreAssetList(stub *sw.StubWrapper, init bool) errors.ICCError {
 	return nil
 }
 
+// getRestoredList reconstructs the assetTypeList from the stored list comparing to the current list
 func getRestoredList(storedList []AssetType, init bool) []AssetType {
 	assetList := AssetTypeList()
 
