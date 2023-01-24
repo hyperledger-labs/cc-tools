@@ -46,21 +46,23 @@ var CreateAssetType = Transaction{
 			}
 		}
 
-		assets.UpdateAssetList(list)
+		if len(list) > 0 {
+			assets.UpdateAssetList(list)
 
-		err := assets.StoreAssetList(stub)
-		if err != nil {
-			return nil, errors.WrapError(err, "failed to store asset list")
-		}
+			err := assets.StoreAssetList(stub)
+			if err != nil {
+				return nil, errors.WrapError(err, "failed to store asset list")
+			}
 
-		err = assets.SetEventForList(stub)
-		if err != nil {
-			return nil, errors.WrapError(err, "failed to set event for asset list")
+			err = assets.SetEventForList(stub)
+			if err != nil {
+				return nil, errors.WrapError(err, "failed to set event for asset list")
+			}
 		}
 
 		resBytes, nerr := json.Marshal(list)
 		if nerr != nil {
-			return nil, errors.WrapError(err, "failed to marshal response")
+			return nil, errors.WrapError(nerr, "failed to marshal response")
 		}
 
 		return resBytes, nil
