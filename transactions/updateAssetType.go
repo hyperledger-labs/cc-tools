@@ -271,11 +271,7 @@ func checkEmptyAssets(stub *sw.StubWrapper, tag string) (bool, errors.ICCError) 
 		return false, errors.WrapError(err, "failed to get query result")
 	}
 
-	if resultsIterator.HasNext() {
-		return true, nil
-	}
-
-	return false, nil
+	return !resultsIterator.HasNext(), nil
 }
 
 func initilizeDefaultValues(stub *sw.StubWrapper, assetTag string, defaultValuesMap []map[string]interface{}) ([]interface{}, errors.ICCError) {
