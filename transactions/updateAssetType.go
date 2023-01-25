@@ -307,18 +307,18 @@ func initilizeDefaultValues(stub *sw.StubWrapper, assetTag string, defaultValues
 			return nil, errors.WrapErrorWithStatus(err, "failed to unmarshal queryResponse values", http.StatusInternalServerError)
 		}
 
+		for _, propMap := range defaultValuesMap {
+			propTag := propMap["tag"].(string)
+			if _, ok := data[propTag]; !ok {
+				data[propTag] = propMap["defaultValue"]
+			}
+		}
+
 		asset, err := assets.NewAsset(data)
 		if err != nil {
 			return nil, errors.WrapError(err, "could not assemble asset type")
 		}
 		assetMap := (map[string]interface{})(asset)
-
-		for _, propMap := range defaultValuesMap {
-			propTag := propMap["tag"].(string)
-			if _, ok := assetMap[propTag]; !ok {
-				assetMap[propTag] = propMap["defaultValue"]
-			}
-		}
 
 		assetMap, err = asset.Update(stub, assetMap)
 		if err != nil {

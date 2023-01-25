@@ -10,6 +10,8 @@ import (
 	sw "github.com/goledgerdev/cc-tools/stubwrapper"
 )
 
+// ? Allow delete cascade?
+
 // DeleteAssetType is the transaction which deletes a dynamic Asset Type
 var DeleteAssetType = Transaction{
 	Tag:         "deleteAssetType",
@@ -140,7 +142,7 @@ func handleRegisteredAssets(stub *sw.StubWrapper, tag string, force bool) ([]int
 
 		_, err = asset.Delete(stub)
 		if err != nil {
-			return nil, errors.WrapError(err, "could not force delete asset")
+			return nil, errors.WrapError(err, "could not force delete AssetType assets")
 		}
 	}
 
