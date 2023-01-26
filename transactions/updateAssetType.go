@@ -10,9 +10,7 @@ import (
 	sw "github.com/goledgerdev/cc-tools/stubwrapper"
 )
 
-// ? Update tag name?
-// ? Allow dataType to be updated?
-// ? Allow isKey prop to be updated/created/removed?
+// ! Testar ordem na atualização de propriedades
 
 // UpdateAssetType is the transaction which updates a dynamic Asset Type
 var UpdateAssetType = Transaction{
@@ -212,6 +210,10 @@ func handleProps(assetType assets.AssetType, propMap []interface{}, emptyAssets 
 			newProp, err := assets.BuildAssetProp(v)
 			if err != nil {
 				return assetType, nil, errors.WrapError(err, "failed to build prop")
+			}
+
+			if newProp.IsKey {
+				return assetType, nil, errors.NewCCError("cannot create key prop", http.StatusBadRequest)
 			}
 
 			propObj = append(propObj, newProp)

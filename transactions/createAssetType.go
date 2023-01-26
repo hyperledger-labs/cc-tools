@@ -9,8 +9,6 @@ import (
 	sw "github.com/goledgerdev/cc-tools/stubwrapper"
 )
 
-// ? Hanlde Validate function fields?
-
 // CreateAssetType is the transaction which creates a dynamic Asset Type
 var CreateAssetType = Transaction{
 	Tag:         "createAssetType",

@@ -8,8 +8,6 @@ import (
 	sw "github.com/goledgerdev/cc-tools/stubwrapper"
 )
 
-// ? Hanlde Validate function fields?
-
 // LoadAssetTypeList is the transaction which loads the asset Type list from the blockchain
 var LoadAssetTypeList = Transaction{
 	Tag:         "loadAssetTypeList",
