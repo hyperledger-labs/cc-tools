@@ -149,11 +149,7 @@ func RestoreAssetList(stub *sw.StubWrapper, init bool) errors.ICCError {
 		}
 		listMap := (map[string]interface{})(*listAsset)
 
-		txTimeStr := listMap["lastUpdated"].(string)
-		txTime, nerr := time.Parse(time.RFC3339, txTimeStr)
-		if nerr != nil {
-			return errors.NewCCError("error parsing asset list last updated time", http.StatusInternalServerError)
-		}
+		txTime := listMap["lastUpdated"].(time.Time)
 
 		if GetAssetListUpdateTime().After(txTime) {
 			return nil
