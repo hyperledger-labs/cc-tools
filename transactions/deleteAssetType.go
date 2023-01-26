@@ -61,7 +61,7 @@ var DeleteAssetType = Transaction{
 			}
 
 			// Verify Asset Type usage
-			res["assets"], err = handleRegisteredAssets(stub, tagValue.(string), forceValue.(bool))
+			err = handleRegisteredAssets(stub, tagValue.(string), forceValue.(bool))
 			if err != nil {
 				return nil, errors.WrapError(err, "error checking asset type usage")
 			}
@@ -100,7 +100,7 @@ var DeleteAssetType = Transaction{
 	},
 }
 
-func handleRegisteredAssets(stub *sw.StubWrapper, tag string, force bool) ([]interface{}, errors.ICCError) {
+func handleRegisteredAssets(stub *sw.StubWrapper, tag string, force bool) errors.ICCError {
 	query := fmt.Sprintf(
 		`{
 			"selector": {
@@ -112,41 +112,14 @@ func handleRegisteredAssets(stub *sw.StubWrapper, tag string, force bool) ([]int
 
 	resultsIterator, err := stub.GetQueryResult(query)
 	if err != nil {
-		return nil, errors.WrapError(err, "failed to get query result")
+		return errors.WrapError(err, "failed to get query result")
 	}
 
 	if resultsIterator.HasNext() && !force {
-		return nil, errors.NewCCError(fmt.Sprintf("asset type '%s' is in use", tag), http.StatusBadRequest)
+		return errors.NewCCError(fmt.Sprintf("asset type '%s' is in use", tag), http.StatusBadRequest)
 	}
 
-	res := make([]interface{}, 0)
-	for resultsIterator.HasNext() {
-		queryResponse, err := resultsIterator.Next()
-		if err != nil {
-			return nil, errors.WrapErrorWithStatus(err, "error iterating response", http.StatusInternalServerError)
-		}
-
-		var data map[string]interface{}
-
-		err = json.Unmarshal(queryResponse.Value, &data)
-		if err != nil {
-			return nil, errors.WrapErrorWithStatus(err, "failed to unmarshal queryResponse values", http.StatusInternalServerError)
-		}
-
-		asset, err := assets.NewAsset(data)
-		if err != nil {
-			return nil, errors.WrapError(err, "could not assemble asset type")
-		}
-
-		res = append(res, asset)
-
-		_, err = asset.Delete(stub)
-		if err != nil {
-			return nil, errors.WrapError(err, "could not force delete AssetType assets")
-		}
-	}
-
-	return res, nil
+	return nil
 }
 
 func checkAssetTypeReferences(tag string) errors.ICCError {
