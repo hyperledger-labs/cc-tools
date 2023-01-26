@@ -84,11 +84,6 @@ var DeleteAssetType = Transaction{
 			return nil, errors.WrapError(err, "failed to store asset list")
 		}
 
-		nerr := stub.Stub.SetEvent("assetListChange", nil)
-		if nerr != nil {
-			return nil, errors.NewCCError("error setting event for asset list", http.StatusInternalServerError)
-		}
-
 		resBytes, nerr := json.Marshal(resArr)
 		if nerr != nil {
 			return nil, errors.WrapError(err, "failed to marshal response")
