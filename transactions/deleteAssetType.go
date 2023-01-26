@@ -10,8 +10,6 @@ import (
 	sw "github.com/goledgerdev/cc-tools/stubwrapper"
 )
 
-// ? Allow delete cascade?
-
 // DeleteAssetType is the transaction which deletes a dynamic Asset Type
 var DeleteAssetType = Transaction{
 	Tag:         "deleteAssetType",

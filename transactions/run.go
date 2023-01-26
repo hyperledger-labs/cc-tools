@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"regexp"
 
+	"github.com/goledgerdev/cc-tools/assets"
 	"github.com/goledgerdev/cc-tools/errors"
 	sw "github.com/goledgerdev/cc-tools/stubwrapper"
 	"github.com/hyperledger/fabric-chaincode-go/shim"
@@ -29,6 +30,13 @@ func Run(stub shim.ChaincodeStubInterface) ([]byte, errors.ICCError) {
 
 	sw := &sw.StubWrapper{
 		Stub: stub,
+	}
+
+	if assets.GetEnabledDynamicAssetType() {
+		err := assets.RestoreAssetList(sw, false)
+		if err != nil {
+			return nil, errors.WrapError(err, "failed to restore asset list")
+		}
 	}
 
 	// Verify callers permissions
