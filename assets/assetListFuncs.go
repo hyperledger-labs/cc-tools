@@ -2,6 +2,7 @@ package assets
 
 import (
 	"net/http"
+	"time"
 
 	"github.com/goledgerdev/cc-tools/errors"
 	sw "github.com/goledgerdev/cc-tools/stubwrapper"
@@ -68,6 +69,13 @@ func StoreAssetList(stub *sw.StubWrapper) errors.ICCError {
 	assetList := AssetTypeList()
 	l := ArrayFromAssetTypeList(assetList)
 
+	txTimestamp, err := stub.Stub.GetTxTimestamp()
+	if err != nil {
+		return errors.WrapError(err, "failed to get tx timestamp")
+	}
+	txTime := txTimestamp.AsTime()
+	txTimeStr := txTime.Format(time.RFC3339)
+
 	listKey, err := NewKey(map[string]interface{}{
 		"@assetType": "assetTypeListData",
 		"id":         "primary",
@@ -89,6 +97,7 @@ func StoreAssetList(stub *sw.StubWrapper) errors.ICCError {
 		listMap := (map[string]interface{})(*listAsset)
 
 		listMap["list"] = l
+		listMap["lastUpdated"] = txTimeStr
 
 		_, err = listAsset.Update(stub, listMap)
 		if err != nil {
@@ -96,9 +105,10 @@ func StoreAssetList(stub *sw.StubWrapper) errors.ICCError {
 		}
 	} else {
 		listMap := map[string]interface{}{
-			"@assetType": "assetTypeListData",
-			"id":         "primary",
-			"list":       l,
+			"@assetType":  "assetTypeListData",
+			"id":          "primary",
+			"list":        l,
+			"lastUpdated": txTimeStr,
 		}
 
 		listAsset, err := NewAsset(listMap)
@@ -111,6 +121,8 @@ func StoreAssetList(stub *sw.StubWrapper) errors.ICCError {
 			return errors.WrapError(err, "error putting asset list")
 		}
 	}
+
+	SetAssetListUpdateTime(txTime)
 
 	return nil
 }
@@ -137,11 +149,23 @@ func RestoreAssetList(stub *sw.StubWrapper, init bool) errors.ICCError {
 		}
 		listMap := (map[string]interface{})(*listAsset)
 
+		txTimeStr := listMap["lastUpdated"].(string)
+		txTime, nerr := time.Parse(time.RFC3339, txTimeStr)
+		if nerr != nil {
+			return errors.NewCCError("error parsing asset list last updated time", http.StatusInternalServerError)
+		}
+
+		if GetAssetListUpdateTime().After(txTime) {
+			return nil
+		}
+
 		l := AssetTypeListFromArray(listMap["list"].([]interface{}))
 
 		l = getRestoredList(l, init)
 
 		ReplaceAssetList(l)
+
+		SetAssetListUpdateTime(txTime)
 	}
 
 	return nil
@@ -187,4 +211,14 @@ func getRestoredList(storedList []AssetType, init bool) []AssetType {
 	}
 
 	return assetList
+}
+
+// GetAssetListUpdateTime returns the last time the asset list was updated
+func GetAssetListUpdateTime() time.Time {
+	return listUpdateTime
+}
+
+// SetAssetListUpdateTime sets the last time the asset list was updated
+func SetAssetListUpdateTime(t time.Time) {
+	listUpdateTime = t
 }

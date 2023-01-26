@@ -42,7 +42,15 @@ func GetListAssetType() AssetType {
 				Label:    "List",
 				DataType: "[]@object",
 				Writers:  dynamicAssetTypeConfig.AssetAdmins,
-			}},
+			},
+			{
+				Required: true,
+				Tag:      "lastUpdated",
+				Label:    "Last Updated",
+				DataType: "datetime",
+				Writers:  dynamicAssetTypeConfig.AssetAdmins,
+			},
+		},
 	}
 	return AssetTypeListData
 }
