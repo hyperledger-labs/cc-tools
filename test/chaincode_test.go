@@ -18,6 +18,9 @@ var testTxList = []tx.Transaction{
 	tx.CreateAsset,
 	tx.UpdateAsset,
 	tx.DeleteAsset,
+	tx.CreateAssetType,
+	tx.UpdateAssetType,
+	tx.DeleteAssetType,
 }
 
 var testAssetList = []assets.AssetType{
@@ -167,6 +170,36 @@ var testAssetList = []assets.AssetType{
 				Tag:      "secret",
 				Label:    "Secret",
 				DataType: "string",
+			},
+		},
+	},
+	{
+		Tag:         "assetTypeListData",
+		Label:       "AssetTypeListData",
+		Description: "AssetTypeListData",
+
+		Props: []assets.AssetProp{
+			{
+				Required: true,
+				IsKey:    true,
+				Tag:      "id",
+				Label:    "ID",
+				DataType: "string",
+				Writers:  []string{`org1MSP`},
+			},
+			{
+				Required: true,
+				Tag:      "list",
+				Label:    "List",
+				DataType: "[]@object",
+				Writers:  []string{`org1MSP`},
+			},
+			{
+				Required: true,
+				Tag:      "lastUpdated",
+				Label:    "Last Updated",
+				DataType: "datetime",
+				Writers:  []string{`org1MSP`},
 			},
 		},
 	},
