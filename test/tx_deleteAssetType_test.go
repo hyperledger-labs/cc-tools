@@ -5,15 +5,13 @@ import (
 	"log"
 	"reflect"
 	"testing"
-	"time"
 
 	"github.com/goledgerdev/cc-tools/mock"
 )
 
 // TODO: Lista de assets com referencia
-// TODO: Verify is there is at least one isKey
 
-func TestCreateAssetType(t *testing.T) {
+func TestDeleteAssetType(t *testing.T) {
 	stub := mock.NewMockStub("org1MSP", new(testCC))
 	newType := map[string]interface{}{
 		"tag":         "magazine",
@@ -100,35 +98,51 @@ func TestCreateAssetType(t *testing.T) {
 		t.FailNow()
 	}
 
-	// Create Asset
-	asset := map[string]interface{}{
-		"@assetType": "magazine",
-		"name":       "MAG",
-		"images":     []string{"url.com/1", "url.com/2"},
+	// Delete Type
+	deleteReq := map[string]interface{}{
+		"tag":   "magazine",
+		"force": true,
 	}
 	req = map[string]interface{}{
-		"asset": []map[string]interface{}{asset},
+		"assetTypes": []map[string]interface{}{deleteReq},
 	}
 	reqBytes, err = json.Marshal(req)
 	if err != nil {
 		t.FailNow()
 	}
 
-	res = stub.MockInvoke("createAsset", [][]byte{
-		[]byte("createAsset"),
+	res = stub.MockInvoke("deleteAssetType", [][]byte{
+		[]byte("deleteAssetType"),
 		reqBytes,
 	})
-	lastUpdated, _ := stub.GetTxTimestamp()
 	expectedResponse = map[string]interface{}{
-		"@key":         "magazine:236a29db-f53c-59e1-ac6d-a4f264dbc477",
-		"@lastTouchBy": "org1MSP",
-		"@lastTx":      "createAsset",
-		"@lastUpdated": lastUpdated.AsTime().Format(time.RFC3339),
-		"@assetType":   "magazine",
-		"name":         "MAG",
-		"images": []interface{}{
-			"url.com/1",
-			"url.com/2",
+		"assetType": map[string]interface{}{
+			"description": "Magazine definition",
+			"dynamic":     true,
+			"label":       "Magazine",
+			"props": []interface{}{
+				map[string]interface{}{
+					"dataType":    "string",
+					"description": "",
+					"isKey":       true,
+					"label":       "Name",
+					"readOnly":    false,
+					"required":    true,
+					"tag":         "name",
+					"writers":     []interface{}{"org1MSP"},
+				},
+				map[string]interface{}{
+					"dataType":    "[]string",
+					"description": "",
+					"isKey":       false,
+					"label":       "Images",
+					"readOnly":    false,
+					"required":    false,
+					"tag":         "images",
+					"writers":     nil,
+				},
+			},
+			"tag": "magazine",
 		},
 	}
 
@@ -137,42 +151,27 @@ func TestCreateAssetType(t *testing.T) {
 		t.FailNow()
 	}
 
-	var resAssetPayload []map[string]interface{}
-	err = json.Unmarshal(res.GetPayload(), &resAssetPayload)
+	var resDeletePayload []map[string]interface{}
+	err = json.Unmarshal(res.GetPayload(), &resDeletePayload)
 	if err != nil {
 		log.Println(err)
 		t.FailNow()
 	}
 
-	if len(resAssetPayload) != 1 {
+	if len(resDeletePayload) != 1 {
 		log.Println("response length should be 1")
 		t.FailNow()
 	}
 
-	if !reflect.DeepEqual(resAssetPayload[0], expectedResponse) {
+	if !reflect.DeepEqual(resDeletePayload[0], expectedResponse) {
 		log.Println("these should be equal")
-		log.Printf("%#v\n", resAssetPayload[0])
-		log.Printf("%#v\n", expectedResponse)
-		t.FailNow()
-	}
-
-	var state map[string]interface{}
-	stateBytes := stub.State["magazine:236a29db-f53c-59e1-ac6d-a4f264dbc477"]
-	err = json.Unmarshal(stateBytes, &state)
-	if err != nil {
-		log.Println(err)
-		t.FailNow()
-	}
-
-	if !reflect.DeepEqual(state, expectedResponse) {
-		log.Println("these should be equal")
-		log.Printf("%#v\n", state)
+		log.Printf("%#v\n", resDeletePayload[0])
 		log.Printf("%#v\n", expectedResponse)
 		t.FailNow()
 	}
 }
 
-func TestCreateAssetTypeEmptyList(t *testing.T) {
+func TestDeleteAssetTypeEmptyList(t *testing.T) {
 	stub := mock.NewMockStub("org1MSP", new(testCC))
 
 	req := map[string]interface{}{
@@ -199,7 +198,7 @@ func TestCreateAssetTypeEmptyList(t *testing.T) {
 	}
 }
 
-func TestCreateExistingAssetType(t *testing.T) {
+func TestDeleteExistingAssetType(t *testing.T) {
 	stub := mock.NewMockStub("org1MSP", new(testCC))
 	newType := map[string]interface{}{
 		"tag":         "library",

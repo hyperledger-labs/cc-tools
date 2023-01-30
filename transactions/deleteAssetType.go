@@ -59,9 +59,11 @@ var DeleteAssetType = Transaction{
 			}
 
 			// Verify Asset Type usage
-			err = handleRegisteredAssets(stub, tagValue.(string), forceValue.(bool))
-			if err != nil {
-				return nil, errors.WrapError(err, "error checking asset type usage")
+			if !forceValue.(bool) {
+				err = handleRegisteredAssets(stub, tagValue.(string))
+				if err != nil {
+					return nil, errors.WrapError(err, "error checking asset type usage")
+				}
 			}
 
 			// Verify Asset Type references
@@ -93,7 +95,7 @@ var DeleteAssetType = Transaction{
 	},
 }
 
-func handleRegisteredAssets(stub *sw.StubWrapper, tag string, force bool) errors.ICCError {
+func handleRegisteredAssets(stub *sw.StubWrapper, tag string) errors.ICCError {
 	query := fmt.Sprintf(
 		`{
 			"selector": {
@@ -108,7 +110,7 @@ func handleRegisteredAssets(stub *sw.StubWrapper, tag string, force bool) errors
 		return errors.WrapError(err, "failed to get query result")
 	}
 
-	if resultsIterator.HasNext() && !force {
+	if resultsIterator.HasNext() {
 		return errors.NewCCError(fmt.Sprintf("asset type '%s' is in use", tag), http.StatusBadRequest)
 	}
 

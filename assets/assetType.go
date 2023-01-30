@@ -95,12 +95,25 @@ func (t AssetType) ToMap() map[string]interface{} {
 
 // AssetTypeFromMap returns an asset type from a map representation.
 func AssetTypeFromMap(m map[string]interface{}) AssetType {
+	label, ok := m["label"].(string)
+	if !ok {
+		label = ""
+	}
+	description, ok := m["description"].(string)
+	if !ok {
+		description = ""
+	}
+	dynamic, ok := m["dynamic"].(bool)
+	if !ok {
+		dynamic = false
+	}
+
 	res := AssetType{
 		Tag:         m["tag"].(string),
-		Label:       m["label"].(string),
-		Description: m["description"].(string),
+		Label:       label,
+		Description: description,
 		Props:       AssetPropListFromArray(m["props"].([]interface{})),
-		Dynamic:     m["dynamic"].(bool),
+		Dynamic:     dynamic,
 	}
 
 	readers := make([]string, 0)

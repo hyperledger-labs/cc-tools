@@ -61,13 +61,34 @@ func (p AssetProp) ToMap() map[string]interface{} {
 
 // AssetPropFromMap converts a map[string]interface{} to an AssetProp
 func AssetPropFromMap(m map[string]interface{}) AssetProp {
+	description, ok := m["description"].(string)
+	if !ok {
+		description = ""
+	}
+	label, ok := m["label"].(string)
+	if !ok {
+		label = ""
+	}
+	isKey, ok := m["isKey"].(bool)
+	if !ok {
+		isKey = false
+	}
+	required, ok := m["required"].(bool)
+	if !ok {
+		required = false
+	}
+	readOnly, ok := m["readOnly"].(bool)
+	if !ok {
+		readOnly = false
+	}
+
 	res := AssetProp{
 		Tag:          m["tag"].(string),
-		Label:        m["label"].(string),
-		Description:  m["description"].(string),
-		IsKey:        m["isKey"].(bool),
-		Required:     m["required"].(bool),
-		ReadOnly:     m["readOnly"].(bool),
+		Label:        label,
+		Description:  description,
+		IsKey:        isKey,
+		Required:     required,
+		ReadOnly:     readOnly,
 		DefaultValue: m["defaultValue"],
 		DataType:     m["dataType"].(string),
 	}
