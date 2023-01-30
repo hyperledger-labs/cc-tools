@@ -39,7 +39,7 @@ var DeleteAssetType = Transaction{
 
 			tagValue, err := assets.CheckValue(assetTypeMap["tag"], true, "string", "tag")
 			if err != nil {
-				return nil, errors.WrapError(err, "no tag value in item")
+				return nil, errors.NewCCError("no tag value in item", http.StatusBadRequest)
 			}
 
 			forceValue, err := assets.CheckValue(assetTypeMap["force"], false, "boolean", "force")
@@ -50,12 +50,12 @@ var DeleteAssetType = Transaction{
 			// Verify Asset Type existance
 			assetTypeCheck := assets.FetchAssetType(tagValue.(string))
 			if assetTypeCheck == nil {
-				return nil, errors.WrapError(err, fmt.Sprintf("asset type '%s' not found", tagValue.(string)))
+				return nil, errors.NewCCError(fmt.Sprintf("asset type '%s' not found", tagValue.(string)), http.StatusBadRequest)
 			}
 
 			// Verify if Asset Type allows dynamic modifications
 			if !assetTypeCheck.Dynamic {
-				return nil, errors.WrapError(err, fmt.Sprintf("asset type '%s' does not allows dynamic modifications", tagValue.(string)))
+				return nil, errors.NewCCError(fmt.Sprintf("asset type '%s' does not allows dynamic modifications", tagValue.(string)), http.StatusBadRequest)
 			}
 
 			// Verify Asset Type usage

@@ -68,6 +68,8 @@ func buildAssetType(typeMap map[string]interface{}) (assets.AssetType, errors.IC
 	if !ok {
 		return assets.AssetType{}, errors.NewCCError("invalid props array", http.StatusBadRequest)
 	}
+
+	hasKey := false
 	props := make([]assets.AssetProp, len(propsArr))
 	for i, prop := range propsArr {
 		propMap := prop.(map[string]interface{})
@@ -75,7 +77,14 @@ func buildAssetType(typeMap map[string]interface{}) (assets.AssetType, errors.IC
 		if err != nil {
 			return assets.AssetType{}, errors.WrapError(err, "failed to build asset prop")
 		}
+		if assetProp.IsKey {
+			hasKey = true
+		}
 		props[i] = assetProp
+	}
+
+	if !hasKey {
+		return assets.AssetType{}, errors.NewCCError("asset type must have a key", http.StatusBadRequest)
 	}
 
 	// Tag

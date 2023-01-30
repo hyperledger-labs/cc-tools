@@ -21,6 +21,7 @@ var testTxList = []tx.Transaction{
 	tx.CreateAssetType,
 	tx.UpdateAssetType,
 	tx.DeleteAssetType,
+	tx.LoadAssetTypeList,
 }
 
 var testAssetList = []assets.AssetType{

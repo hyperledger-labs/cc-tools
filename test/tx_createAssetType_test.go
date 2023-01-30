@@ -11,7 +11,6 @@ import (
 )
 
 // TODO: Lista de assets com referencia
-// TODO: Verify is there is at least one isKey
 
 func TestCreateAssetType(t *testing.T) {
 	stub := mock.NewMockStub("org1MSP", new(testCC))
@@ -242,6 +241,45 @@ func TestCreateExistingAssetType(t *testing.T) {
 
 	if len(resPayload) != 0 {
 		log.Println("response length should be 0")
+		t.FailNow()
+	}
+}
+
+func TestCreateAssetTypeWithoutKey(t *testing.T) {
+	stub := mock.NewMockStub("org1MSP", new(testCC))
+	newType := map[string]interface{}{
+		"tag":         "library",
+		"label":       "Library",
+		"description": "Library definition",
+		"props": []map[string]interface{}{
+			{
+				"tag":      "name",
+				"label":    "Name",
+				"dataType": "string",
+				"required": true,
+			},
+		},
+	}
+	req := map[string]interface{}{
+		"assetTypes": []map[string]interface{}{newType},
+	}
+	reqBytes, err := json.Marshal(req)
+	if err != nil {
+		t.FailNow()
+	}
+
+	res := stub.MockInvoke("createAssetType", [][]byte{
+		[]byte("createAssetType"),
+		reqBytes,
+	})
+
+	if res.GetStatus() != 400 {
+		log.Println(res)
+		t.FailNow()
+	}
+
+	if res.GetMessage() != "failed to build asset type: asset type must have a key" {
+		log.Printf("error message different from expected: %s", res.GetMessage())
 		t.FailNow()
 	}
 }

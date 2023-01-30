@@ -43,6 +43,11 @@ func TestGetTx(t *testing.T) {
 		},
 		map[string]interface{}{
 			"description": "",
+			"label":       "Load Asset Type List from blockchain",
+			"tag":         "loadAssetTypeList",
+		},
+		map[string]interface{}{
+			"description": "",
 			"label":       "Get Tx",
 			"tag":         "getTx",
 		},

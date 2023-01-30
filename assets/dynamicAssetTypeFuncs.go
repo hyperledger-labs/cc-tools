@@ -167,12 +167,12 @@ func CheckDataType(dataType string) errors.ICCError {
 
 		assetType := FetchAssetType(trimDataType)
 		if assetType == nil {
-			return errors.NewCCError(fmt.Sprintf("invalid dataType value %s", dataType), http.StatusBadRequest)
+			return errors.NewCCError(fmt.Sprintf("invalid dataType value '%s'", dataType), http.StatusBadRequest)
 		}
 	} else {
 		dataTypeObj := FetchDataType(trimDataType)
 		if dataTypeObj == nil {
-			return errors.NewCCError(fmt.Sprintf("invalid dataType value %s", dataType), http.StatusBadRequest)
+			return errors.NewCCError(fmt.Sprintf("invalid dataType value '%s'", dataType), http.StatusBadRequest)
 		}
 	}
 
