@@ -214,7 +214,7 @@ func handleProps(assetType assets.AssetType, propMap []interface{}, emptyAssets 
 				requiredValues = append(requiredValues, requiredValue)
 			}
 
-			newProp, err := assets.BuildAssetProp(v)
+			newProp, err := assets.BuildAssetProp(v, nil)
 			if err != nil {
 				return assetType, nil, errors.WrapError(err, "failed to build prop")
 			}

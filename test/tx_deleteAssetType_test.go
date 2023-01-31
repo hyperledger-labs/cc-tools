@@ -9,8 +9,6 @@ import (
 	"github.com/goledgerdev/cc-tools/mock"
 )
 
-// TODO: Lista de assets com referencia
-
 func TestDeleteAssetType(t *testing.T) {
 	stub := mock.NewMockStub("org1MSP", new(testCC))
 	newType := map[string]interface{}{

@@ -1,7 +1,5 @@
 package assets
 
-// ? Is there a way to not allow an asset be modified outside a transaction?
-
 // dynamicAssetTypeConfig is the configuration data for the Dynamic assetTypes feature
 var dynamicAssetTypeConfig = DynamicAssetType{}
 

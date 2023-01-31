@@ -20,7 +20,7 @@ func TestBuildAssetPropValid(t *testing.T) {
 		"dataType":     "cpf",
 		"writers":      []interface{}{"org1MSP"},
 	}
-	prop, err := assets.BuildAssetProp(propMap)
+	prop, err := assets.BuildAssetProp(propMap, nil)
 
 	expectedProp := assets.AssetProp{
 		Tag:          "id",
@@ -60,7 +60,7 @@ func TestBuildAssetPropInvalid(t *testing.T) {
 		"dataType":     "inexistant",
 		"writers":      []interface{}{"org1MSP"},
 	}
-	_, err := assets.BuildAssetProp(propMap)
+	_, err := assets.BuildAssetProp(propMap, nil)
 
 	err.Status()
 	if err.Status() != 400 {
@@ -106,6 +106,53 @@ func TestHandlePropUpdate(t *testing.T) {
 		log.Println("these should be deeply equal")
 		log.Println(updatedProp)
 		log.Println(prop)
+		t.FailNow()
+	}
+}
+
+func TestBuildAssetPropWithReferenceList(t *testing.T) {
+	newTypeList := []interface{}{
+		map[string]interface{}{
+			"tag":   "newType",
+			"label": "New Type",
+		},
+	}
+
+	propMap := map[string]interface{}{
+		"tag":          "id",
+		"label":        "CPF (Brazilian ID)",
+		"description":  "",
+		"isKey":        true,
+		"required":     true,
+		"readOnly":     false,
+		"defaultValue": nil,
+		"dataType":     "->newType",
+		"writers":      []interface{}{"org1MSP"},
+	}
+	prop, err := assets.BuildAssetProp(propMap, newTypeList)
+
+	expectedProp := assets.AssetProp{
+		Tag:          "id",
+		Label:        "CPF (Brazilian ID)",
+		Description:  "",
+		IsKey:        true,
+		Required:     true,
+		ReadOnly:     false,
+		DefaultValue: nil,
+		DataType:     "->newType",
+		Writers:      []string{"org1MSP"},
+	}
+
+	if err != nil {
+		log.Println("an error should not have occurred")
+		log.Println(err)
+		t.FailNow()
+	}
+
+	if !reflect.DeepEqual(prop, expectedProp) {
+		log.Println("these should be deeply equal")
+		log.Println(prop)
+		log.Println(expectedProp)
 		t.FailNow()
 	}
 }

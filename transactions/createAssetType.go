@@ -32,7 +32,7 @@ var CreateAssetType = Transaction{
 		for _, assetType := range assetTypes {
 			assetTypeMap := assetType.(map[string]interface{})
 
-			newAssetType, err := buildAssetType(assetTypeMap)
+			newAssetType, err := buildAssetType(assetTypeMap, assetTypes)
 			if err != nil {
 				return nil, errors.WrapError(err, "failed to build asset type")
 			}
@@ -62,7 +62,7 @@ var CreateAssetType = Transaction{
 	},
 }
 
-func buildAssetType(typeMap map[string]interface{}) (assets.AssetType, errors.ICCError) {
+func buildAssetType(typeMap map[string]interface{}, newTypesList []interface{}) (assets.AssetType, errors.ICCError) {
 	// Build Props Array
 	propsArr, ok := typeMap["props"].([]interface{})
 	if !ok {
@@ -73,7 +73,7 @@ func buildAssetType(typeMap map[string]interface{}) (assets.AssetType, errors.IC
 	props := make([]assets.AssetProp, len(propsArr))
 	for i, prop := range propsArr {
 		propMap := prop.(map[string]interface{})
-		assetProp, err := assets.BuildAssetProp(propMap)
+		assetProp, err := assets.BuildAssetProp(propMap, newTypesList)
 		if err != nil {
 			return assets.AssetType{}, errors.WrapError(err, "failed to build asset prop")
 		}

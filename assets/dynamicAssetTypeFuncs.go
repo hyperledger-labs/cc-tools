@@ -9,7 +9,7 @@ import (
 )
 
 // BuildAssetProp builds an AssetProp from an object with the required fields
-func BuildAssetProp(propMap map[string]interface{}) (AssetProp, errors.ICCError) {
+func BuildAssetProp(propMap map[string]interface{}, newTypesList []interface{}) (AssetProp, errors.ICCError) {
 	// Tag
 	tagValue, err := CheckValue(propMap["tag"], true, "string", "tag")
 	if err != nil {
@@ -51,7 +51,7 @@ func BuildAssetProp(propMap map[string]interface{}) (AssetProp, errors.ICCError)
 	if err != nil {
 		return AssetProp{}, errors.WrapError(err, "invalid dataType value")
 	}
-	err = CheckDataType(dataTypeValue.(string))
+	err = CheckDataType(dataTypeValue.(string), newTypesList)
 	if err != nil {
 		return AssetProp{}, errors.WrapError(err, "failed checking data type")
 	}
@@ -158,7 +158,7 @@ func HandlePropUpdate(assetProps AssetProp, propMap map[string]interface{}) (Ass
 }
 
 // CheckDataType verifies if dataType is valid among the ones availiable in the chaincode
-func CheckDataType(dataType string) errors.ICCError {
+func CheckDataType(dataType string, newTypesList []interface{}) errors.ICCError {
 	trimDataType := strings.TrimPrefix(dataType, "[]")
 
 	// ? How to handle array of assets types? (the array being in the creation)
@@ -167,7 +167,17 @@ func CheckDataType(dataType string) errors.ICCError {
 
 		assetType := FetchAssetType(trimDataType)
 		if assetType == nil {
-			return errors.NewCCError(fmt.Sprintf("invalid dataType value '%s'", dataType), http.StatusBadRequest)
+			foundDataType := false
+			for _, newTypeInterface := range newTypesList {
+				newType := newTypeInterface.(map[string]interface{})
+				if newType["tag"] == trimDataType {
+					foundDataType = true
+					break
+				}
+			}
+			if !foundDataType {
+				return errors.NewCCError(fmt.Sprintf("invalid dataType value '%s'", dataType), http.StatusBadRequest)
+			}
 		}
 	} else {
 		dataTypeObj := FetchDataType(trimDataType)
