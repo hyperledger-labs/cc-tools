@@ -10,8 +10,6 @@ import (
 	sw "github.com/goledgerdev/cc-tools/stubwrapper"
 )
 
-// ! Testar ordem na atualização de propriedades
-
 // UpdateAssetType is the transaction which updates a dynamic Asset Type
 var UpdateAssetType = Transaction{
 	Tag:         "updateAssetType",
@@ -27,9 +25,18 @@ var UpdateAssetType = Transaction{
 			DataType:    "[]@object",
 			Required:    true,
 		},
+		{
+			Tag:         "skipAssetEmptyValidation",
+			Description: "Do not validate existing assets on the update. Its use should be avoided.",
+			DataType:    "boolean",
+		},
 	},
 	Routine: func(stub *sw.StubWrapper, req map[string]interface{}) ([]byte, errors.ICCError) {
 		assetTypes := req["assetTypes"].([]interface{})
+		skipAssetsValidation, ok := req["skipAssetEmptyValidation"].(bool)
+		if !ok {
+			skipAssetsValidation = false
+		}
 
 		assetTypeList := assets.AssetTypeList()
 		assetTypeListFallback := assets.AssetTypeList()
@@ -48,7 +55,7 @@ var UpdateAssetType = Transaction{
 			// Verify Asset Type existance
 			assetTypeCheck := assets.FetchAssetType(tagValue.(string))
 			if assetTypeCheck == nil {
-				return nil, errors.WrapError(err, fmt.Sprintf("asset type '%s' not found", tagValue.(string)))
+				return nil, errors.NewCCError(fmt.Sprintf("asset type '%s' not found", tagValue.(string)), http.StatusBadRequest)
 			}
 			assetTypeObj := *assetTypeCheck
 
@@ -90,9 +97,14 @@ var UpdateAssetType = Transaction{
 					if !ok {
 						return nil, errors.NewCCError("invalid props array", http.StatusBadRequest)
 					}
-					emptyAssets, err := checkEmptyAssets(stub, tagValue.(string))
-					if err != nil {
-						return nil, errors.WrapError(err, "failed to check if there assets for tag")
+					var emptyAssets bool
+					if skipAssetsValidation {
+						emptyAssets = true
+					} else {
+						emptyAssets, err = checkEmptyAssets(stub, tagValue.(string))
+						if err != nil {
+							return nil, errors.WrapError(err, "failed to check if there assets for tag")
+						}
 					}
 					newAssetType, newRequiredValues, err := handleProps(assetTypeObj, propsArr, emptyAssets)
 					if err != nil {
@@ -118,7 +130,7 @@ var UpdateAssetType = Transaction{
 
 		for k, v := range requiredValues {
 			requiredValuesMap := v.([]map[string]interface{})
-			if len(requiredValuesMap) > 0 {
+			if len(requiredValuesMap) > 0 && !skipAssetsValidation {
 				updatedAssets, err := initilizeDefaultValues(stub, k, requiredValuesMap)
 				if err != nil {
 					// Rollback Asset Type List
