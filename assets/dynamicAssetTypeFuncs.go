@@ -161,7 +161,6 @@ func HandlePropUpdate(assetProps AssetProp, propMap map[string]interface{}) (Ass
 func CheckDataType(dataType string, newTypesList []interface{}) errors.ICCError {
 	trimDataType := strings.TrimPrefix(dataType, "[]")
 
-	// ? How to handle array of assets types? (the array being in the creation)
 	if strings.HasPrefix(trimDataType, "->") {
 		trimDataType = strings.TrimPrefix(trimDataType, "->")
 
