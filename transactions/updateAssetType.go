@@ -159,20 +159,19 @@ func handleProps(assetType assets.AssetType, propMap []interface{}, emptyAssets 
 	propObj := assetType.Props
 	requiredValues := make([]map[string]interface{}, 0)
 
-	for _, v := range propMap {
-		v, ok := v.(map[string]interface{})
+	for _, p := range propMap {
+		p, ok := p.(map[string]interface{})
 		if !ok {
 			return assetType, nil, errors.NewCCError("invalid prop object", http.StatusBadRequest)
 		}
 
-		// Get "tag" and "delete" values
-		tag, err := assets.CheckValue(v["tag"], false, "string", "tag")
+		tag, err := assets.CheckValue(p["tag"], false, "string", "tag")
 		if err != nil {
 			return assetType, nil, errors.WrapError(err, "invalid tag value")
 		}
 		tagValue := tag.(string)
 
-		delete, err := assets.CheckValue(v["delete"], false, "boolean", "delete")
+		delete, err := assets.CheckValue(p["delete"], false, "boolean", "delete")
 		if err != nil {
 			return assetType, nil, errors.WrapError(err, "invalid delete info")
 		}
@@ -181,10 +180,10 @@ func handleProps(assetType assets.AssetType, propMap []interface{}, emptyAssets 
 		hasProp := assetType.HasProp(tagValue)
 
 		if deleteVal && !hasProp {
-			// Deleting nexistant prop
+			// Handle inexistant prop deletion
 			return assetType, nil, errors.WrapError(err, "attempt to delete inexistent prop")
 		} else if deleteVal && hasProp {
-			// Prop deletion
+			// Delete prop
 			for i, prop := range propObj {
 				if prop.Tag == tagValue {
 					if prop.IsKey {
@@ -194,15 +193,15 @@ func handleProps(assetType assets.AssetType, propMap []interface{}, emptyAssets 
 				}
 			}
 		} else if !hasProp && !deleteVal {
-			// Prop creation
-			required, err := assets.CheckValue(v["required"], false, "boolean", "required")
+			// Create new prop
+			required, err := assets.CheckValue(p["required"], false, "boolean", "required")
 			if err != nil {
 				return assetType, nil, errors.WrapError(err, "invalid required info")
 			}
 			requiredVal := required.(bool)
 
 			if requiredVal {
-				defaultValue, ok := v["defaultValue"]
+				defaultValue, ok := p["defaultValue"]
 				if !ok && !emptyAssets {
 					return assetType, nil, errors.NewCCError("required prop must have a default value in case of existing assets", http.StatusBadRequest)
 				}
@@ -214,7 +213,7 @@ func handleProps(assetType assets.AssetType, propMap []interface{}, emptyAssets 
 				requiredValues = append(requiredValues, requiredValue)
 			}
 
-			newProp, err := assets.BuildAssetProp(v, nil)
+			newProp, err := assets.BuildAssetProp(p, nil)
 			if err != nil {
 				return assetType, nil, errors.WrapError(err, "failed to build prop")
 			}
@@ -225,16 +224,16 @@ func handleProps(assetType assets.AssetType, propMap []interface{}, emptyAssets 
 
 			propObj = append(propObj, newProp)
 		} else {
-			// Prop update
+			// Update prop
 			for i, prop := range propObj {
 				if prop.Tag == tagValue {
-					required, err := assets.CheckValue(v["required"], false, "boolean", "required")
+					required, err := assets.CheckValue(p["required"], false, "boolean", "required")
 					if err != nil {
 						return assetType, nil, errors.WrapError(err, "invalid required info")
 					}
 					requiredVal := required.(bool)
 
-					defaultValue, ok := v["defaultValue"]
+					defaultValue, ok := p["defaultValue"]
 					if !ok {
 						defaultValue = prop.DefaultValue
 					}
@@ -251,7 +250,7 @@ func handleProps(assetType assets.AssetType, propMap []interface{}, emptyAssets 
 						requiredValues = append(requiredValues, requiredValue)
 					}
 
-					updatedProp, err := assets.HandlePropUpdate(prop, v)
+					updatedProp, err := assets.HandlePropUpdate(prop, p)
 					if err != nil {
 						return assetType, nil, errors.WrapError(err, "failed to update prop")
 					}
