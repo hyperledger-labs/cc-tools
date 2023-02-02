@@ -181,7 +181,7 @@ func handleProps(assetType assets.AssetType, propMap []interface{}, emptyAssets 
 
 		if deleteVal && !hasProp {
 			// Handle inexistant prop deletion
-			return assetType, nil, errors.WrapError(err, "attempt to delete inexistent prop")
+			return assetType, nil, errors.NewCCError("attempt to delete inexistent prop", http.StatusBadRequest)
 		} else if deleteVal && hasProp {
 			// Delete prop
 			for i, prop := range propObj {
