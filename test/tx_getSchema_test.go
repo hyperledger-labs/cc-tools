@@ -39,6 +39,12 @@ func TestGetSchema(t *testing.T) {
 			"tag":     "secret",
 			"writers": nil,
 		},
+		map[string]interface{}{
+			"description": "AssetTypeListData",
+			"label":       "AssetTypeListData",
+			"tag":         "assetTypeListData",
+			"writers":     nil,
+		},
 	}
 	err := invokeAndVerify(stub, "getSchema", nil, expectedResponse, 200)
 	if err != nil {
