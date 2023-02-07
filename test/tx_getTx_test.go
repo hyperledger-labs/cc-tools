@@ -28,6 +28,26 @@ func TestGetTx(t *testing.T) {
 		},
 		map[string]interface{}{
 			"description": "",
+			"label":       "Create Asset Type",
+			"tag":         "createAssetType",
+		},
+		map[string]interface{}{
+			"description": "",
+			"label":       "Update Asset Type",
+			"tag":         "updateAssetType",
+		},
+		map[string]interface{}{
+			"description": "",
+			"label":       "Delete Asset Type",
+			"tag":         "deleteAssetType",
+		},
+		map[string]interface{}{
+			"description": "",
+			"label":       "Load Asset Type List from blockchain",
+			"tag":         "loadAssetTypeList",
+		},
+		map[string]interface{}{
+			"description": "",
 			"label":       "Get Tx",
 			"tag":         "getTx",
 		},
