@@ -58,6 +58,7 @@ var GetSchema = Transaction{
 			Description string   `json:"description"`
 			Readers     []string `json:"readers,omitempty"`
 			Writers     []string `json:"writers"`
+			Dynamic     bool     `json:"dynamic"`
 		}
 		var assetList []assetListElem
 		for _, assetTypeDef := range assetTypeList {
@@ -66,6 +67,7 @@ var GetSchema = Transaction{
 				Label:       assetTypeDef.Label,
 				Description: assetTypeDef.Description,
 				Readers:     assetTypeDef.Readers,
+				Dynamic:     assetTypeDef.Dynamic,
 			})
 		}
 
