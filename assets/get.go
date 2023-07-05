@@ -44,7 +44,7 @@ func get(stub *sw.StubWrapper, pvtCollection, key string, committed bool) (*Asse
 	return &response, nil
 }
 
-// Get fetches asset entry from write set or ledger.
+// GetMany fetches assets entries from write set or ledger.
 func (a *Asset) Get(stub *sw.StubWrapper) (*Asset, errors.ICCError) {
 	var pvtCollection string
 	if a.IsPrivate() {
@@ -62,6 +62,26 @@ func (k *Key) Get(stub *sw.StubWrapper) (*Asset, errors.ICCError) {
 	}
 
 	return get(stub, pvtCollection, k.Key(), false)
+}
+
+// Get fetches asset entry from write set or ledger.
+func GetMany(stub *sw.StubWrapper, keys []Key) ([]*Asset, errors.ICCError) {
+	var assets []*Asset
+
+	for _, k := range keys {
+		var pvtCollection string
+		if k.IsPrivate() {
+			pvtCollection = k.TypeTag()
+		}
+
+		asset, err := get(stub, pvtCollection, k.Key(), false)
+		if err != nil {
+			return nil, err
+		}
+		assets = append(assets, asset)
+	}
+
+	return assets, nil
 }
 
 // GetCommitted fetches asset entry from ledger.
