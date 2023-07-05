@@ -2,7 +2,6 @@ package assets
 
 import (
 	"encoding/json"
-	"net/http"
 	"strings"
 
 	"github.com/goledgerdev/cc-tools/errors"
@@ -52,28 +51,25 @@ func NewKey(m map[string]interface{}) (k Key, err errors.ICCError) {
 	}
 
 	// Validate if @key corresponds to asset type
-	_, keyExists := k["@key"]
-	if keyExists {
-		index := strings.Index(k["@assetType"].(string), k["@key"].(string))
-		if index != 0 {
-			keyExists = false
+	key, keyExists := k["@key"]
+	if keyExists && key != nil {
+		_, typeExists := k["@assetType"].(string)
+		if typeExists {
+			index := strings.Index(k["@key"].(string), k["@assetType"].(string))
+			if index != 0 {
+				keyExists = false
+			}
 		}
 	}
 
 	// Generate object key
-	if !keyExists {
+	if !keyExists || key == nil {
 		var keyStr string
 		keyStr, err = GenerateKey(k)
 		if err != nil {
 			err = errors.WrapError(err, "error generating key for asset")
 		}
 		k["@key"] = keyStr
-	}
-
-	// Validate if @key corresponds to asset type
-	index := strings.Index(k["@assetType"].(string), k["@key"].(string))
-	if index != 0 {
-		err = errors.NewCCError("key does not correspond to asset type", http.StatusBadRequest)
 	}
 
 	for t := range k {
