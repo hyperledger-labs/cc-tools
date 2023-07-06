@@ -165,7 +165,8 @@ func getRecursive(stub *sw.StubWrapper, pvtCollection, key string, keysChecked [
 		switch prop := v.(type) {
 		case map[string]interface{}:
 
-			if prop["@assetType"].(string) == "@object" {
+			assetType, ok := prop["@assetType"].(string)
+			if !ok || assetType == "@object" {
 				continue
 			}
 
@@ -211,7 +212,8 @@ func getRecursive(stub *sw.StubWrapper, pvtCollection, key string, keysChecked [
 			for idx, elem := range prop {
 				if elemMap, ok := elem.(map[string]interface{}); ok {
 
-					if elemMap["@assetType"].(string) == "@object" {
+					assetType, ok := elemMap["@assetType"].(string)
+					if !ok || assetType == "@object" {
 						continue
 					}
 
