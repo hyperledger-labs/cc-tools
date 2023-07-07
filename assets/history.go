@@ -17,7 +17,6 @@ type HistoryResponse struct {
 
 func History(stub *sw.StubWrapper, key string, resolve bool) (*HistoryResponse, errors.ICCError) {
 	var resultsIterator shim.HistoryQueryIteratorInterface
-	// var responseMetadata *pb.QueryResponseMetadata
 
 	resultsIterator, err := stub.GetHistoryForKey(key)
 	if err != nil {
