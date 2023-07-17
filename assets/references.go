@@ -127,18 +127,20 @@ func (k Key) Refs(stub *sw.StubWrapper) ([]Key, errors.ICCError) {
 }
 
 // Referrers returns an array of Keys of all the assets pointing to asset.
-func (a Asset) Referrers(stub *sw.StubWrapper) ([]Key, errors.ICCError) {
+// assetTypeFilter can be used to filter the results by asset type.
+func (a Asset) Referrers(stub *sw.StubWrapper, assetTypeFilter ...string) ([]Key, errors.ICCError) {
 	assetKey := a.Key()
-	return referrers(stub, assetKey)
+	return referrers(stub, assetKey, assetTypeFilter)
 }
 
 // Referrers returns an array of Keys of all the assets pointing to key.
-func (k Key) Referrers(stub *sw.StubWrapper) ([]Key, errors.ICCError) {
+// assetTypeFilter can be used to filter the results by asset type.
+func (k Key) Referrers(stub *sw.StubWrapper, assetTypeFilter ...string) ([]Key, errors.ICCError) {
 	assetKey := k.Key()
-	return referrers(stub, assetKey)
+	return referrers(stub, assetKey, assetTypeFilter)
 }
 
-func referrers(stub *sw.StubWrapper, assetKey string) ([]Key, errors.ICCError) {
+func referrers(stub *sw.StubWrapper, assetKey string, assetTypeFilter []string) ([]Key, errors.ICCError) {
 	queryIt, err := stub.GetStateByPartialCompositeKey(assetKey, []string{})
 	if err != nil {
 		return nil, errors.WrapErrorWithStatus(err, "failed to check reference index", 500)
@@ -194,13 +196,26 @@ func referrers(stub *sw.StubWrapper, assetKey string) ([]Key, errors.ICCError) {
 
 	var ret []Key
 	for _, retKey := range retKeys {
-		ret = append(ret, Key{
-			"@assetType": strings.Split(retKey, ":")[0],
-			"@key":       retKey,
-		})
+		assetType := strings.Split(retKey, ":")[0]
+		if len(assetTypeFilter) <= 0 || contains(assetTypeFilter, assetType) {
+			ret = append(ret, Key{
+				"@assetType": strings.Split(retKey, ":")[0],
+				"@key":       retKey,
+			})
+		}
 	}
 
 	return ret, nil
+}
+
+func contains(s []string, str string) bool {
+	for _, v := range s {
+		if v == str {
+			return true
+		}
+	}
+
+	return false
 }
 
 // validateRefs checks if subAsset references exist in blockchain.

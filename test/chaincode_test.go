@@ -90,7 +90,7 @@ var testAssetList = []assets.AssetType{
 				Tag:      "name",
 				Label:    "Library Name",
 				DataType: "string",
-				Writers:  []string{`org3MSP`}, // This means only org3 can create the asset (others can edit)
+				Writers:  []string{`$org\dMSP`}, // This means only org3 can create the asset (others can edit)
 			},
 			{
 				// Asset reference list
@@ -103,6 +103,12 @@ var testAssetList = []assets.AssetType{
 				Tag:      "entranceCode",
 				Label:    "Entrance Code for the Library",
 				DataType: "->secret",
+			},
+			{
+				// Asset reference list
+				Tag:      "librarian",
+				Label:    "Librarian",
+				DataType: "->person",
 			},
 		},
 	},
