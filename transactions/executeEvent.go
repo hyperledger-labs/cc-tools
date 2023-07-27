@@ -50,7 +50,10 @@ var ExecuteEvent = Transaction{
 			return nil, errors.NewCCError("event is not of type 'EventCustom'", http.StatusBadRequest)
 		}
 
-		event.CustomFunction(payload)
+		err := event.CustomFunction(payload)
+		if err != nil {
+			return nil, errors.WrapError(err, "error executing custom function")
+		}
 
 		return nil, nil
 	},
