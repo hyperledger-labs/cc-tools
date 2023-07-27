@@ -30,6 +30,14 @@ type Event struct {
 	// Type is the type of event
 	Type EventType `json:"type"`
 
+	// Receivers is an array that specifies which organizations will receive the event.
+	// Accepts either basic strings for exact matches
+	// eg. []string{'org1MSP', 'org2MSP'}
+	// or regular expressions
+	// eg. []string{`$org\dMSP`} and cc-tools will
+	// check for a match with regular expression `org\dMSP`
+	Receivers []string `json:"receivers,omitempty"`
+
 	// Transaction is the transaction that the event triggers (if of type EventTransaction)
 	Transaction string `json:"transaction"`
 
@@ -41,13 +49,8 @@ type Event struct {
 	// If empty, the event will trigger on the same chaincode as the transaction that calls the event
 	Chaincode string `json:"chaincode"`
 
-	// Receivers is an array that specifies which organizations will receive the event.
-	// Accepts either basic strings for exact matches
-	// eg. []string{'org1MSP', 'org2MSP'}
-	// or regular expressions
-	// eg. []string{`$org\dMSP`} and cc-tools will
-	// check for a match with regular expression `org\dMSP`
-	Receivers []string `json:"receivers,omitempty"`
+	// CustomFunction is used an event of type "EventCustom" is called.
+	CustomFunction func([]byte) error `json:"-"`
 }
 
 func (event Event) CallEvent(stub *sw.StubWrapper, payload []byte) errors.ICCError {
