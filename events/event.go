@@ -27,6 +27,9 @@ type Event struct {
 	// Description is a simple explanation describing the meaning of the event.
 	Description string `json:"description"`
 
+	// BaseLog is the basisc log message for the event
+	BaseLog string `json:"baseLog"`
+
 	// Type is the type of event
 	Type EventType `json:"type"`
 
