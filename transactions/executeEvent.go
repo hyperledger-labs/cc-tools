@@ -14,7 +14,7 @@ var ExecuteEvent = Transaction{
 	Tag:         "executeEvent",
 	Label:       "Execute Event",
 	Description: "ExecuteEvent executes an event of type 'EventCustom'",
-	Method:      "GET",
+	Method:      "POST",
 
 	ReadOnly: true,
 	MetaTx:   true,
