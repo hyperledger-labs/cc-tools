@@ -53,6 +53,7 @@ type Event struct {
 	Chaincode string `json:"chaincode"`
 
 	// CustomFunction is used an event of type "EventCustom" is called.
+	// It is a function that receives a stub and a payload and returns an error.
 	CustomFunction func(*sw.StubWrapper, []byte) error `json:"-"`
 }
 
