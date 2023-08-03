@@ -9,14 +9,15 @@ import (
 	sw "github.com/goledgerdev/cc-tools/stubwrapper"
 )
 
-// ExecuteEvent executes an event of type "EventCustom"
-var ExecuteEvent = Transaction{
-	Tag:         "executeEvent",
-	Label:       "Execute Event",
-	Description: "ExecuteEvent executes an event of type 'EventCustom'",
-	Method:      "POST",
+// RunEvent runs an event of type "EventCustom" as readOnly
+var RunEvent = Transaction{
+	Tag:         "runEvent",
+	Label:       "Run Event",
+	Description: "RunEvent runs an event of type 'EventCustom' as readOnly",
+	Method:      "GET",
 
-	MetaTx: true,
+	ReadOnly: true,
+	MetaTx:   true,
 	Args: ArgList{
 		{
 			Tag:         "eventTag",

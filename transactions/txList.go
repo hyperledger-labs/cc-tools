@@ -11,6 +11,7 @@ var basicTxs = []Transaction{
 	GetDataTypes,
 	GetEvents,
 	ExecuteEvent,
+	RunEvent,
 	ReadAsset,
 	ReadAssetHistory,
 	Search,
