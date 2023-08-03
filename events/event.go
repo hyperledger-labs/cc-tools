@@ -55,6 +55,9 @@ type Event struct {
 	// CustomFunction is used an event of type "EventCustom" is called.
 	// It is a function that receives a stub and a payload and returns an error.
 	CustomFunction func(*sw.StubWrapper, []byte) error `json:"-"`
+
+	// ReadOnly indicates if the CustomFunction has the ability to alter the world state (if of type EventTransaction).
+	ReadOnly bool `json:"readOnly"`
 }
 
 func (event Event) CallEvent(stub *sw.StubWrapper, payload []byte) errors.ICCError {
