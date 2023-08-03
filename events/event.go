@@ -56,7 +56,7 @@ type Event struct {
 	// It is a function that receives a stub and a payload and returns an error.
 	CustomFunction func(*sw.StubWrapper, []byte) error `json:"-"`
 
-	// ReadOnly indicates if the CustomFunction has the ability to alter the world state (if of type EventTransaction).
+	// ReadOnly indicates if the CustomFunction has the ability to alter the world state (if of type EventCustom).
 	ReadOnly bool `json:"readOnly"`
 }
 
