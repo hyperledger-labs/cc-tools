@@ -77,6 +77,11 @@ func TestGetTx(t *testing.T) {
 			"tag":         "executeEvent",
 		},
 		map[string]interface{}{
+			"description": "RunEvent runs an event of type 'EventCustom' as readOnly",
+			"label":       "Run Event",
+			"tag":         "runEvent",
+		},
+		map[string]interface{}{
 			"description": "",
 			"label":       "Read Asset",
 			"tag":         "readAsset",
