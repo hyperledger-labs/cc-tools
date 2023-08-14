@@ -64,6 +64,26 @@ func (k *Key) Get(stub *sw.StubWrapper) (*Asset, errors.ICCError) {
 	return get(stub, pvtCollection, k.Key(), false)
 }
 
+// GetMany fetches assets entries from write set or ledger.
+func GetMany(stub *sw.StubWrapper, keys []Key) ([]*Asset, errors.ICCError) {
+	var assets []*Asset
+
+	for _, k := range keys {
+		var pvtCollection string
+		if k.IsPrivate() {
+			pvtCollection = k.TypeTag()
+		}
+
+		asset, err := get(stub, pvtCollection, k.Key(), false)
+		if err != nil {
+			return nil, err
+		}
+		assets = append(assets, asset)
+	}
+
+	return assets, nil
+}
+
 // GetCommitted fetches asset entry from ledger.
 func (a *Asset) GetCommitted(stub *sw.StubWrapper) (*Asset, errors.ICCError) {
 	var pvtCollection string
@@ -159,12 +179,28 @@ func getRecursive(stub *sw.StubWrapper, pvtCollection, key string, keysChecked [
 		return nil, errors.WrapErrorWithStatus(err, "failed to unmarshal asset from ledger", 500)
 	}
 
+	keysCheckedInScope := make([]string, 0)
+
 	for k, v := range response {
 		switch prop := v.(type) {
 		case map[string]interface{}:
+
+			assetType, ok := prop["@assetType"].(string)
+			if !ok || assetType == "@object" {
+				continue
+			}
+
 			propKey, err := NewKey(prop)
 			if err != nil {
 				return nil, errors.WrapErrorWithStatus(err, "failed to resolve asset references", 500)
+			}
+
+			keyIsFetchedInScope := false
+			for _, key := range keysCheckedInScope {
+				if key == propKey.Key() {
+					keyIsFetchedInScope = true
+					break
+				}
 			}
 
 			keyIsFetched := false
@@ -174,10 +210,11 @@ func getRecursive(stub *sw.StubWrapper, pvtCollection, key string, keysChecked [
 					break
 				}
 			}
-			if keyIsFetched {
+			if keyIsFetched && !keyIsFetchedInScope {
 				continue
 			}
 			keysChecked = append(keysChecked, propKey.Key())
+			keysCheckedInScope = append(keysCheckedInScope, propKey.Key())
 
 			var subAsset map[string]interface{}
 			if propKey.IsPrivate() {
@@ -194,9 +231,23 @@ func getRecursive(stub *sw.StubWrapper, pvtCollection, key string, keysChecked [
 		case []interface{}:
 			for idx, elem := range prop {
 				if elemMap, ok := elem.(map[string]interface{}); ok {
+
+					assetType, ok := elemMap["@assetType"].(string)
+					if !ok || assetType == "@object" {
+						continue
+					}
+
 					elemKey, err := NewKey(elemMap)
 					if err != nil {
 						return nil, errors.WrapErrorWithStatus(err, "failed to resolve asset references", 500)
+					}
+
+					keyIsFetchedInScope := false
+					for _, key := range keysCheckedInScope {
+						if key == elemKey.Key() {
+							keyIsFetchedInScope = true
+							break
+						}
 					}
 
 					keyIsFetched := false
@@ -206,10 +257,11 @@ func getRecursive(stub *sw.StubWrapper, pvtCollection, key string, keysChecked [
 							break
 						}
 					}
-					if keyIsFetched {
+					if keyIsFetched && !keyIsFetchedInScope {
 						continue
 					}
 					keysChecked = append(keysChecked, elemKey.Key())
+					keysCheckedInScope = append(keysCheckedInScope, elemKey.Key())
 
 					var subAsset map[string]interface{}
 					if elemKey.IsPrivate() {

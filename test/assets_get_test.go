@@ -52,6 +52,82 @@ func TestGetAsset(t *testing.T) {
 	stub.MockTransactionEnd("TestGetAsset")
 }
 
+func TestGetManyAssets(t *testing.T) {
+	stub := mock.NewMockStub("org1MSP", new(testCC))
+
+	// State setup
+	asset1 := assets.Asset{
+		"@key":         "person:47061146-c642-51a1-844a-bf0b17cb5e19",
+		"@lastTouchBy": "org1MSP",
+		"@lastTx":      "createAsset",
+		"@assetType":   "person",
+		"name":         "Maria",
+		"id":           "31820792048",
+		"height":       0.0,
+	}
+	asset2 := assets.Asset{
+		"@key":         "person:4cccb9ff-e7e2-535a-9047-d8ee85f02cb8",
+		"@lastTouchBy": "org1MSP",
+		"@lastTx":      "createAsset",
+		"@assetType":   "person",
+		"name":         "José",
+		"id":           "18990442052",
+		"height":       0.0,
+	}
+	asset3 := assets.Asset{
+		"@key":         "person:916c708a-1d6c-5c4f-8f12-d9d36f2aad27",
+		"@lastTouchBy": "org1MSP",
+		"@lastTx":      "createAsset",
+		"@assetType":   "person",
+		"name":         "João",
+		"id":           "88871984030",
+		"height":       0.0,
+	}
+
+	stub.MockTransactionStart("setupGetManyAssets")
+	setupState, _ := json.Marshal(asset1)
+	stub.PutState("person:47061146-c642-51a1-844a-bf0b17cb5e19", setupState)
+	setupState, _ = json.Marshal(asset2)
+	stub.PutState("person:4cccb9ff-e7e2-535a-9047-d8ee85f02cb8", setupState)
+	setupState, _ = json.Marshal(asset3)
+	stub.PutState("person:916c708a-1d6c-5c4f-8f12-d9d36f2aad27", setupState)
+	stub.MockTransactionEnd("setupGetManyAssets")
+
+	expectedResponse := []*assets.Asset{&asset1, &asset2, &asset3}
+
+	assetKeys := []assets.Key{
+		{
+			"@assetType": "person",
+			"@key":       "person:47061146-c642-51a1-844a-bf0b17cb5e19",
+		},
+		{
+			"@assetType": "person",
+			"@key":       "person:4cccb9ff-e7e2-535a-9047-d8ee85f02cb8",
+		},
+		{
+			"@assetType": "person",
+			"@key":       "person:916c708a-1d6c-5c4f-8f12-d9d36f2aad27",
+		},
+	}
+
+	stub.MockTransactionStart("TestGetManyAssets")
+	sw := &sw.StubWrapper{
+		Stub: stub,
+	}
+	gotAsset, err := assets.GetMany(sw, assetKeys)
+	if err != nil {
+		log.Println(err)
+		t.FailNow()
+	}
+	if !reflect.DeepEqual(gotAsset, expectedResponse) {
+		log.Println("these should be deeply equal")
+		log.Println(expectedResponse)
+		log.Println(gotAsset)
+		t.FailNow()
+	}
+	stub.MockTransactionEnd("TestGetManyAssets")
+}
+
 func TestGetCommittedAsset(t *testing.T) {
 	stub := mock.NewMockStub("org1MSP", new(testCC))
 

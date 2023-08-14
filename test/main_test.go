@@ -6,6 +6,7 @@ import (
 	"testing"
 
 	"github.com/goledgerdev/cc-tools/assets"
+	"github.com/goledgerdev/cc-tools/events"
 	tx "github.com/goledgerdev/cc-tools/transactions"
 )
 
@@ -14,7 +15,7 @@ func TestMain(m *testing.M) {
 
 	tx.InitHeader(tx.Header{
 		Name:    "CC Tools Test",
-		Version: "v0.7.1",
+		Version: "v0.8.1",
 		Colors: map[string][]string{
 			"@default": {"#4267B2", "#34495E", "#ECF0F1"},
 		},
@@ -24,6 +25,8 @@ func TestMain(m *testing.M) {
 	})
 
 	tx.InitTxList(testTxList)
+
+	events.InitEventList(testEventTypeList)
 
 	err := assets.CustomDataTypes(testCustomDataTypes)
 	if err != nil {

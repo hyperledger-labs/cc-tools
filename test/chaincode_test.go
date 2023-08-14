@@ -6,6 +6,7 @@ import (
 
 	"github.com/goledgerdev/cc-tools/assets"
 	"github.com/goledgerdev/cc-tools/errors"
+	"github.com/goledgerdev/cc-tools/events"
 	tx "github.com/goledgerdev/cc-tools/transactions"
 	"github.com/hyperledger/fabric-chaincode-go/shim"
 	pb "github.com/hyperledger/fabric-protos-go/peer"
@@ -18,6 +19,10 @@ var testTxList = []tx.Transaction{
 	tx.CreateAsset,
 	tx.UpdateAsset,
 	tx.DeleteAsset,
+	tx.CreateAssetType,
+	tx.UpdateAssetType,
+	tx.DeleteAssetType,
+	tx.LoadAssetTypeList,
 }
 
 var testAssetList = []assets.AssetType{
@@ -65,6 +70,12 @@ var testAssetList = []assets.AssetType{
 				DefaultValue: 0,
 				DataType:     "number",
 			},
+			{
+				// Generic JSON object
+				Tag:      "info",
+				Label:    "Other Info",
+				DataType: "@object",
+			},
 		},
 	},
 	{
@@ -80,7 +91,7 @@ var testAssetList = []assets.AssetType{
 				Tag:      "name",
 				Label:    "Library Name",
 				DataType: "string",
-				Writers:  []string{`org3MSP`}, // This means only org3 can create the asset (others can edit)
+				Writers:  []string{`$org\dMSP`}, // This means only org3 can create the asset (others can edit)
 			},
 			{
 				// Asset reference list
@@ -93,6 +104,12 @@ var testAssetList = []assets.AssetType{
 				Tag:      "entranceCode",
 				Label:    "Entrance Code for the Library",
 				DataType: "->secret",
+			},
+			{
+				// Asset reference list
+				Tag:      "librarian",
+				Label:    "Librarian",
+				DataType: "->person",
 			},
 		},
 	},
@@ -164,6 +181,36 @@ var testAssetList = []assets.AssetType{
 			},
 		},
 	},
+	{
+		Tag:         "assetTypeListData",
+		Label:       "AssetTypeListData",
+		Description: "AssetTypeListData",
+
+		Props: []assets.AssetProp{
+			{
+				Required: true,
+				IsKey:    true,
+				Tag:      "id",
+				Label:    "ID",
+				DataType: "string",
+				Writers:  []string{`org1MSP`},
+			},
+			{
+				Required: true,
+				Tag:      "list",
+				Label:    "List",
+				DataType: "[]@object",
+				Writers:  []string{`org1MSP`},
+			},
+			{
+				Required: true,
+				Tag:      "lastUpdated",
+				Label:    "Last Updated",
+				DataType: "datetime",
+				Writers:  []string{`org1MSP`},
+			},
+		},
+	},
 }
 
 var testCustomDataTypes = map[string]assets.DataType{
@@ -183,6 +230,17 @@ var testCustomDataTypes = map[string]assets.DataType{
 
 			return cpf, cpf, nil
 		},
+	},
+}
+
+var testEventTypeList = []events.Event{
+	{
+		Tag:         "createLibraryLog",
+		Label:       "Create Library Log",
+		Description: "Log of a library creation",
+		Type:        events.EventLog,
+		BaseLog:     "New library created",
+		Receivers:   []string{"$org1MSP", "$orgMSP"},
 	},
 }
 

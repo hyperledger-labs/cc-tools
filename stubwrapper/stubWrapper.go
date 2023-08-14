@@ -201,3 +201,21 @@ func (sw *StubWrapper) GetMSPID() (string, errors.ICCError) {
 	}
 	return mspid, nil
 }
+
+// SplitCompositeKey returns composite keys
+func (sw *StubWrapper) SplitCompositeKey(compositeKey string) (string, []string, errors.ICCError) {
+	key, keys, err := sw.Stub.SplitCompositeKey(compositeKey)
+	if err != nil {
+		return "", nil, errors.WrapError(err, "stub.SplitCompositeKey call error")
+	}
+	return key, keys, nil
+}
+
+func (sw *StubWrapper) SetEvent(name string, payload []byte) errors.ICCError {
+	err := sw.Stub.SetEvent(name, payload)
+	if err != nil {
+		return errors.WrapError(err, "stub.SetEvent call error")
+	}
+
+	return nil
+}

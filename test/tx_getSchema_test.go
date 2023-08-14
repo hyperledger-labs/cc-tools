@@ -16,18 +16,21 @@ func TestGetSchema(t *testing.T) {
 			"label":       "Person",
 			"tag":         "person",
 			"writers":     nil,
+			"dynamic":     false,
 		},
 		map[string]interface{}{
 			"description": "Library as a collection of books",
 			"label":       "Library",
 			"tag":         "library",
 			"writers":     nil,
+			"dynamic":     false,
 		},
 		map[string]interface{}{
 			"description": "Book",
 			"label":       "Book",
 			"tag":         "book",
 			"writers":     nil,
+			"dynamic":     false,
 		},
 		map[string]interface{}{
 			"description": "Secret between Org2 and Org3",
@@ -38,6 +41,14 @@ func TestGetSchema(t *testing.T) {
 			},
 			"tag":     "secret",
 			"writers": nil,
+			"dynamic": false,
+		},
+		map[string]interface{}{
+			"description": "AssetTypeListData",
+			"label":       "AssetTypeListData",
+			"tag":         "assetTypeListData",
+			"writers":     nil,
+			"dynamic":     false,
 		},
 	}
 	err := invokeAndVerify(stub, "getSchema", nil, expectedResponse, 200)
@@ -98,6 +109,16 @@ func TestGetSchema(t *testing.T) {
 				"required":     false,
 				"tag":          "height",
 				"writers":      nil,
+			},
+			map[string]interface{}{
+				"dataType":    "@object",
+				"description": "",
+				"isKey":       false,
+				"label":       "Other Info",
+				"readOnly":    false,
+				"required":    false,
+				"tag":         "info",
+				"writers":     nil,
 			},
 		},
 	}

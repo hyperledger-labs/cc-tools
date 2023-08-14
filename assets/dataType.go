@@ -1,8 +1,10 @@
 package assets
 
 import (
+	"encoding/json"
 	"fmt"
 	"math"
+	"net/http"
 	"strconv"
 	"time"
 
@@ -156,6 +158,37 @@ var dataTypeMap = map[string]*DataType{
 			}
 
 			return dataTime.Format(time.RFC3339), dataTime, nil
+		},
+	},
+	"@object": {
+		AcceptedFormats: []string{"@object"},
+		Parse: func(data interface{}) (string, interface{}, errors.ICCError) {
+			dataVal, ok := data.(map[string]interface{})
+			if !ok {
+				switch v := data.(type) {
+				case []byte:
+					err := json.Unmarshal(v, &dataVal)
+					if err != nil {
+						return "", nil, errors.WrapErrorWithStatus(err, "failed to unmarshal []byte into map[string]interface{}", http.StatusBadRequest)
+					}
+				case string:
+					err := json.Unmarshal([]byte(v), &dataVal)
+					if err != nil {
+						return "", nil, errors.WrapErrorWithStatus(err, "failed to unmarshal string into map[string]interface{}", http.StatusBadRequest)
+					}
+				default:
+					return "", nil, errors.NewCCError(fmt.Sprintf("asset property must be either a byte array or a string, but received type is: %T", data), http.StatusBadRequest)
+				}
+			}
+
+			dataVal["@assetType"] = "@object"
+
+			retVal, err := json.Marshal(dataVal)
+			if err != nil {
+				return "", nil, errors.WrapErrorWithStatus(err, "failed to marshal return value", http.StatusInternalServerError)
+			}
+
+			return string(retVal), dataVal, nil
 		},
 	},
 }

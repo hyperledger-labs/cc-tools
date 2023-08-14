@@ -28,6 +28,26 @@ func TestGetTx(t *testing.T) {
 		},
 		map[string]interface{}{
 			"description": "",
+			"label":       "Create Asset Type",
+			"tag":         "createAssetType",
+		},
+		map[string]interface{}{
+			"description": "",
+			"label":       "Update Asset Type",
+			"tag":         "updateAssetType",
+		},
+		map[string]interface{}{
+			"description": "",
+			"label":       "Delete Asset Type",
+			"tag":         "deleteAssetType",
+		},
+		map[string]interface{}{
+			"description": "",
+			"label":       "Load Asset Type List from blockchain",
+			"tag":         "loadAssetTypeList",
+		},
+		map[string]interface{}{
+			"description": "",
 			"label":       "Get Tx",
 			"tag":         "getTx",
 		},
@@ -45,6 +65,21 @@ func TestGetTx(t *testing.T) {
 			"description": "GetDataTypes returns the primary data type map",
 			"label":       "Get DataTypes",
 			"tag":         "getDataTypes",
+		},
+		map[string]interface{}{
+			"description": "GetEvents returns the events map",
+			"label":       "Get Events",
+			"tag":         "getEvents",
+		},
+		map[string]interface{}{
+			"description": "ExecuteEvent executes an event of type 'EventCustom'",
+			"label":       "Execute Event",
+			"tag":         "executeEvent",
+		},
+		map[string]interface{}{
+			"description": "RunEvent runs an event of type 'EventCustom' as readOnly",
+			"label":       "Run Event",
+			"tag":         "runEvent",
 		},
 		map[string]interface{}{
 			"description": "",
