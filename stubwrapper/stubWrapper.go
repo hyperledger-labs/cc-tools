@@ -210,3 +210,12 @@ func (sw *StubWrapper) SplitCompositeKey(compositeKey string) (string, []string,
 	}
 	return key, keys, nil
 }
+
+func (sw *StubWrapper) SetEvent(name string, payload []byte) errors.ICCError {
+	err := sw.Stub.SetEvent(name, payload)
+	if err != nil {
+		return errors.WrapError(err, "stub.SetEvent call error")
+	}
+
+	return nil
+}
