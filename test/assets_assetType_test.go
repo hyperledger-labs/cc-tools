@@ -277,7 +277,7 @@ func TestArrayFromAssetTypeList(t *testing.T) {
 					"required": true,
 					"label":    "Library Name",
 					"dataType": "string",
-					"writers":  []interface{}{"org3MSP"},
+					"writers":  []interface{}{`$org\dMSP`},
 				},
 				map[string]interface{}{
 					"tag":      "books",
@@ -288,6 +288,11 @@ func TestArrayFromAssetTypeList(t *testing.T) {
 					"tag":      "entranceCode",
 					"label":    "Entrance Code for the Library",
 					"dataType": "->secret",
+				},
+				map[string]interface{}{
+					"tag":      "librarian",
+					"label":    "Librarian",
+					"dataType": "->person",
 				},
 			},
 		},

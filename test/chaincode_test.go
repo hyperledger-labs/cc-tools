@@ -6,6 +6,7 @@ import (
 
 	"github.com/goledgerdev/cc-tools/assets"
 	"github.com/goledgerdev/cc-tools/errors"
+	"github.com/goledgerdev/cc-tools/events"
 	tx "github.com/goledgerdev/cc-tools/transactions"
 	"github.com/hyperledger/fabric-chaincode-go/shim"
 	pb "github.com/hyperledger/fabric-protos-go/peer"
@@ -90,7 +91,7 @@ var testAssetList = []assets.AssetType{
 				Tag:      "name",
 				Label:    "Library Name",
 				DataType: "string",
-				Writers:  []string{`org3MSP`}, // This means only org3 can create the asset (others can edit)
+				Writers:  []string{`$org\dMSP`}, // This means only org3 can create the asset (others can edit)
 			},
 			{
 				// Asset reference list
@@ -103,6 +104,12 @@ var testAssetList = []assets.AssetType{
 				Tag:      "entranceCode",
 				Label:    "Entrance Code for the Library",
 				DataType: "->secret",
+			},
+			{
+				// Asset reference list
+				Tag:      "librarian",
+				Label:    "Librarian",
+				DataType: "->person",
 			},
 		},
 	},
@@ -223,6 +230,17 @@ var testCustomDataTypes = map[string]assets.DataType{
 
 			return cpf, cpf, nil
 		},
+	},
+}
+
+var testEventTypeList = []events.Event{
+	{
+		Tag:         "createLibraryLog",
+		Label:       "Create Library Log",
+		Description: "Log of a library creation",
+		Type:        events.EventLog,
+		BaseLog:     "New library created",
+		Receivers:   []string{"$org1MSP", "$orgMSP"},
 	},
 }
 

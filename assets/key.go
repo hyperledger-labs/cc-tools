@@ -2,6 +2,7 @@ package assets
 
 import (
 	"encoding/json"
+	"strings"
 
 	"github.com/goledgerdev/cc-tools/errors"
 )
@@ -49,9 +50,20 @@ func NewKey(m map[string]interface{}) (k Key, err errors.ICCError) {
 		k[t] = v
 	}
 
+	// Validate if @key corresponds to asset type
+	key, keyExists := k["@key"]
+	if keyExists && key != nil {
+		_, typeExists := k["@assetType"].(string)
+		if typeExists {
+			index := strings.Index(k["@key"].(string), k["@assetType"].(string))
+			if index != 0 {
+				keyExists = false
+			}
+		}
+	}
+
 	// Generate object key
-	_, keyExists := k["@key"]
-	if !keyExists {
+	if !keyExists || key == nil {
 		var keyStr string
 		keyStr, err = GenerateKey(k)
 		if err != nil {

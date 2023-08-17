@@ -6,6 +6,7 @@ import (
 	"testing"
 
 	"github.com/goledgerdev/cc-tools/assets"
+	"github.com/goledgerdev/cc-tools/events"
 	tx "github.com/goledgerdev/cc-tools/transactions"
 )
 
@@ -24,6 +25,8 @@ func TestMain(m *testing.M) {
 	})
 
 	tx.InitTxList(testTxList)
+
+	events.InitEventList(testEventTypeList)
 
 	err := assets.CustomDataTypes(testCustomDataTypes)
 	if err != nil {
