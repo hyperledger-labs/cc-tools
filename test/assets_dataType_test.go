@@ -152,12 +152,28 @@ func TestDataTypeAsset(t *testing.T) {
 	testParseValid(t, dtype, string(testCaseExpectedByte2), string(testCaseExpectedByte2), testCase2)
 
 	testCase3 := map[string]interface{}{
+		"@key": "library:ca683ce5-05bf-5799-a359-b28a1f981f96",
+	}
+	testCaseExpected3 := map[string]interface{}{
+		"@assetType": "library",
+		"@key":       "library:ca683ce5-05bf-5799-a359-b28a1f981f96",
+	}
+	testCaseExpectedByte3, _ := json.Marshal(testCaseExpected3)
+	testParseValid(t, dtype, testCase3, string(testCaseExpectedByte3), testCase3)
+
+	invalidCase1 := map[string]interface{}{
 		"@assetType": "library",
 	}
-	testParseInvalid(t, dtype, testCase3, http.StatusBadRequest)
+	testParseInvalid(t, dtype, invalidCase1, http.StatusBadRequest)
 
-	testCase4 := map[string]interface{}{
+	invalidCase2 := map[string]interface{}{
 		"@assetType": "inexistant",
 	}
-	testParseInvalid(t, dtype, testCase4, http.StatusBadRequest)
+	testParseInvalid(t, dtype, invalidCase2, http.StatusBadRequest)
+
+	invalidCase3 := map[string]interface{}{
+		"@assetType": "person",
+		"@key":       "library:ca683ce5-05bf-5799-a359-b28a1f981f96",
+	}
+	testParseInvalid(t, dtype, invalidCase3, http.StatusBadRequest)
 }

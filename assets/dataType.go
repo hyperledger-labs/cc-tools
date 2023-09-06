@@ -6,6 +6,7 @@ import (
 	"math"
 	"net/http"
 	"strconv"
+	"strings"
 	"time"
 
 	"github.com/goledgerdev/cc-tools/errors"
@@ -30,7 +31,7 @@ type DataType struct {
 // CustomDataTypes allows cc developer to inject custom primitive data types
 func CustomDataTypes(m map[string]DataType) error {
 	// Avoid initialization cycle
-	if FetchAssetType("@asset") == nil {
+	if FetchAssetType("->@asset") == nil {
 		dataTypeMap["->@asset"] = &assetDatatype
 	}
 
@@ -224,6 +225,15 @@ var assetDatatype = DataType{
 			return "", nil, errors.WrapError(er, "failed to generate key")
 		}
 		dataVal["@key"] = key
+
+		assetType, ok := dataVal["@assetType"].(string)
+		if ok {
+			if !strings.Contains(key, assetType) {
+				return "", nil, errors.NewCCError(fmt.Sprintf("asset type '%s' doesnt match key '%s'", assetType, key), http.StatusBadRequest)
+			}
+		} else {
+			dataVal["@assetType"] = key[:strings.IndexByte(key, ':')]
+		}
 
 		retVal, err := json.Marshal(dataVal)
 		if err != nil {
