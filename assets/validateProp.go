@@ -61,12 +61,6 @@ func validateProp(prop interface{}, propDef AssetProp) (interface{}, error) {
 				return nil, errors.WrapError(err, fmt.Sprintf("invalid '%s' (%s) asset property", propDef.Tag, propDef.Label))
 			}
 		} else {
-			// Check if type is defined in assetList
-			subAssetType := FetchAssetType(dataTypeName)
-			if subAssetType == nil {
-				return nil, errors.NewCCError(fmt.Sprintf("invalid asset type named '%s'", propDef.DataType), 400)
-			}
-
 			// Check if received subAsset is a map
 			var recvMap map[string]interface{}
 			switch t := prop.(type) {
@@ -80,8 +74,21 @@ func validateProp(prop interface{}, propDef AssetProp) (interface{}, error) {
 				return nil, errors.NewCCError("asset reference must be an object", 400)
 			}
 
-			// Add assetType to received object
-			recvMap["@assetType"] = dataTypeName
+			if dataTypeName != "@asset" {
+				// Check if type is defined in assetList
+				subAssetType := FetchAssetType(dataTypeName)
+				if subAssetType == nil {
+					return nil, errors.NewCCError(fmt.Sprintf("invalid asset type named '%s'", propDef.DataType), 400)
+				}
+
+				// Add assetType to received object
+				recvMap["@assetType"] = dataTypeName
+			} else {
+				_, ok := recvMap["@assetType"].(string)
+				if !ok {
+					return nil, errors.NewCCError("invalid asset reference: missing '@assetType' property", 400)
+				}
+			}
 
 			// Check if all key props are included
 			key, err := NewKey(recvMap)

@@ -48,6 +48,9 @@ func (t AssetType) SubAssets() (subAssets []AssetProp) {
 		dataType := prop.DataType
 		dataType = strings.TrimPrefix(dataType, "[]")
 		dataType = strings.TrimPrefix(dataType, "->")
+		if dataType == "@asset" {
+			subAssets = append(subAssets, prop)
+		}
 		subAssetType := FetchAssetType(dataType)
 		if subAssetType != nil {
 			subAssets = append(subAssets, prop)

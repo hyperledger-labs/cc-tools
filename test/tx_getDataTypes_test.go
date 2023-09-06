@@ -51,9 +51,9 @@ func TestGetDataTypes(t *testing.T) {
 			},
 			"DropDownValues": nil,
 		},
-		"@asset": map[string]interface{}{
+		"->@asset": map[string]interface{}{
 			"acceptedFormats": []interface{}{
-				"@asset",
+				"->@asset",
 			},
 			"DropDownValues": nil,
 		},

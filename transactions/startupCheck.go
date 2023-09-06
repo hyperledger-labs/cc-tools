@@ -41,7 +41,7 @@ func StartupCheck() errors.ICCError {
 				dtype != "@object" {
 				if strings.HasPrefix(dtype, "->") {
 					dtype = strings.TrimPrefix(dtype, "->")
-					if assets.FetchAssetType(dtype) == nil {
+					if assets.FetchAssetType(dtype) == nil && dtype != "@asset" {
 						return errors.NewCCError(fmt.Sprintf("invalid arg type %s in tx %s", arg.DataType, txName), 500)
 					}
 				} else {

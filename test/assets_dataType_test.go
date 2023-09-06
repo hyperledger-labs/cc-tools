@@ -121,7 +121,7 @@ func TestDataTypeObject(t *testing.T) {
 	testParseInvalid(t, dtype, "{'key': 'value'}", http.StatusBadRequest)
 }
 func TestDataTypeAsset(t *testing.T) {
-	dtypeName := "@asset"
+	dtypeName := "->@asset"
 	dtype, exists := assets.DataTypeMap()[dtypeName]
 	if !exists {
 		log.Printf("%s datatype not declared in DataTypeMap\n", dtypeName)

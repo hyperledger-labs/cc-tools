@@ -31,7 +31,7 @@ type DataType struct {
 func CustomDataTypes(m map[string]DataType) error {
 	// Avoid initialization cycle
 	if FetchAssetType("@asset") == nil {
-		dataTypeMap["@asset"] = &assetDatatype
+		dataTypeMap["->@asset"] = &assetDatatype
 	}
 
 	for k, v := range m {
@@ -199,7 +199,7 @@ var dataTypeMap = map[string]*DataType{
 }
 
 var assetDatatype = DataType{
-	AcceptedFormats: []string{"@asset"},
+	AcceptedFormats: []string{"->@asset"},
 	Parse: func(data interface{}) (string, interface{}, errors.ICCError) {
 		dataVal, ok := data.(map[string]interface{})
 		if !ok {

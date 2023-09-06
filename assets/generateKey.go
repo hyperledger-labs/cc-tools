@@ -90,11 +90,6 @@ func GenerateKey(asset map[string]interface{}) (string, errors.ICCError) {
 				keySeed += seed
 			} else {
 				// If key is a subAsset, generate subAsset's key to append to seed
-				assetTypeDef := FetchAssetType(dataTypeName)
-				if assetTypeDef == nil {
-					return "", errors.NewCCError(fmt.Sprintf("internal error: invalid sub asset type %s", prop.DataType), 500)
-				}
-
 				var propMap map[string]interface{}
 				switch t := propInterface.(type) {
 				case map[string]interface{}:
@@ -106,6 +101,14 @@ func GenerateKey(asset map[string]interface{}) (string, errors.ICCError) {
 				default:
 					errMsg := fmt.Sprintf("subAsset key %s must be sent as map[string]interface{} (JSON object)", prop.Tag)
 					return "", errors.NewCCError(errMsg, 400)
+				}
+
+				if dataTypeName == "@asset" {
+					dataTypeName = propMap["@assetType"].(string)
+				}
+				assetTypeDef := FetchAssetType(dataTypeName)
+				if assetTypeDef == nil {
+					return "", errors.NewCCError(fmt.Sprintf("internal error: invalid sub asset type %s", prop.DataType), 500)
 				}
 
 				propMap["@assetType"] = dataTypeName
