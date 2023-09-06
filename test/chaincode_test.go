@@ -76,6 +76,12 @@ var testAssetList = []assets.AssetType{
 				Label:    "Other Info",
 				DataType: "@object",
 			},
+			{
+				// Generic JSON object
+				Tag:      "association",
+				Label:    "Association",
+				DataType: "[]->@asset",
+			},
 		},
 	},
 	{
