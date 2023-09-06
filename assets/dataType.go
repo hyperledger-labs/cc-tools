@@ -191,4 +191,44 @@ var dataTypeMap = map[string]*DataType{
 			return string(retVal), dataVal, nil
 		},
 	},
+	"@asset": {
+		AcceptedFormats: []string{"@asset"},
+		Parse: func(data interface{}) (string, interface{}, errors.ICCError) {
+			dataVal, ok := data.(map[string]interface{})
+			if !ok {
+				switch v := data.(type) {
+				case []byte:
+					err := json.Unmarshal(v, &dataVal)
+					if err != nil {
+						return "", nil, errors.WrapErrorWithStatus(err, "failed to unmarshal []byte into map[string]interface{}", http.StatusBadRequest)
+					}
+				case string:
+					err := json.Unmarshal([]byte(v), &dataVal)
+					if err != nil {
+						return "", nil, errors.WrapErrorWithStatus(err, "failed to unmarshal string into map[string]interface{}", http.StatusBadRequest)
+					}
+				default:
+					return "", nil, errors.NewCCError(fmt.Sprintf("asset property must be either a byte array or a string, but received type is: %T", data), http.StatusBadRequest)
+				}
+			}
+
+			// Check if assetType is defined
+			assetType, ok := dataVal["@assetType"].(string)
+			if !ok {
+				return "", nil, errors.NewCCError("asset property must have an '@assetType' property", http.StatusBadRequest)
+			}
+
+			// Check if assetType is valid
+			if FetchAssetType(assetType) == nil {
+				return "", nil, errors.NewCCError(fmt.Sprintf("asset property '@assetType' must be an existing asset type, but received '%s'", assetType), http.StatusBadRequest)
+			}
+
+			retVal, err := json.Marshal(dataVal)
+			if err != nil {
+				return "", nil, errors.WrapErrorWithStatus(err, "failed to marshal return value", http.StatusInternalServerError)
+			}
+
+			return string(retVal), dataVal, nil
+		},
+	},
 }
