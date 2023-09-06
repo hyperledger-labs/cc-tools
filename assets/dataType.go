@@ -30,7 +30,7 @@ type DataType struct {
 // CustomDataTypes allows cc developer to inject custom primitive data types
 func CustomDataTypes(m map[string]DataType) error {
 	// Avoid initialization cycle
-	if FetchAssetType("@asset") != nil {
+	if FetchAssetType("@asset") == nil {
 		dataTypeMap["@asset"] = &assetDatatype
 	}
 
