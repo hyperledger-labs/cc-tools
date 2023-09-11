@@ -1,6 +1,7 @@
 package transactions
 
 import (
+	"github.com/goledgerdev/cc-tools/accesscontrol"
 	"github.com/goledgerdev/cc-tools/errors"
 	sw "github.com/goledgerdev/cc-tools/stubwrapper"
 )
@@ -11,7 +12,7 @@ type Transaction struct {
 	// Regexp is supported by putting '$' before the MSP regexp e.g. []string{`$org\dMSP`}.
 	// Please note this restriction DOES NOT protect ledger data from being
 	// read by unauthorized organizations, this should be done with Private Data.
-	Callers []string `json:"callers,omitempty"`
+	Callers []accesscontrol.Caller `json:"callers,omitempty"`
 
 	// Tag is how the tx will be called.
 	Tag string `json:"tag"`

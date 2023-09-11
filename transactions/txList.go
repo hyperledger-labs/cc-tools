@@ -1,6 +1,9 @@
 package transactions
 
-import "github.com/goledgerdev/cc-tools/assets"
+import (
+	"github.com/goledgerdev/cc-tools/accesscontrol"
+	"github.com/goledgerdev/cc-tools/assets"
+)
 
 var txList = []Transaction{}
 
@@ -45,7 +48,14 @@ func FetchTx(txName string) *Transaction {
 func InitTxList(l []Transaction) {
 	txList = append(l, basicTxs...)
 	if assets.GetEnabledDynamicAssetType() {
-		callers := assets.GetAssetAdminsDynamicAssetType()
+		callersMSP := assets.GetAssetAdminsDynamicAssetType()
+		var callers []accesscontrol.Caller
+		for _, msp := range callersMSP {
+			callers = append(callers, accesscontrol.Caller{
+				MSP: msp,
+			})
+		}
+
 		for i := range dynamicAssetTypesTxs {
 			if dynamicAssetTypesTxs[i].Tag != "loadAssetTypeList" {
 				dynamicAssetTypesTxs[i].Callers = callers
