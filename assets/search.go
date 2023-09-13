@@ -99,6 +99,8 @@ func Search(stub *sw.StubWrapper, request map[string]interface{}, privateCollect
 			data = asset
 		}
 
+		delete(data, "@lastTouchBy")
+
 		searchResult = append(searchResult, data)
 	}
 

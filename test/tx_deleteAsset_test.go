@@ -62,6 +62,7 @@ func TestDeleteAsset(t *testing.T) {
 		t.FailNow()
 	}
 
+	delete(expectedResponse, "@lastTouchBy")
 	if !reflect.DeepEqual(resPayload, expectedResponse) {
 		log.Println("these should be equal")
 		log.Printf("%#v\n", resPayload)

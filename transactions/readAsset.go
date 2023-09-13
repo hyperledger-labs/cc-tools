@@ -51,7 +51,15 @@ var ReadAsset = Transaction{
 				return nil, errors.WrapErrorWithStatus(err, "failed to serialize asset", 500)
 			}
 		} else {
-			assetJSON, err = key.GetBytes(stub)
+			var asset *assets.Asset
+			asset, err = key.Get(stub)
+			if err != nil {
+				return nil, errors.WrapError(err, "failed to get asset state")
+			}
+
+			delete(*asset, "@lastTouchBy")
+
+			assetJSON, err = json.Marshal(asset)
 			if err != nil {
 				return nil, errors.WrapError(err, "failed to get asset state")
 			}
