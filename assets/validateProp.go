@@ -86,11 +86,20 @@ func validateProp(prop interface{}, propDef AssetProp) (interface{}, error) {
 				recvMap["@assetType"] = dataTypeName
 			} else {
 				keyStr, keyExists := recvMap["@key"].(string)
-				if !keyExists {
-					return nil, errors.NewCCError("invalid asset reference: missing '@key' property", http.StatusBadRequest)
+				assetTypeStr, typeExists := recvMap["@assetType"].(string)
+				if !keyExists && !typeExists {
+					return nil, errors.NewCCError("invalid asset reference: missing '@key' or '@assetType' property", http.StatusBadRequest)
 				}
-				assetTypeName := keyStr[:strings.IndexByte(keyStr, ':')]
-				recvMap["@assetType"] = assetTypeName
+				if keyExists {
+					assetTypeName := keyStr[:strings.IndexByte(keyStr, ':')]
+					if !typeExists {
+						recvMap["@assetType"] = assetTypeName
+					} else {
+						if assetTypeName != assetTypeStr {
+							return nil, errors.NewCCError("invalid asset reference: '@key' and '@assetType' properties do not match", http.StatusBadRequest)
+						}
+					}
+				}
 			}
 
 			// Check if all key props are included
