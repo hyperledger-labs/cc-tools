@@ -31,7 +31,7 @@ func (a *Asset) put(stub *sw.StubWrapper) (map[string]interface{}, errors.ICCErr
 
 	// Write asset to blockchain
 	if a.IsPrivate() {
-		err = stub.PutPrivateData(a.TypeTag(), a.Key(), assetJSON)
+		err = stub.PutPrivateData(a.CollectionName(), a.Key(), assetJSON)
 		if err != nil {
 			return nil, errors.WrapError(err, "failed to write asset to ledger")
 		}

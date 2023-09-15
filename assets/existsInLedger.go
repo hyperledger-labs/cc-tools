@@ -6,15 +6,15 @@ import (
 	sw "github.com/goledgerdev/cc-tools/stubwrapper"
 )
 
-func existsInLedger(stub *sw.StubWrapper, isPrivate bool, typeTag, key string) (bool, errors.ICCError) {
+func existsInLedger(stub *sw.StubWrapper, isPrivate bool, collection, key string) (bool, errors.ICCError) {
 	var assetBytes []byte
 	var err error
 	if isPrivate {
 		_, isMock := stub.Stub.(*mock.MockStub)
 		if isMock {
-			assetBytes, err = stub.GetPrivateData(typeTag, key)
+			assetBytes, err = stub.GetPrivateData(collection, key)
 		} else {
-			assetBytes, err = stub.GetPrivateDataHash(typeTag, key)
+			assetBytes, err = stub.GetPrivateDataHash(collection, key)
 		}
 	} else {
 		assetBytes, err = stub.GetState(key)
@@ -34,7 +34,7 @@ func (a *Asset) ExistsInLedger(stub *sw.StubWrapper) (bool, errors.ICCError) {
 	if a.Key() == "" {
 		return false, errors.NewCCError("asset key is empty", 500)
 	}
-	return existsInLedger(stub, a.IsPrivate(), a.TypeTag(), a.Key())
+	return existsInLedger(stub, a.IsPrivate(), a.CollectionName(), a.Key())
 }
 
 // ExistsInLedger checks if asset referenced by a key object currently has a state.
@@ -42,20 +42,20 @@ func (k *Key) ExistsInLedger(stub *sw.StubWrapper) (bool, errors.ICCError) {
 	if k.Key() == "" {
 		return false, errors.NewCCError("key is empty", 500)
 	}
-	return existsInLedger(stub, k.IsPrivate(), k.TypeTag(), k.Key())
+	return existsInLedger(stub, k.IsPrivate(), k.CollectionName(), k.Key())
 }
 
 // ----------------------------------------
 
-func committedInLedger(stub *sw.StubWrapper, isPrivate bool, typeTag, key string) (bool, errors.ICCError) {
+func committedInLedger(stub *sw.StubWrapper, isPrivate bool, collection, key string) (bool, errors.ICCError) {
 	var assetBytes []byte
 	var err error
 	if isPrivate {
 		_, isMock := stub.Stub.(*mock.MockStub)
 		if isMock {
-			assetBytes, err = stub.Stub.GetPrivateData(typeTag, key)
+			assetBytes, err = stub.Stub.GetPrivateData(collection, key)
 		} else {
-			assetBytes, err = stub.Stub.GetPrivateDataHash(typeTag, key)
+			assetBytes, err = stub.Stub.GetPrivateDataHash(collection, key)
 		}
 	} else {
 		assetBytes, err = stub.Stub.GetState(key)
@@ -75,7 +75,7 @@ func (a *Asset) CommittedInLedger(stub *sw.StubWrapper) (bool, errors.ICCError) 
 	if a.Key() == "" {
 		return false, errors.NewCCError("asset key is empty", 500)
 	}
-	return committedInLedger(stub, a.IsPrivate(), a.TypeTag(), a.Key())
+	return committedInLedger(stub, a.IsPrivate(), a.CollectionName(), a.Key())
 }
 
 // CommittedInLedger checks if asset referenced by a key object currently has a state committed in ledger.
@@ -83,5 +83,5 @@ func (k *Key) CommittedInLedger(stub *sw.StubWrapper) (bool, errors.ICCError) {
 	if k.Key() == "" {
 		return false, errors.NewCCError("key is empty", 500)
 	}
-	return committedInLedger(stub, k.IsPrivate(), k.TypeTag(), k.Key())
+	return committedInLedger(stub, k.IsPrivate(), k.CollectionName(), k.Key())
 }

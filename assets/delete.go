@@ -34,7 +34,7 @@ func (a *Asset) delete(stub *sw.StubWrapper) ([]byte, errors.ICCError) {
 			return nil, errors.WrapError(err, "failed to marshal asset")
 		}
 	} else {
-		err = stub.DelPrivateData(a.TypeTag(), a.Key())
+		err = stub.DelPrivateData(a.CollectionName(), a.Key())
 		if err != nil {
 			return nil, errors.WrapError(err, "failed to delete state from private collection")
 		}

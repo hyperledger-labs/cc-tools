@@ -30,6 +30,10 @@ type AssetType struct {
 
 	// Dynamic is a flag that indicates if the asset type is dynamic.
 	Dynamic bool `json:"dynamic,omitempty"`
+
+	// Private collection name it belongs to. When empty and len(readers) > 0,
+	// Tag is considered instead
+	Collection string `json:"collection,omitempty"`
 }
 
 // Keys returns a list of asset properties which are defined as primary keys. (IsKey == true)
@@ -79,6 +83,15 @@ func (t AssetType) GetPropDef(propTag string) *AssetProp {
 // IsPrivate returns true if asset is in a private collection.
 func (t AssetType) IsPrivate() bool {
 	return len(t.Readers) > 0
+}
+
+// CollectionName returns the private collection name. Default is tag.
+func (t AssetType) CollectionName() string {
+	if t.Collection == "" {
+		return t.Tag
+	}
+
+	return t.Collection
 }
 
 // ToMap returns a map representation of the asset type.

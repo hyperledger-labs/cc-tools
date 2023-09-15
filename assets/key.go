@@ -99,6 +99,16 @@ func (k Key) IsPrivate() bool {
 	return assetTypeDef.IsPrivate()
 }
 
+func (k Key) CollectionName() string {
+	// Fetch asset properties
+	assetTypeDef := k.Type()
+	if assetTypeDef == nil {
+		return ""
+	}
+
+	return assetTypeDef.CollectionName()
+}
+
 // TypeTag returns @assetType attribute
 func (k Key) TypeTag() string {
 	assetType, _ := k["@assetType"].(string)
