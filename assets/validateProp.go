@@ -2,6 +2,7 @@ package assets
 
 import (
 	"fmt"
+	"net/http"
 	"reflect"
 	"strings"
 
@@ -84,10 +85,12 @@ func validateProp(prop interface{}, propDef AssetProp) (interface{}, error) {
 				// Add assetType to received object
 				recvMap["@assetType"] = dataTypeName
 			} else {
-				_, ok := recvMap["@assetType"].(string)
-				if !ok {
-					return nil, errors.NewCCError("invalid asset reference: missing '@assetType' property", 400)
+				keyStr, keyExists := recvMap["@key"].(string)
+				if !keyExists {
+					return nil, errors.NewCCError("invalid asset reference: missing '@key' property", http.StatusBadRequest)
 				}
+				assetTypeName := keyStr[:strings.IndexByte(keyStr, ':')]
+				recvMap["@assetType"] = assetTypeName
 			}
 
 			// Check if all key props are included
