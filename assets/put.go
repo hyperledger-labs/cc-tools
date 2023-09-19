@@ -3,6 +3,7 @@ package assets
 import (
 	"encoding/json"
 	"fmt"
+	"reflect"
 	"strings"
 
 	"github.com/goledgerdev/cc-tools/errors"
@@ -97,29 +98,42 @@ func putRecursive(stub *sw.StubWrapper, object map[string]interface{}, root bool
 		return nil, errors.WrapError(err, "unable to create asset object")
 	}
 
-	if !root {
-		exists, err := objAsKey.ExistsInLedger(stub)
+	exists, err := objAsKey.ExistsInLedger(stub)
+	if err != nil {
+		return nil, errors.WrapError(err, "failed checking if asset exists")
+	}
+
+	asset := map[string]interface{}{}
+	if exists && !root {
+		asset, err = objAsKey.GetRecursive(stub)
 		if err != nil {
-			return nil, errors.WrapError(err, "failed checking if asset exists")
+			return nil, errors.WrapError(err, "failed fetching sub-asset that already exists")
 		}
-		if exists {
-			asset, err := objAsKey.GetRecursive(stub)
-			if err != nil {
-				return nil, errors.WrapError(err, "failed fetching sub-asset that already exists")
-			}
-			if asset == nil {
-				return nil, errors.NewCCError("existing sub-asset could not be fetched", 404)
-			}
-
-			// If asset key is not in object, add asset value to object (so that properties are not erased)
-			for k := range asset {
-				if _, ok := object[k]; !ok {
-					object[k] = asset[k]
-				}
-			}
-
-			// TODO: check property by property if asset must be updated
+		if asset == nil {
+			return nil, errors.NewCCError("existing sub-asset could not be fetched", 404)
 		}
+	} else if exists {
+		asset, err = objAsKey.GetMap(stub)
+		if err != nil {
+			return nil, errors.WrapError(err, "failed fetching asset that already exists")
+		}
+	}
+
+	// If asset key is not in object, add asset value to object (so that properties are not erased)
+	for k := range asset {
+		if _, ok := object[k]; !ok {
+			object[k] = asset[k]
+		}
+	}
+
+	var shouldUpdate bool
+	for k, v := range object {
+		if !reflect.DeepEqual(v, asset[k]) {
+			shouldUpdate = true
+		}
+	}
+	if !shouldUpdate {
+		return asset, nil
 	}
 
 	objAsAsset, err := NewAsset(object)

@@ -159,11 +159,9 @@ func (k *Key) Update(stub *sw.StubWrapper, update map[string]interface{}) (map[s
 						writePermission = true
 						break
 					}
-				} else { // if writer is not regexp
-					if w == txCreator {
-						writePermission = true
-						break
-					}
+				} else if w == txCreator { // if writer is not regexp
+					writePermission = true
+					break
 				}
 			}
 			if !writePermission {
