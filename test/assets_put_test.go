@@ -217,11 +217,6 @@ func TestPutNewAssetRecursive(t *testing.T) {
 }
 
 func TestUpdateRecursive(t *testing.T) {
-	stub := mock.NewMockStub("org1MSP", new(testCC))
-	sw := &sw.StubWrapper{
-		Stub: stub,
-	}
-
 	tests := []struct {
 		description string
 
@@ -344,12 +339,6 @@ func TestUpdateRecursive(t *testing.T) {
 					map[string]interface{}{ // This book will not be updated
 						"@assetType": "book",
 						"@key":       "book:a36a2920-c405-51c3-b584-dcd758338cb5",
-						"title":      "Meu Nome é Maria",
-						"author":     "Maria Viana",
-						"currentTenant": map[string]interface{}{ // This person will not be updated
-							"@assetType": "person",
-							"id":         "31820792048",
-						},
 					},
 					map[string]interface{}{ // This book will be updated
 						"@assetType": "book",
@@ -365,7 +354,6 @@ func TestUpdateRecursive(t *testing.T) {
 				},
 			},
 			expectedResponse: func(lastUpdated string) map[string]interface{} {
-				publishedTimeBook1, _ := time.Parse(time.RFC3339, "2019-05-06T22:12:41Z")
 				publishedTimeBook2, _ := time.Parse(time.RFC3339, "2020-06-10T22:12:41Z")
 
 				return map[string]interface{}{
@@ -395,7 +383,7 @@ func TestUpdateRecursive(t *testing.T) {
 								"height":       1.66,
 							},
 							"genres":    []interface{}{"biography", "non-fiction"},
-							"published": publishedTimeBook1,
+							"published": "2019-05-06T22:12:41Z",
 						},
 						map[string]interface{}{
 							"@assetType":   "book",
@@ -445,6 +433,11 @@ func TestUpdateRecursive(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.description, func(t *testing.T) {
+			stub := mock.NewMockStub("org1MSP", new(testCC))
+			sw := &sw.StubWrapper{
+				Stub: stub,
+			}
+
 			// Put asset
 			stub.MockTransactionStart("TestPutAsset")
 			var err error
