@@ -6,8 +6,8 @@ import (
 	"reflect"
 	"strings"
 
-	"github.com/goledgerdev/cc-tools/errors"
-	sw "github.com/goledgerdev/cc-tools/stubwrapper"
+	"github.com/hyperledger-labs/cc-tools/errors"
+	sw "github.com/hyperledger-labs/cc-tools/stubwrapper"
 )
 
 // put writes the reference index to the ledger, then encodes the

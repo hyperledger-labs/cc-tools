@@ -4,10 +4,10 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/goledgerdev/cc-tools/assets"
-	"github.com/goledgerdev/cc-tools/errors"
-	"github.com/goledgerdev/cc-tools/events"
-	tx "github.com/goledgerdev/cc-tools/transactions"
+	"github.com/hyperledger-labs/cc-tools/assets"
+	"github.com/hyperledger-labs/cc-tools/errors"
+	"github.com/hyperledger-labs/cc-tools/events"
+	tx "github.com/hyperledger-labs/cc-tools/transactions"
 	"github.com/hyperledger/fabric-chaincode-go/shim"
 	pb "github.com/hyperledger/fabric-protos-go/peer"
 )
