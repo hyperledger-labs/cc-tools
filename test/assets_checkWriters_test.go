@@ -4,9 +4,9 @@ import (
 	"log"
 	"testing"
 
-	"github.com/goledgerdev/cc-tools/assets"
-	"github.com/goledgerdev/cc-tools/mock"
-	sw "github.com/goledgerdev/cc-tools/stubwrapper"
+	"github.com/hyperledger-labs/cc-tools/assets"
+	"github.com/hyperledger-labs/cc-tools/mock"
+	sw "github.com/hyperledger-labs/cc-tools/stubwrapper"
 )
 
 func TestCheckWriters(t *testing.T) {

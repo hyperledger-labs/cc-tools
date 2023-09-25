@@ -4,8 +4,8 @@ import (
 	"encoding/json"
 	"net/http"
 
-	"github.com/goledgerdev/cc-tools/errors"
-	sw "github.com/goledgerdev/cc-tools/stubwrapper"
+	"github.com/hyperledger-labs/cc-tools/errors"
+	sw "github.com/hyperledger-labs/cc-tools/stubwrapper"
 	"github.com/hyperledger/fabric-chaincode-go/shim"
 	pb "github.com/hyperledger/fabric-protos-go/peer"
 )

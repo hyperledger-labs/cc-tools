@@ -1,4 +1,4 @@
-module github.com/goledgerdev/cc-tools
+module github.com/hyperledger-labs/cc-tools
 
 go 1.14
 

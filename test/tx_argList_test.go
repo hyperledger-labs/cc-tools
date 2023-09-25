@@ -5,7 +5,7 @@ import (
 	"reflect"
 	"testing"
 
-	tx "github.com/goledgerdev/cc-tools/transactions"
+	tx "github.com/hyperledger-labs/cc-tools/transactions"
 )
 
 func TestGetArgDef(t *testing.T) {
