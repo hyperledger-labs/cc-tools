@@ -1,8 +1,8 @@
 package transactions
 
 import (
-	"github.com/goledgerdev/cc-tools/accesscontrol"
-	"github.com/goledgerdev/cc-tools/assets"
+	"github.com/hyperledger-labs/cc-tools/accesscontrol"
+	"github.com/hyperledger-labs/cc-tools/assets"
 )
 
 var txList = []Transaction{}

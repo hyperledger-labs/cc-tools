@@ -3,10 +3,10 @@ package transactions
 import (
 	"fmt"
 
-	"github.com/goledgerdev/cc-tools/accesscontrol"
-	"github.com/goledgerdev/cc-tools/assets"
-	"github.com/goledgerdev/cc-tools/errors"
-	sw "github.com/goledgerdev/cc-tools/stubwrapper"
+	"github.com/hyperledger-labs/cc-tools/accesscontrol"
+	"github.com/hyperledger-labs/cc-tools/assets"
+	"github.com/hyperledger-labs/cc-tools/errors"
+	sw "github.com/hyperledger-labs/cc-tools/stubwrapper"
 	"github.com/hyperledger/fabric-chaincode-go/shim"
 )
 

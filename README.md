@@ -1,13 +1,13 @@
 # GoLedger CC Tools
 
-[![Go Report Card](https://goreportcard.com/badge/github.com/goledgerdev/cc-tools)](https://goreportcard.com/report/github.com/goledgerdev/cc-tools)
-[![GoDoc](https://godoc.org/github.com/goledgerdev/cc-tools?status.svg)](https://godoc.org/github.com/goledgerdev/cc-tools)
+[![Go Report Card](https://goreportcard.com/badge/github.com/hyperledger-labs/cc-tools)](https://goreportcard.com/report/github.com/hyperledger-labs/cc-tools)
+[![GoDoc](https://godoc.org/github.com/hyperledger-labs/cc-tools?status.svg)](https://godoc.org/github.com/hyperledger-labs/cc-tools)
 
 This project is a GoLedger open-source project aimed at providing tools for Hyperledger Fabric chaincode development in Golang. This might have breaking changes before we arrive at release v1.0.0. 
 
 ## Getting Started
 
-Make sure you visit the repository [goledgerdev/cc-tools-demo](https://github.com/goledgerdev/cc-tools-demo), which is a template of a functional chaincode that uses cc-tools and provides ready-to-use scripts to deploy development networks. This is our preferred way of working, but you can feel free to import the package and assemble the chaincode as you choose. 
+Make sure you visit the repository [hyperledger-labs/cc-tools-demo](https://github.com/hyperledger-labs/cc-tools-demo), which is a template of a functional chaincode that uses cc-tools and provides ready-to-use scripts to deploy development networks. This is our preferred way of working, but you can feel free to import the package and assemble the chaincode as you choose. 
 
 CC Tools has been tested with Hyperledger Fabric 1.x and 2.x realeases.
 

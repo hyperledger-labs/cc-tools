@@ -3,7 +3,7 @@ package accesscontrol
 import (
 	"regexp"
 
-	"github.com/goledgerdev/cc-tools/errors"
+	"github.com/hyperledger-labs/cc-tools/errors"
 	"github.com/hyperledger/fabric-chaincode-go/pkg/cid"
 	"github.com/hyperledger/fabric-chaincode-go/shim"
 )
