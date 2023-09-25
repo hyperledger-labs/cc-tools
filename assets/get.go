@@ -3,8 +3,8 @@ package assets
 import (
 	"encoding/json"
 
-	"github.com/goledgerdev/cc-tools/errors"
-	sw "github.com/goledgerdev/cc-tools/stubwrapper"
+	"github.com/hyperledger-labs/cc-tools/errors"
+	sw "github.com/hyperledger-labs/cc-tools/stubwrapper"
 )
 
 func get(stub *sw.StubWrapper, pvtCollection, key string, committed bool) (*Asset, errors.ICCError) {

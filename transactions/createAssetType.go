@@ -4,9 +4,9 @@ import (
 	"encoding/json"
 	"net/http"
 
-	"github.com/goledgerdev/cc-tools/assets"
-	"github.com/goledgerdev/cc-tools/errors"
-	sw "github.com/goledgerdev/cc-tools/stubwrapper"
+	"github.com/hyperledger-labs/cc-tools/assets"
+	"github.com/hyperledger-labs/cc-tools/errors"
+	sw "github.com/hyperledger-labs/cc-tools/stubwrapper"
 )
 
 // CreateAssetType is the transaction which creates a dynamic Asset Type

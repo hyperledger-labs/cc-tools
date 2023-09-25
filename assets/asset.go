@@ -4,8 +4,8 @@ import (
 	"encoding/json"
 	"time"
 
-	"github.com/goledgerdev/cc-tools/errors"
-	sw "github.com/goledgerdev/cc-tools/stubwrapper"
+	"github.com/hyperledger-labs/cc-tools/errors"
+	sw "github.com/hyperledger-labs/cc-tools/stubwrapper"
 )
 
 // Asset implements the json.Unmarshaler interface and is the base object in cc-tools network.

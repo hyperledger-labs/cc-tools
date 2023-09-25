@@ -1,8 +1,8 @@
 package stubwrapper
 
 import (
-	"github.com/goledgerdev/cc-tools/errors"
-	"github.com/goledgerdev/cc-tools/mock"
+	"github.com/hyperledger-labs/cc-tools/errors"
+	"github.com/hyperledger-labs/cc-tools/mock"
 	"github.com/hyperledger/fabric-chaincode-go/pkg/cid"
 	"github.com/hyperledger/fabric-chaincode-go/shim"
 	pb "github.com/hyperledger/fabric-protos-go/peer"

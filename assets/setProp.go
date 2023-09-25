@@ -3,7 +3,7 @@ package assets
 import (
 	"fmt"
 
-	"github.com/goledgerdev/cc-tools/errors"
+	"github.com/hyperledger-labs/cc-tools/errors"
 )
 
 // SetProp sets the prop value with proper validation. It does not update the asset in the ledger.
