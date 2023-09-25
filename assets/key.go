@@ -4,7 +4,7 @@ import (
 	"encoding/json"
 	"strings"
 
-	"github.com/goledgerdev/cc-tools/errors"
+	"github.com/hyperledger-labs/cc-tools/errors"
 )
 
 // Key stores the information for retrieving an Asset from the ledger.
