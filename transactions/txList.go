@@ -1,6 +1,6 @@
 package transactions
 
-import "github.com/goledgerdev/cc-tools/assets"
+import "github.com/hyperledger-labs/cc-tools/assets"
 
 var txList = []Transaction{}
 

@@ -5,7 +5,7 @@ import (
 	"reflect"
 	"testing"
 
-	"github.com/goledgerdev/cc-tools/events"
+	"github.com/hyperledger-labs/cc-tools/events"
 )
 
 func TestFetchEvent(t *testing.T) {
