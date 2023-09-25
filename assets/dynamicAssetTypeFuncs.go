@@ -5,7 +5,7 @@ import (
 	"net/http"
 	"strings"
 
-	"github.com/goledgerdev/cc-tools/errors"
+	"github.com/hyperledger/cc-tools/errors"
 )
 
 // BuildAssetProp builds an AssetProp from an object with the required fields

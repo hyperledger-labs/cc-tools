@@ -5,8 +5,8 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/goledgerdev/cc-tools/errors"
-	sw "github.com/goledgerdev/cc-tools/stubwrapper"
+	"github.com/hyperledger/cc-tools/errors"
+	sw "github.com/hyperledger/cc-tools/stubwrapper"
 )
 
 // put writes the reference index to the ledger, then encodes the

@@ -7,7 +7,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/goledgerdev/cc-tools/mock"
+	"github.com/hyperledger/cc-tools/mock"
 )
 
 func TestUpdateAsset(t *testing.T) {

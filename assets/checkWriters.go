@@ -4,8 +4,8 @@ import (
 	"fmt"
 	"regexp"
 
-	"github.com/goledgerdev/cc-tools/errors"
-	sw "github.com/goledgerdev/cc-tools/stubwrapper"
+	"github.com/hyperledger/cc-tools/errors"
+	sw "github.com/hyperledger/cc-tools/stubwrapper"
 )
 
 // CheckWriters checks if tx creator is allowed to write asset.

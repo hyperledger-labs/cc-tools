@@ -6,7 +6,7 @@ import (
 	"log"
 	"reflect"
 
-	"github.com/goledgerdev/cc-tools/mock"
+	"github.com/hyperledger/cc-tools/mock"
 )
 
 func invokeAndVerify(stub *mock.MockStub, txName string, req, expectedRes interface{}, expectedStatus int32) error {

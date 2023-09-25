@@ -3,9 +3,9 @@ package test
 import (
 	"testing"
 
-	"github.com/goledgerdev/cc-tools/assets"
-	"github.com/goledgerdev/cc-tools/mock"
-	sw "github.com/goledgerdev/cc-tools/stubwrapper"
+	"github.com/hyperledger/cc-tools/assets"
+	"github.com/hyperledger/cc-tools/mock"
+	sw "github.com/hyperledger/cc-tools/stubwrapper"
 )
 
 func TestExistsInLedgerNoKey(t *testing.T) {

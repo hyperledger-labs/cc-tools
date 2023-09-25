@@ -8,7 +8,7 @@ import (
 	"strconv"
 	"time"
 
-	"github.com/goledgerdev/cc-tools/errors"
+	"github.com/hyperledger/cc-tools/errors"
 )
 
 // DataType is the struct defining a primitive data type.

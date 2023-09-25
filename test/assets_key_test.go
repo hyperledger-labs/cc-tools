@@ -5,7 +5,7 @@ import (
 	"reflect"
 	"testing"
 
-	"github.com/goledgerdev/cc-tools/assets"
+	"github.com/hyperledger/cc-tools/assets"
 )
 
 func TestKeyString(t *testing.T) {

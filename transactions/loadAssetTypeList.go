@@ -3,9 +3,9 @@ package transactions
 import (
 	"encoding/json"
 
-	"github.com/goledgerdev/cc-tools/assets"
-	"github.com/goledgerdev/cc-tools/errors"
-	sw "github.com/goledgerdev/cc-tools/stubwrapper"
+	"github.com/hyperledger/cc-tools/assets"
+	"github.com/hyperledger/cc-tools/errors"
+	sw "github.com/hyperledger/cc-tools/stubwrapper"
 )
 
 // LoadAssetTypeList is the transaction which loads the asset Type list from the blockchain

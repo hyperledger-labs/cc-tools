@@ -5,8 +5,8 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/goledgerdev/cc-tools/assets"
-	"github.com/goledgerdev/cc-tools/errors"
+	"github.com/hyperledger/cc-tools/assets"
+	"github.com/hyperledger/cc-tools/errors"
 	"github.com/hyperledger/fabric-chaincode-go/shim"
 )
 

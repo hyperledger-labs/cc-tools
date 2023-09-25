@@ -4,9 +4,9 @@ import (
 	b64 "encoding/base64"
 	"net/http"
 
-	"github.com/goledgerdev/cc-tools/errors"
-	"github.com/goledgerdev/cc-tools/events"
-	sw "github.com/goledgerdev/cc-tools/stubwrapper"
+	"github.com/hyperledger/cc-tools/errors"
+	"github.com/hyperledger/cc-tools/events"
+	sw "github.com/hyperledger/cc-tools/stubwrapper"
 )
 
 // RunEvent runs an event of type "EventCustom" as readOnly

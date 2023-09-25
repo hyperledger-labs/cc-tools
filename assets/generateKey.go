@@ -4,8 +4,8 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/goledgerdev/cc-tools/errors"
 	"github.com/google/uuid"
+	"github.com/hyperledger/cc-tools/errors"
 )
 
 // GenerateKey implements the logic to generate an asset's unique key. It validates

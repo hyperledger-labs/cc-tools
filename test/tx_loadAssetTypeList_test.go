@@ -5,8 +5,8 @@ import (
 	"log"
 	"testing"
 
-	"github.com/goledgerdev/cc-tools/assets"
-	"github.com/goledgerdev/cc-tools/mock"
+	"github.com/hyperledger/cc-tools/assets"
+	"github.com/hyperledger/cc-tools/mock"
 )
 
 func TestLoadAssetTypeList(t *testing.T) {

@@ -9,7 +9,7 @@ import (
 	"reflect"
 	"testing"
 
-	"github.com/goledgerdev/cc-tools/mock"
+	"github.com/hyperledger/cc-tools/mock"
 	"github.com/stretchr/testify/assert"
 )
 

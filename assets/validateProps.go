@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/goledgerdev/cc-tools/errors"
+	"github.com/hyperledger/cc-tools/errors"
 )
 
 // ValidateProps checks if all props are compliant to format

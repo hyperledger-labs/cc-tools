@@ -5,8 +5,8 @@ import (
 	"regexp"
 	"strings"
 
-	"github.com/goledgerdev/cc-tools/errors"
-	sw "github.com/goledgerdev/cc-tools/stubwrapper"
+	"github.com/hyperledger/cc-tools/errors"
+	sw "github.com/hyperledger/cc-tools/stubwrapper"
 )
 
 // Update receives a map[string]interface{} with key/vals to update the asset value in the world state.

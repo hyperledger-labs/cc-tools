@@ -6,7 +6,7 @@ import (
 	"reflect"
 	"testing"
 
-	"github.com/goledgerdev/cc-tools/mock"
+	"github.com/hyperledger/cc-tools/mock"
 )
 
 func TestReadAsset(t *testing.T) {

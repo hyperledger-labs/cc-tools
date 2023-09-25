@@ -4,7 +4,7 @@ import (
 	"encoding/json"
 	"testing"
 
-	"github.com/goledgerdev/cc-tools/mock"
+	"github.com/hyperledger/cc-tools/mock"
 )
 
 func TestSearchEmptyQuery(t *testing.T) {

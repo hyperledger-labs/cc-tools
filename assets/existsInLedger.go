@@ -1,9 +1,9 @@
 package assets
 
 import (
-	"github.com/goledgerdev/cc-tools/errors"
-	"github.com/goledgerdev/cc-tools/mock"
-	sw "github.com/goledgerdev/cc-tools/stubwrapper"
+	"github.com/hyperledger/cc-tools/errors"
+	"github.com/hyperledger/cc-tools/mock"
+	sw "github.com/hyperledger/cc-tools/stubwrapper"
 )
 
 func existsInLedger(stub *sw.StubWrapper, isPrivate bool, typeTag, key string) (bool, errors.ICCError) {

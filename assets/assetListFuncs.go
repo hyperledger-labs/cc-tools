@@ -4,8 +4,8 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/goledgerdev/cc-tools/errors"
-	sw "github.com/goledgerdev/cc-tools/stubwrapper"
+	"github.com/hyperledger/cc-tools/errors"
+	sw "github.com/hyperledger/cc-tools/stubwrapper"
 )
 
 // AssetTypeList returns a copy of the assetTypeList variable.

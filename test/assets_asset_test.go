@@ -6,7 +6,7 @@ import (
 	"reflect"
 	"testing"
 
-	"github.com/goledgerdev/cc-tools/assets"
+	"github.com/hyperledger/cc-tools/assets"
 )
 
 func TestAssetUnmarshal(t *testing.T) {

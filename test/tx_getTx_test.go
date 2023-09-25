@@ -4,7 +4,7 @@ import (
 	"log"
 	"testing"
 
-	"github.com/goledgerdev/cc-tools/mock"
+	"github.com/hyperledger/cc-tools/mock"
 )
 
 func TestGetTx(t *testing.T) {
