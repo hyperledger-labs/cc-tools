@@ -5,8 +5,8 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/goledgerdev/cc-tools/errors"
-	sw "github.com/goledgerdev/cc-tools/stubwrapper"
+	"github.com/hyperledger-labs/cc-tools/errors"
+	sw "github.com/hyperledger-labs/cc-tools/stubwrapper"
 )
 
 // Refs returns an array of Keys containing the reference keys for all present subAssets.

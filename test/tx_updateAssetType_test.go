@@ -6,7 +6,7 @@ import (
 	"reflect"
 	"testing"
 
-	"github.com/goledgerdev/cc-tools/mock"
+	"github.com/hyperledger-labs/cc-tools/mock"
 )
 
 func TestUpdateAssetType(t *testing.T) {

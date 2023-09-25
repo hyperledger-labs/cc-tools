@@ -7,7 +7,7 @@ import (
 	"reflect"
 	"testing"
 
-	"github.com/goledgerdev/cc-tools/assets"
+	"github.com/hyperledger-labs/cc-tools/assets"
 )
 
 func testParseValid(t *testing.T, dtype assets.DataType, inputVal interface{}, expectedKey string, expectedVal interface{}) {

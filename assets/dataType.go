@@ -9,7 +9,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/goledgerdev/cc-tools/errors"
+	"github.com/hyperledger-labs/cc-tools/errors"
 )
 
 // DataType is the struct defining a primitive data type.
