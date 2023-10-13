@@ -11,6 +11,8 @@
 
 
 ### **Retired Maintainers**
+|  Nome  |  Github  |
+|:-------|:--------|
 |  Bruno Andreghetti  |  [bandreghetti](https://github.com/bandreghetti)  |
 |  João Pedro  |  [JoaoPedroAssis](https://github.com/JoaoPedroAssis)  |
 |  Arthur Paiva  |  [ArthurPaivaT](https://github.com/ArthurPaivaT)  |
