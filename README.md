@@ -88,7 +88,7 @@ It is possible to also create custom transactions in the chaincode, that must be
 
 The transactions package has the `StartupCheck` just like the assets package, which is a function that verifies if all the transactions are correctly implemented in the chaincode.
 
-#### **StubWrapper**
+### **StubWrapper**
 The main purpose of the StubWrapper is to provide additional functionalities and simplify the development of chaincodes. 
 
 The StubWrapper maintains a WriteSet to ensure that modifications made during the execution of a chaincode are properly reflected when querying the ledger state. Even if these changes have not been confirmed on the ledger yet, the StubWrapper records the pending modifications in the WriteSet. This allows subsequent queries to utilize the WriteSet to return the updated data, ensuring consistency and accuracy of information during the execution of the chaincode. The same applies to private data.
