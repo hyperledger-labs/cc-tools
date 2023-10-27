@@ -170,7 +170,14 @@ func putRecursive(stub *sw.StubWrapper, object map[string]interface{}, root bool
 				// If subAsset is badly formatted, this method shouldn't have been called
 				return nil, errors.NewCCError(fmt.Sprintf("asset reference property '%s' must be an object", subAsset.Tag), 400)
 			}
-			obj["@assetType"] = dType
+			if dType != "@asset" {
+				obj["@assetType"] = dType
+			} else {
+				_, ok := obj["@assetType"].(string)
+				if !ok {
+					return nil, errors.NewCCError(fmt.Sprintf("asset reference property '%s' must have an '@assetType' property", subAsset.Tag), 400)
+				}
+			}
 			putSubAsset, err := putRecursive(stub, obj, false)
 			if err != nil {
 				return nil, errors.WrapError(err, fmt.Sprintf("failed to put sub-asset %s recursively", subAsset.Tag))

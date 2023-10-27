@@ -51,6 +51,12 @@ func TestGetDataTypes(t *testing.T) {
 			},
 			"DropDownValues": nil,
 		},
+		"->@asset": map[string]interface{}{
+			"acceptedFormats": []interface{}{
+				"->@asset",
+			},
+			"DropDownValues": nil,
+		},
 	}
 	err := invokeAndVerify(stub, "getDataTypes", nil, expectedResponse, 200)
 	if err != nil {

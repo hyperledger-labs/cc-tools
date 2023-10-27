@@ -163,6 +163,9 @@ func CheckDataType(dataType string, newTypesList []interface{}) errors.ICCError 
 
 	if strings.HasPrefix(trimDataType, "->") {
 		trimDataType = strings.TrimPrefix(trimDataType, "->")
+		if trimDataType == "@asset" {
+			return nil
+		}
 
 		assetType := FetchAssetType(trimDataType)
 		if assetType == nil {

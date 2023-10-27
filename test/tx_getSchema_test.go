@@ -120,6 +120,16 @@ func TestGetSchema(t *testing.T) {
 				"tag":         "info",
 				"writers":     nil,
 			},
+			map[string]interface{}{
+				"dataType":    "[]->@asset",
+				"description": "",
+				"isKey":       false,
+				"label":       "Association",
+				"readOnly":    false,
+				"required":    false,
+				"tag":         "association",
+				"writers":     nil,
+			},
 		},
 	}
 	err = invokeAndVerify(stub, "getSchema", req, expectedPersonSchema, 200)

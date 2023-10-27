@@ -69,10 +69,13 @@ func StartupCheck() errors.ICCError {
 			// Check if there are references to undefined types
 			if isSubAsset {
 				// Checks if the prop's datatype exists on assetMap
-				propTypeDef := FetchAssetType(dataTypeName)
-				if propTypeDef == nil {
-					return errors.NewCCError(fmt.Sprintf("reference for undefined asset type '%s'", propDef.DataType), 500)
+				if dataTypeName != "@asset" {
+					propTypeDef := FetchAssetType(dataTypeName)
+					if propTypeDef == nil {
+						return errors.NewCCError(fmt.Sprintf("reference for undefined asset type '%s'", propDef.DataType), 500)
+					}
 				}
+
 				if propDef.DefaultValue != nil {
 					return errors.NewCCError(fmt.Sprintf("reference cannot have a default value in prop '%s' of asset '%s'", propDef.Label, assetType.Label), 500)
 				}
