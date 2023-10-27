@@ -93,7 +93,7 @@ func (a *Asset) PutNew(stub *sw.StubWrapper) (map[string]interface{}, errors.ICC
 	return res, nil
 }
 
-func putRecursive(stub *sw.StubWrapper, object map[string]interface{}, root bool) (map[string]interface{}, errors.ICCError) {
+func putRecursive(stub *sw.StubWrapper, object map[string]interface{}) (map[string]interface{}, errors.ICCError) {
 	var err error
 
 	objAsKey, err := NewKey(object)
@@ -181,7 +181,7 @@ func putRecursive(stub *sw.StubWrapper, object map[string]interface{}, root bool
 					return nil, errors.NewCCError(fmt.Sprintf("asset reference property '%s' must have an '@assetType' property", subAsset.Tag), 400)
 				}
 			}
-			putSubAsset, err := putRecursive(stub, obj, false)
+			putSubAsset, err := putRecursive(stub, obj)
 			if err != nil {
 				return nil, errors.WrapError(err, fmt.Sprintf("failed to put sub-asset %s recursively", subAsset.Tag))
 			}
@@ -218,7 +218,7 @@ func putRecursive(stub *sw.StubWrapper, object map[string]interface{}, root bool
 // PutRecursive inserts asset and all its subassets in blockchain.
 // This method is experimental and might not work as intended. Use with caution.
 func PutRecursive(stub *sw.StubWrapper, object map[string]interface{}) (map[string]interface{}, errors.ICCError) {
-	return putRecursive(stub, object, true)
+	return putRecursive(stub, object)
 }
 
 // PutNewRecursive inserts asset and all its subassets in blockchain
