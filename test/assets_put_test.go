@@ -357,6 +357,7 @@ func TestUpdateRecursive(t *testing.T) {
 					"@assetType":   "library",
 					"@key":         "library:9c5ffeb3-2491-5a88-858c-653b1ea8dbc5",
 					"@lastTx":      "",
+					"@lastTouchBy": "org1MSP",
 					"@lastUpdated": lastUpdated,
 					"name":         "biographies",
 					"books": []interface{}{
@@ -364,6 +365,7 @@ func TestUpdateRecursive(t *testing.T) {
 							"@assetType":   "book",
 							"@key":         "book:a36a2920-c405-51c3-b584-dcd758338cb5",
 							"@lastTx":      "",
+							"@lastTouchBy": "org1MSP",
 							"@lastUpdated": lastUpdated,
 							"title":        "Meu Nome é Maria",
 							"author":       "Maria Viana",
@@ -371,6 +373,7 @@ func TestUpdateRecursive(t *testing.T) {
 								"@assetType":   "person",
 								"@key":         "person:47061146-c642-51a1-844a-bf0b17cb5e19",
 								"@lastTx":      "",
+								"@lastTouchBy": "org1MSP",
 								"@lastUpdated": lastUpdated,
 								"name":         "Maria",
 								"id":           "31820792048",
