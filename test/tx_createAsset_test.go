@@ -135,7 +135,6 @@ func TestCreateAssetGenericAssociation(t *testing.T) {
 	lastUpdated, _ := stub.GetTxTimestamp()
 	expectedResponse := map[string]interface{}{
 		"@key":         "person:47061146-c642-51a1-844a-bf0b17cb5e19",
-		"@lastTouchBy": "org1MSP",
 		"@lastTx":      "createAsset",
 		"@lastUpdated": lastUpdated.AsTime().Format(time.RFC3339),
 		"@assetType":   "person",
@@ -185,6 +184,8 @@ func TestCreateAssetGenericAssociation(t *testing.T) {
 		log.Println(err)
 		t.FailNow()
 	}
+
+	expectedResponse["@lastTouchBy"] = "org1MSP"
 
 	if !reflect.DeepEqual(state, expectedResponse) {
 		log.Println("these should be equal")
