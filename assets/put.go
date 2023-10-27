@@ -32,7 +32,7 @@ func (a *Asset) put(stub *sw.StubWrapper) (map[string]interface{}, errors.ICCErr
 
 	// Write asset to blockchain
 	if a.IsPrivate() {
-		err = stub.PutPrivateData(a.TypeTag(), a.Key(), assetJSON)
+		err = stub.PutPrivateData(a.CollectionName(), a.Key(), assetJSON)
 		if err != nil {
 			return nil, errors.WrapError(err, "failed to write asset to ledger")
 		}
@@ -47,6 +47,9 @@ func (a *Asset) put(stub *sw.StubWrapper) (map[string]interface{}, errors.ICCErr
 	if err != nil {
 		return nil, errors.WrapError(err, "failed to write asset to ledger")
 	}
+
+	delete(*a, "@lastTouchBy")
+
 	return *a, nil
 }
 
@@ -170,7 +173,14 @@ func putRecursive(stub *sw.StubWrapper, object map[string]interface{}, root bool
 				// If subAsset is badly formatted, this method shouldn't have been called
 				return nil, errors.NewCCError(fmt.Sprintf("asset reference property '%s' must be an object", subAsset.Tag), 400)
 			}
-			obj["@assetType"] = dType
+			if dType != "@asset" {
+				obj["@assetType"] = dType
+			} else {
+				_, ok := obj["@assetType"].(string)
+				if !ok {
+					return nil, errors.NewCCError(fmt.Sprintf("asset reference property '%s' must have an '@assetType' property", subAsset.Tag), 400)
+				}
+			}
 			putSubAsset, err := putRecursive(stub, obj, false)
 			if err != nil {
 				return nil, errors.WrapError(err, fmt.Sprintf("failed to put sub-asset %s recursively", subAsset.Tag))

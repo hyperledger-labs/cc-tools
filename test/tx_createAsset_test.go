@@ -35,7 +35,6 @@ func TestCreateAsset(t *testing.T) {
 	lastUpdated, _ := stub.GetTxTimestamp()
 	expectedResponse := map[string]interface{}{
 		"@key":         "person:47061146-c642-51a1-844a-bf0b17cb5e19",
-		"@lastTouchBy": "org1MSP",
 		"@lastTx":      "createAsset",
 		"@lastUpdated": lastUpdated.AsTime().Format(time.RFC3339),
 		"@assetType":   "person",
@@ -79,6 +78,114 @@ func TestCreateAsset(t *testing.T) {
 		log.Println(err)
 		t.FailNow()
 	}
+
+	expectedResponse["@lastTouchBy"] = "org1MSP"
+	if !reflect.DeepEqual(state, expectedResponse) {
+		log.Println("these should be equal")
+		log.Printf("%#v\n", state)
+		log.Printf("%#v\n", expectedResponse)
+		t.FailNow()
+	}
+}
+
+func TestCreateAssetGenericAssociation(t *testing.T) {
+	stub := mock.NewMockStub("org1MSP", new(testCC))
+	book := map[string]interface{}{
+		"@assetType": "book",
+		"title":      "Book Title",
+		"author":     "Author",
+	}
+
+	library := map[string]interface{}{
+		"@assetType": "library",
+		"name":       "Library Name",
+	}
+
+	req := map[string]interface{}{
+		"asset": []map[string]interface{}{book, library},
+	}
+	reqBytes, err := json.Marshal(req)
+	if err != nil {
+		t.FailNow()
+	}
+
+	res := stub.MockInvoke("createAsset", [][]byte{
+		[]byte("createAsset"),
+		reqBytes,
+	})
+
+	person := map[string]interface{}{
+		"@assetType":  "person",
+		"name":        "Maria",
+		"id":          "318.207.920-48",
+		"association": []map[string]interface{}{book, library},
+	}
+	req = map[string]interface{}{
+		"asset": []map[string]interface{}{person},
+	}
+	reqBytes, err = json.Marshal(req)
+	if err != nil {
+		t.FailNow()
+	}
+
+	res = stub.MockInvoke("createAsset", [][]byte{
+		[]byte("createAsset"),
+		reqBytes,
+	})
+	lastUpdated, _ := stub.GetTxTimestamp()
+	expectedResponse := map[string]interface{}{
+		"@key":         "person:47061146-c642-51a1-844a-bf0b17cb5e19",
+		"@lastTx":      "createAsset",
+		"@lastUpdated": lastUpdated.AsTime().Format(time.RFC3339),
+		"@assetType":   "person",
+		"name":         "Maria",
+		"id":           "31820792048",
+		"height":       0.0,
+		"association": []interface{}{
+			map[string]interface{}{
+				"@assetType": "book",
+				"@key":       "book:46179ee0-5503-54e1-aa51-bbaad559638b",
+			},
+			map[string]interface{}{
+				"@assetType": "library",
+				"@key":       "library:9aeaddc4-d1cb-5b03-9ad0-1d9af7416c2e",
+			},
+		},
+	}
+
+	if res.GetStatus() != 200 {
+		log.Println(res)
+		t.FailNow()
+	}
+
+	var resPayload []map[string]interface{}
+	err = json.Unmarshal(res.GetPayload(), &resPayload)
+	if err != nil {
+		log.Println(err)
+		t.FailNow()
+	}
+
+	if len(resPayload) != 1 {
+		log.Println("response length should be 1")
+		t.FailNow()
+	}
+
+	if !reflect.DeepEqual(resPayload[0], expectedResponse) {
+		log.Println("these should be equal")
+		log.Printf("%#v\n", resPayload[0])
+		log.Printf("%#v\n", expectedResponse)
+		t.FailNow()
+	}
+
+	var state map[string]interface{}
+	stateBytes := stub.State["person:47061146-c642-51a1-844a-bf0b17cb5e19"]
+	err = json.Unmarshal(stateBytes, &state)
+	if err != nil {
+		log.Println(err)
+		t.FailNow()
+	}
+
+	expectedResponse["@lastTouchBy"] = "org1MSP"
 
 	if !reflect.DeepEqual(state, expectedResponse) {
 		log.Println("these should be equal")

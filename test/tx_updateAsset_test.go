@@ -69,7 +69,6 @@ func TestUpdateAsset(t *testing.T) {
 
 	expectedPerson := map[string]interface{}{
 		"@key":         "person:47061146-c642-51a1-844a-bf0b17cb5e19",
-		"@lastTouchBy": "org1MSP",
 		"@lastTx":      "updateAsset",
 		"@lastUpdated": lastUpdated.AsTime().Format(time.RFC3339),
 		"@assetType":   "person",
@@ -93,9 +92,10 @@ func TestUpdateAsset(t *testing.T) {
 		t.FailNow()
 	}
 
+	expectedPerson["@lastTouchBy"] = "org1MSP"
 	if !reflect.DeepEqual(state, expectedPerson) {
 		log.Println("these should be equal")
-		log.Printf("%#v\n", resPayload)
+		log.Printf("%#v\n", state)
 		log.Printf("%#v\n", expectedPerson)
 		t.FailNow()
 	}

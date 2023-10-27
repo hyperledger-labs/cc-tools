@@ -118,7 +118,6 @@ func TestCreateAssetType(t *testing.T) {
 	lastUpdated, _ := stub.GetTxTimestamp()
 	expectedResponse = map[string]interface{}{
 		"@key":         "magazine:236a29db-f53c-59e1-ac6d-a4f264dbc477",
-		"@lastTouchBy": "org1MSP",
 		"@lastTx":      "createAsset",
 		"@lastUpdated": lastUpdated.AsTime().Format(time.RFC3339),
 		"@assetType":   "magazine",
@@ -161,6 +160,7 @@ func TestCreateAssetType(t *testing.T) {
 		t.FailNow()
 	}
 
+	expectedResponse["@lastTouchBy"] = "org1MSP"
 	if !reflect.DeepEqual(state, expectedResponse) {
 		log.Println("these should be equal")
 		log.Printf("%#v\n", state)

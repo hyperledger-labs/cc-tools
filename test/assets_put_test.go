@@ -117,6 +117,7 @@ func TestPutAssetWithSubAsset(t *testing.T) {
 		t.FailNow()
 	}
 
+	expectedState["@lastTouchBy"] = "org1MSP"
 	if !reflect.DeepEqual(expectedState, state) {
 		log.Println("these should be deeply equal")
 		log.Println(expectedState)
@@ -158,7 +159,6 @@ func TestPutNewAssetRecursive(t *testing.T) {
 	expectedBook := map[string]interface{}{
 		"@assetType":   "book",
 		"@key":         "book:a36a2920-c405-51c3-b584-dcd758338cb5",
-		"@lastTouchBy": "org1MSP",
 		"@lastTx":      "",
 		"@lastUpdated": lastUpdated.AsTime().Format(time.RFC3339),
 		"title":        "Meu Nome é Maria",
@@ -166,7 +166,6 @@ func TestPutNewAssetRecursive(t *testing.T) {
 		"currentTenant": map[string]interface{}{
 			"@assetType":   "person",
 			"@key":         "person:47061146-c642-51a1-844a-bf0b17cb5e19",
-			"@lastTouchBy": "org1MSP",
 			"@lastTx":      "",
 			"@lastUpdated": lastUpdated.AsTime().Format(time.RFC3339),
 			"name":         "Maria",
@@ -259,7 +258,6 @@ func TestUpdateRecursive(t *testing.T) {
 				return map[string]interface{}{
 					"@assetType":   "book",
 					"@key":         "book:a36a2920-c405-51c3-b584-dcd758338cb5",
-					"@lastTouchBy": "org1MSP",
 					"@lastTx":      "",
 					"@lastUpdated": lastUpdated,
 					"title":        "Meu Nome é Maria",
@@ -267,7 +265,6 @@ func TestUpdateRecursive(t *testing.T) {
 					"currentTenant": map[string]interface{}{
 						"@assetType":   "person",
 						"@key":         "person:47061146-c642-51a1-844a-bf0b17cb5e19",
-						"@lastTouchBy": "org1MSP",
 						"@lastTx":      "",
 						"@lastUpdated": lastUpdated,
 						"name":         "Maria",
@@ -359,7 +356,6 @@ func TestUpdateRecursive(t *testing.T) {
 				return map[string]interface{}{
 					"@assetType":   "library",
 					"@key":         "library:9c5ffeb3-2491-5a88-858c-653b1ea8dbc5",
-					"@lastTouchBy": "org1MSP",
 					"@lastTx":      "",
 					"@lastUpdated": lastUpdated,
 					"name":         "biographies",
@@ -367,7 +363,6 @@ func TestUpdateRecursive(t *testing.T) {
 						map[string]interface{}{
 							"@assetType":   "book",
 							"@key":         "book:a36a2920-c405-51c3-b584-dcd758338cb5",
-							"@lastTouchBy": "org1MSP",
 							"@lastTx":      "",
 							"@lastUpdated": lastUpdated,
 							"title":        "Meu Nome é Maria",
@@ -375,7 +370,6 @@ func TestUpdateRecursive(t *testing.T) {
 							"currentTenant": map[string]interface{}{
 								"@assetType":   "person",
 								"@key":         "person:47061146-c642-51a1-844a-bf0b17cb5e19",
-								"@lastTouchBy": "org1MSP",
 								"@lastTx":      "",
 								"@lastUpdated": lastUpdated,
 								"name":         "Maria",
@@ -388,7 +382,6 @@ func TestUpdateRecursive(t *testing.T) {
 						map[string]interface{}{
 							"@assetType":   "book",
 							"@key":         "book:679f58a4-578f-563c-9c22-3f51b9fab6d5",
-							"@lastTouchBy": "org1MSP",
 							"@lastTx":      "",
 							"@lastUpdated": lastUpdated,
 							"title":        "Meu Nome é João",
@@ -396,7 +389,6 @@ func TestUpdateRecursive(t *testing.T) {
 							"currentTenant": map[string]interface{}{
 								"@assetType":   "person",
 								"@key":         "person:09c4f266-3bac-5d2f-813b-db3c41ab3375",
-								"@lastTouchBy": "org1MSP",
 								"@lastTx":      "",
 								"@lastUpdated": lastUpdated,
 								"name":         "João",
