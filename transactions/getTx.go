@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 
+	"github.com/hyperledger-labs/cc-tools/accesscontrol"
 	"github.com/hyperledger-labs/cc-tools/errors"
 	sw "github.com/hyperledger-labs/cc-tools/stubwrapper"
 )
@@ -50,10 +51,10 @@ var getTx = Transaction{
 
 		// If user requested asset list
 		type txListElem struct {
-			Tag         string   `json:"tag"`
-			Label       string   `json:"label"`
-			Description string   `json:"description"`
-			Callers     []string `json:"callers,omitempty"`
+			Tag         string                 `json:"tag"`
+			Label       string                 `json:"label"`
+			Description string                 `json:"description"`
+			Callers     []accesscontrol.Caller `json:"callers,omitempty"`
 		}
 		var txRetList []txListElem
 		for _, tx := range txList {

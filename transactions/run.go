@@ -2,8 +2,8 @@ package transactions
 
 import (
 	"fmt"
-	"regexp"
 
+	"github.com/hyperledger-labs/cc-tools/accesscontrol"
 	"github.com/hyperledger-labs/cc-tools/assets"
 	"github.com/hyperledger-labs/cc-tools/errors"
 	sw "github.com/hyperledger-labs/cc-tools/stubwrapper"
@@ -40,38 +40,13 @@ func Run(stub shim.ChaincodeStubInterface) ([]byte, errors.ICCError) {
 	}
 
 	// Verify callers permissions
-	if tx.Callers != nil {
-		// Get tx caller MSP ID
-		txCaller, err := sw.GetMSPID()
-		if err != nil {
-			return nil, errors.WrapErrorWithStatus(err, "error getting tx caller", 500)
-		}
+	callPermission, err := accesscontrol.AllowCaller(stub, tx.Callers)
+	if err != nil {
+		return nil, errors.WrapError(err, "failed to check permissions")
+	}
 
-		// Check if caller is allowed
-		callPermission := false
-		for _, c := range tx.Callers {
-			if len(c) <= 1 {
-				continue
-			}
-			if c[0] == '$' { // if caller is regexp
-				match, err := regexp.MatchString(c[1:], txCaller)
-				if err != nil {
-					return nil, errors.NewCCError("failed to check if caller matches regexp", 500)
-				}
-				if match {
-					callPermission = true
-					break
-				}
-			} else { // if caller is not regexp
-				if c == txCaller {
-					callPermission = true
-					break
-				}
-			}
-		}
-		if !callPermission {
-			return nil, errors.NewCCError(fmt.Sprintf("%s cannot call this transaction", txCaller), 403)
-		}
+	if !callPermission {
+		return nil, errors.NewCCError("current caller not allowed", 403)
 	}
 
 	return tx.Routine(sw, reqMap)
