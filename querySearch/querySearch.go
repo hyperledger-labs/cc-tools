@@ -91,12 +91,20 @@ func (q *QuerySearch) SetIndexDocSimple(nameIndex string) {
 	q.config.IndexDoc.IndexName = nameIndex
 }
 
-func (q *QuerySearch) SetSort(sortFilter []map[string]string) {
-	q.config.Sort = sortFilter
+func (q *QuerySearch) SetSort(sort ...Sort) {
+	s := make([]map[string]string, len(sort))
+	for _, v := range sort {
+		s = append(s, map[string]string{
+			v.Field: string(v.Type),
+		})
+	}
+	q.config.Sort = s
 }
 
-func (q *QuerySearch) SetResolve(res []string) {
-	q.config.Resolve = res
+func (q *QuerySearch) SetResolve(resolv ...string) {
+	r := make([]string, len(resolv))
+	copy(r, resolv)
+	q.config.Resolve = r
 }
 
 func (q *QuerySearch) NoContains(value interface{}) map[string]interface{} {
