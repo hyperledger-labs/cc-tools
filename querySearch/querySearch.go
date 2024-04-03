@@ -1,3 +1,16 @@
+// This package provides a way to query a database, possibly using a CouchDB-like interface,
+// and defines several types, methods, and functions for querying. It facilitates the creation of queries
+// without having to write queries in a raw form.
+//
+// Configuration
+// -------------
+// The Config struct contains the settings used for querying.
+// These settings include RemoveTags (a list of tags to be removed from the results),
+// AssetName (the name of the asset being queried), PageSize (the number of results per page),
+// BookMark (the bookmark for pagination), Resolve (a list of relations to be resolved),
+// Sort (a list of fields to sort by), IndexDoc (a document containing the index design and name),
+// NoRemoveTagsTransaction (a boolean indicating whether to remove tags during the transaction),
+// and CallBack (a function to be called after the query is executed).
 package querysearch
 
 import (
