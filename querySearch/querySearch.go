@@ -125,14 +125,14 @@ func (q *QuerySearch) AddFieldsOR(fields map[string]interface{}) {
 	q.Query["selector"] = aux
 }
 
-func (q *QuerySearch) AddFieldKeyValue(key string, value interface{}) {
-	q.AddField(FieldSearch{
+func (q *QuerySearch) AddField(key string, value interface{}) {
+	q.AddFields(FieldSearch{
 		KeyName: key,
 		Value:   value,
 	})
 }
 
-func (q *QuerySearch) AddField(fields ...FieldSearch) {
+func (q *QuerySearch) AddFields(fields ...FieldSearch) {
 	for _, f := range fields {
 		if len(f.KeyName) > 0 {
 			aux := q.Query["selector"].(map[string]interface{})
@@ -143,7 +143,7 @@ func (q *QuerySearch) AddField(fields ...FieldSearch) {
 }
 
 func (q *QuerySearch) AddDateRange(nameField string, dataStart, dataEnd time.Time) {
-	q.AddField(FieldSearch{
+	q.AddFields(FieldSearch{
 		KeyName: nameField,
 		Value:   PeriodDay(dataStart, dataEnd),
 	})
