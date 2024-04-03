@@ -10,6 +10,7 @@ import (
 	"github.com/hyperledger/fabric-chaincode-go/shim"
 )
 
+// GetFirstKey returns the key of the first asset that matches the query
 func (q *QuerySearch) GetFirstKey(stub *sw.StubWrapper) (assets.Key, errors.ICCError) {
 	itemMap, err := q.GetFirst(stub)
 	if err != nil {
@@ -32,6 +33,7 @@ func (q *QuerySearch) GetFirstKey(stub *sw.StubWrapper) (assets.Key, errors.ICCE
 	return itemKey, nil
 }
 
+// GetFirst returns the first asset that matches the query
 func (q *QuerySearch) GetFirst(stub *sw.StubWrapper) (map[string]interface{}, errors.ICCError) {
 	result, err := q.getResultsNoPagination(stub)
 	if err != nil {
@@ -52,6 +54,7 @@ func (q *QuerySearch) GetFirst(stub *sw.StubWrapper) (map[string]interface{}, er
 	return fisrtItem, nil
 }
 
+// GetResults returns the assets that match the query with or without pagination
 func (q *QuerySearch) GetResults(stub *sw.StubWrapper) (map[string]interface{}, errors.ICCError) {
 
 	if q.config.PageSize > 0 {
@@ -61,15 +64,21 @@ func (q *QuerySearch) GetResults(stub *sw.StubWrapper) (map[string]interface{}, 
 	return q.getResultsNoPagination(stub)
 }
 
-func (q *QuerySearch) GetResultsByCallBack(stub *sw.StubWrapper) (map[string]interface{}, errors.ICCError) {
-
+// GetResultsByCallBackWithContext returns the assets that match the query using a callback function with a given context
+func (q *QuerySearch) GetResultsByCallBackWithContext(stub *sw.StubWrapper, resultContext map[string]interface{}) (map[string]interface{}, errors.ICCError) {
 	var err error
 	if q.config.CallBack == nil {
 		return nil, errors.WrapError(nil, "failed, func callback not defined")
 	}
 
 	// ** Create results
-	res := map[string]interface{}{}
+	var res map[string]interface{}
+
+	if resultContext == nil {
+		res = map[string]interface{}{}
+	} else {
+		res = resultContext
+	}
 
 	// ** Assembly query
 	q.QueryParser, err = q.Parser()
@@ -112,6 +121,11 @@ func (q *QuerySearch) GetResultsByCallBack(stub *sw.StubWrapper) (map[string]int
 	return res, nil
 }
 
+func (q *QuerySearch) GetResultsByCallBack(stub *sw.StubWrapper) (map[string]interface{}, errors.ICCError) {
+	return q.GetResultsByCallBackWithContext(stub, nil)
+}
+
+// GetResultsNoPagination returns the assets that match the query without pagination
 func (q *QuerySearch) GetResultsByCallBackPagination(stub *sw.StubWrapper) (map[string]interface{}, map[string]interface{}, errors.ICCError) {
 
 	var err error
@@ -190,6 +204,7 @@ func (q *QuerySearch) GetIterator(stub *sw.StubWrapper) (shim.StateQueryIterator
 	return searchIterator, nil
 }
 
+// GetResultsNoPagination returns the assets that match the query without pagination
 func (q *QuerySearch) getResultsNoPagination(stub *sw.StubWrapper) (map[string]interface{}, errors.ICCError) {
 
 	// ** Create results
@@ -210,6 +225,7 @@ func (q *QuerySearch) getResultsNoPagination(stub *sw.StubWrapper) (map[string]i
 	return response, nil
 }
 
+// GetResultsWithPagination returns the assets that match the query with pagination
 func (q *QuerySearch) getResultsWithPagination(stub *sw.StubWrapper) (map[string]interface{}, errors.ICCError) {
 
 	//** Initialize auxiliary variables
