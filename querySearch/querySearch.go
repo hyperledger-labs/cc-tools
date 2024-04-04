@@ -68,6 +68,10 @@ func NewQuery(cfg Config) *QuerySearch {
 	}
 }
 
+func (q *QuerySearch) GetConfig() Config {
+	return q.config
+}
+
 func (q *QuerySearch) AddCallBack(f func(*sw.StubWrapper, map[string]interface{}, map[string]interface{}) error) {
 	q.config.CallBack = f
 }
@@ -92,7 +96,7 @@ func (q *QuerySearch) SetIndexDocSimple(nameIndex string) {
 }
 
 func (q *QuerySearch) SetSort(sort ...Sort) {
-	s := make([]map[string]string, len(sort))
+	s := make([]map[string]string, 0)
 	for _, v := range sort {
 		s = append(s, map[string]string{
 			v.Field: string(v.Type),
@@ -102,9 +106,11 @@ func (q *QuerySearch) SetSort(sort ...Sort) {
 }
 
 func (q *QuerySearch) SetResolve(resolv ...string) {
-	r := make([]string, len(resolv))
-	copy(r, resolv)
-	q.config.Resolve = r
+	q.config.Resolve = append(q.config.Resolve, resolv...)
+}
+
+func (q *QuerySearch) SetRemoveCustomTags(tags ...string) {
+	q.config.RemoveTags = append(q.config.RemoveTags, tags...)
 }
 
 func (q *QuerySearch) NoContains(value interface{}) map[string]interface{} {
