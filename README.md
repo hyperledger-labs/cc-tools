@@ -3,7 +3,7 @@
 [![Go Report Card](https://goreportcard.com/badge/github.com/hyperledger-labs/cc-tools)](https://goreportcard.com/report/github.com/hyperledger-labs/cc-tools)
 [![GoDoc](https://godoc.org/github.com/hyperledger-labs/cc-tools?status.svg)](https://godoc.org/github.com/hyperledger-labs/cc-tools)
 
-This project is a GoLedger open-source project aimed at providing tools for Hyperledger Fabric chaincode development in Golang. This might have breaking changes before we arrive at release v1.0.0. 
+This project is a GoLedger open-source project aimed at providing tools for Hyperledger Fabric chaincode development in Golang.
 
 ## Getting Started
 
