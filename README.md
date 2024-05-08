@@ -9,7 +9,7 @@ This project is a GoLedger open-source project aimed at providing tools for Hype
 
 Make sure you visit the repository [hyperledger-labs/cc-tools-demo](https://github.com/hyperledger-labs/cc-tools-demo), which is a template of a functional chaincode that uses cc-tools and provides ready-to-use scripts to deploy development networks. This is our preferred way of working, but you can feel free to import the package and assemble the chaincode as you choose. 
 
-CC Tools has been tested with Hyperledger Fabric 1.x and 2.x realeases.
+CC Tools has been tested with Hyperledger Fabric v2.2, v2.4 and v2.5 releases.
 
 ## Features
 - Standard asset data mapping (and their properties)
