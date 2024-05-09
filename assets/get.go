@@ -41,8 +41,6 @@ func get(stub *sw.StubWrapper, pvtCollection, key string, committed bool) (*Asse
 		return nil, errors.WrapErrorWithStatus(err, "failed to unmarshal asset from ledger", 500)
 	}
 
-	delete(response, "@lastTouchBy")
-
 	return &response, nil
 }
 
@@ -181,7 +179,6 @@ func getRecursive(stub *sw.StubWrapper, pvtCollection, key string, keysChecked [
 		return nil, errors.WrapErrorWithStatus(err, "failed to unmarshal asset from ledger", 500)
 	}
 
-	delete(response, "@lastTouchBy")
 	keysCheckedInScope := make([]string, 0)
 
 	for k, v := range response {

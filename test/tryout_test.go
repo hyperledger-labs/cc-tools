@@ -23,12 +23,13 @@ func TestTryout(t *testing.T) {
 	}
 	expectedPerson := []interface{}{
 		map[string]interface{}{
-			"@key":       "person:47061146-c642-51a1-844a-bf0b17cb5e19",
-			"@lastTx":    "createAsset",
-			"@assetType": "person",
-			"name":       "Maria",
-			"id":         "31820792048",
-			"height":     0.0,
+			"@key":         "person:47061146-c642-51a1-844a-bf0b17cb5e19",
+			"@lastTouchBy": "org1MSP",
+			"@lastTx":      "createAsset",
+			"@assetType":   "person",
+			"name":         "Maria",
+			"id":           "31820792048",
+			"height":       0.0,
 		},
 	}
 
@@ -58,11 +59,12 @@ func TestTryout(t *testing.T) {
 
 	expectedBook := []interface{}{
 		map[string]interface{}{
-			"@key":       "book:a36a2920-c405-51c3-b584-dcd758338cb5",
-			"@lastTx":    "createAsset",
-			"@assetType": "book",
-			"title":      "Meu Nome é Maria",
-			"author":     "Maria Viana",
+			"@key":         "book:a36a2920-c405-51c3-b584-dcd758338cb5",
+			"@lastTouchBy": "org2MSP",
+			"@lastTx":      "createAsset",
+			"@assetType":   "book",
+			"title":        "Meu Nome é Maria",
+			"author":       "Maria Viana",
 			"currentTenant": map[string]interface{}{
 				"@assetType": "person",
 				"@key":       "person:47061146-c642-51a1-844a-bf0b17cb5e19",
@@ -110,12 +112,13 @@ func TestTryout(t *testing.T) {
 	}
 
 	expectedUpdatePerson := map[string]interface{}{
-		"@key":       "person:47061146-c642-51a1-844a-bf0b17cb5e19",
-		"@lastTx":    "updateAsset",
-		"@assetType": "person",
-		"name":       "Maria",
-		"id":         "31820792048",
-		"height":     1.67,
+		"@key":         "person:47061146-c642-51a1-844a-bf0b17cb5e19",
+		"@lastTouchBy": "org2MSP",
+		"@lastTx":      "updateAsset",
+		"@assetType":   "person",
+		"name":         "Maria",
+		"id":           "31820792048",
+		"height":       1.67,
 	}
 
 	err = invokeAndVerify(stub, "updateAsset", reqUpdatePerson, expectedUpdatePerson, 200)
