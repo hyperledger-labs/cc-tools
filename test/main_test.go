@@ -15,7 +15,7 @@ func TestMain(m *testing.M) {
 
 	tx.InitHeader(tx.Header{
 		Name:    "CC Tools Test",
-		Version: "v0.8.1",
+		Version: "v1.0.0",
 		Colors: map[string][]string{
 			"@default": {"#4267B2", "#34495E", "#ECF0F1"},
 		},

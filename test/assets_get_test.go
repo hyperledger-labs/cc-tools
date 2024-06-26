@@ -16,12 +16,13 @@ func TestGetAsset(t *testing.T) {
 
 	// State setup
 	expectedResponse := assets.Asset{
-		"@key":       "person:47061146-c642-51a1-844a-bf0b17cb5e19",
-		"@lastTx":    "createAsset",
-		"@assetType": "person",
-		"name":       "Maria",
-		"id":         "31820792048",
-		"height":     0.0,
+		"@key":         "person:47061146-c642-51a1-844a-bf0b17cb5e19",
+		"@lastTouchBy": "org1MSP",
+		"@lastTx":      "createAsset",
+		"@assetType":   "person",
+		"name":         "Maria",
+		"id":           "31820792048",
+		"height":       0.0,
 	}
 	stub.MockTransactionStart("setupGetAsset")
 	setupState, _ := json.Marshal(expectedResponse)
@@ -92,9 +93,6 @@ func TestGetManyAssets(t *testing.T) {
 	stub.PutState("person:916c708a-1d6c-5c4f-8f12-d9d36f2aad27", setupState)
 	stub.MockTransactionEnd("setupGetManyAssets")
 
-	delete(asset1, "@lastTouchBy")
-	delete(asset2, "@lastTouchBy")
-	delete(asset3, "@lastTouchBy")
 	expectedResponse := []*assets.Asset{&asset1, &asset2, &asset3}
 
 	assetKeys := []assets.Key{
@@ -163,7 +161,6 @@ func TestGetCommittedAsset(t *testing.T) {
 		t.FailNow()
 	}
 
-	delete(expectedResponse, "@lastTouchBy")
 	if !reflect.DeepEqual(*gotAsset, expectedResponse) {
 		log.Println("these should be deeply equal")
 		log.Println(expectedResponse)
@@ -219,18 +216,20 @@ func TestGetRecursive(t *testing.T) {
 		"@key":       "book:a36a2920-c405-51c3-b584-dcd758338cb5",
 	}
 	expectedResponse := map[string]interface{}{
-		"@key":       "book:a36a2920-c405-51c3-b584-dcd758338cb5",
-		"@lastTx":    "createAsset",
-		"@assetType": "book",
-		"title":      "Meu Nome é Maria",
-		"author":     "Maria Viana",
+		"@key":         "book:a36a2920-c405-51c3-b584-dcd758338cb5",
+		"@lastTouchBy": "org2MSP",
+		"@lastTx":      "createAsset",
+		"@assetType":   "book",
+		"title":        "Meu Nome é Maria",
+		"author":       "Maria Viana",
 		"currentTenant": map[string]interface{}{
-			"@key":       "person:47061146-c642-51a1-844a-bf0b17cb5e19",
-			"@lastTx":    "createAsset",
-			"@assetType": "person",
-			"name":       "Maria",
-			"id":         "31820792048",
-			"height":     0.0,
+			"@key":         "person:47061146-c642-51a1-844a-bf0b17cb5e19",
+			"@lastTouchBy": "org1MSP",
+			"@lastTx":      "createAsset",
+			"@assetType":   "person",
+			"name":         "Maria",
+			"id":           "31820792048",
+			"height":       0.0,
 		},
 		"genres":    []interface{}{"biography", "non-fiction"},
 		"published": "2019-05-06T22:12:41Z",
@@ -296,16 +295,18 @@ func TestGetRecursiveWithPvtData(t *testing.T) {
 		"@key":       "library:37262f3f-5f08-5649-b488-e5abaad266e1",
 	}
 	expectedResponse := map[string]interface{}{
-		"@assetType": "library",
-		"@key":       "library:37262f3f-5f08-5649-b488-e5abaad266e1",
-		"@lastTx":    "createAsset",
-		"name":       "Biblioteca Maria da Silva",
+		"@assetType":   "library",
+		"@key":         "library:37262f3f-5f08-5649-b488-e5abaad266e1",
+		"@lastTouchBy": "org3MSP",
+		"@lastTx":      "createAsset",
+		"name":         "Biblioteca Maria da Silva",
 		"entranceCode": map[string]interface{}{
-			"@assetType": "secret",
-			"@key":       "secret:73a3f9a7-eb91-5f4d-b1bb-c0487e90f40b",
-			"@lastTx":    "createAsset",
-			"secretName": "testSecret",
-			"secret":     "this is very secret",
+			"@assetType":   "secret",
+			"@key":         "secret:73a3f9a7-eb91-5f4d-b1bb-c0487e90f40b",
+			"@lastTouchBy": "org2MSP",
+			"@lastTx":      "createAsset",
+			"secretName":   "testSecret",
+			"secret":       "this is very secret",
 		},
 	}
 

@@ -48,8 +48,6 @@ func (a *Asset) put(stub *sw.StubWrapper) (map[string]interface{}, errors.ICCErr
 		return nil, errors.WrapError(err, "failed to write asset to ledger")
 	}
 
-	delete(*a, "@lastTouchBy")
-
 	return *a, nil
 }
 

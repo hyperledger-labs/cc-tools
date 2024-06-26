@@ -55,7 +55,6 @@ func TestReadAsset(t *testing.T) {
 		t.FailNow()
 	}
 
-	delete(expectedResponse, "@lastTouchBy")
 	if !reflect.DeepEqual(resPayload, expectedResponse) {
 		log.Println("these should be equal")
 		log.Printf("%#v\n", resPayload)
@@ -110,18 +109,20 @@ func TestReadRecursive(t *testing.T) {
 		"@key":       "book:a36a2920-c405-51c3-b584-dcd758338cb5",
 	}
 	expectedResponse := map[string]interface{}{
-		"@key":       "book:a36a2920-c405-51c3-b584-dcd758338cb5",
-		"@lastTx":    "createAsset",
-		"@assetType": "book",
-		"title":      "Meu Nome é Maria",
-		"author":     "Maria Viana",
+		"@key":         "book:a36a2920-c405-51c3-b584-dcd758338cb5",
+		"@lastTouchBy": "org2MSP",
+		"@lastTx":      "createAsset",
+		"@assetType":   "book",
+		"title":        "Meu Nome é Maria",
+		"author":       "Maria Viana",
 		"currentTenant": map[string]interface{}{
-			"@key":       "person:47061146-c642-51a1-844a-bf0b17cb5e19",
-			"@lastTx":    "createAsset",
-			"@assetType": "person",
-			"name":       "Maria",
-			"id":         "31820792048",
-			"height":     0.0,
+			"@key":         "person:47061146-c642-51a1-844a-bf0b17cb5e19",
+			"@lastTouchBy": "org1MSP",
+			"@lastTx":      "createAsset",
+			"@assetType":   "person",
+			"name":         "Maria",
+			"id":           "31820792048",
+			"height":       0.0,
 		},
 		"genres":    []interface{}{"biography", "non-fiction"},
 		"published": "2019-05-06T22:12:41Z",
