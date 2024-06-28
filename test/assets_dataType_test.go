@@ -1,7 +1,9 @@
 package test
 
 import (
+	"encoding/json"
 	"log"
+	"net/http"
 	"reflect"
 	"testing"
 
@@ -21,7 +23,7 @@ func testParseValid(t *testing.T, dtype assets.DataType, inputVal interface{}, e
 		log.Printf("parsing %v expected key: %q but got %q\n", inputVal, expectedKey, key)
 		t.FailNow()
 	}
-	if val != expectedVal {
+	if !reflect.DeepEqual(val, expectedVal) {
 		log.Printf("parsing %v expected parsed val: \"%v\" of type %s but got \"%v\" of type %s\n", inputVal, expectedVal, reflect.TypeOf(expectedVal), val, reflect.TypeOf(val))
 		t.FailNow()
 	}
@@ -91,4 +93,87 @@ func TestDataTypeBoolean(t *testing.T) {
 	testParseValid(t, dtype, "false", "f", false)
 	testParseInvalid(t, dtype, "True", 400)
 	testParseInvalid(t, dtype, 37.3, 400)
+}
+
+func TestDataTypeObject(t *testing.T) {
+	dtypeName := "@object"
+	dtype, exists := assets.DataTypeMap()[dtypeName]
+	if !exists {
+		log.Printf("%s datatype not declared in DataTypeMap\n", dtypeName)
+		t.FailNow()
+	}
+
+	testCase1 := map[string]interface{}{
+		"key1": "value1",
+		"key2": "value2",
+	}
+	testCaseByte1, _ := json.Marshal(testCase1)
+	testCaseExpected1 := map[string]interface{}{
+		"@assetType": "@object",
+		"key1":       "value1",
+		"key2":       "value2",
+	}
+	testCaseExpectedByte1, _ := json.Marshal(testCaseExpected1)
+
+	testParseValid(t, dtype, testCase1, string(testCaseExpectedByte1), testCase1)
+	testParseValid(t, dtype, testCaseByte1, string(testCaseExpectedByte1), testCase1)
+	testParseValid(t, dtype, string(testCaseByte1), string(testCaseExpectedByte1), testCase1)
+	testParseInvalid(t, dtype, "{'key': 'value'}", http.StatusBadRequest)
+}
+func TestDataTypeAsset(t *testing.T) {
+	dtypeName := "->@asset"
+	dtype, exists := assets.DataTypeMap()[dtypeName]
+	if !exists {
+		log.Printf("%s datatype not declared in DataTypeMap\n", dtypeName)
+		t.FailNow()
+	}
+
+	testCase1 := map[string]interface{}{
+		"@assetType": "person",
+		"id":         "42186475006",
+	}
+	testCaseExpected1 := map[string]interface{}{
+		"@assetType": "person",
+		"id":         "42186475006",
+		"@key":       "person:a11e54a8-7e23-5d16-9fed-45523dd96bfa",
+	}
+	testCaseExpectedByte1, _ := json.Marshal(testCaseExpected1)
+	testParseValid(t, dtype, testCase1, string(testCaseExpectedByte1), testCaseExpected1)
+
+	testCase2 := map[string]interface{}{
+		"@assetType": "book",
+		"title":      "Book Name",
+		"author":     "Author Name",
+		"@key":       "book:983a78df-9f0e-5ecb-baf2-4a8698590c81",
+	}
+	testCaseExpectedByte2, _ := json.Marshal(testCase2)
+	testParseValid(t, dtype, testCase2, string(testCaseExpectedByte2), testCase2)
+	testParseValid(t, dtype, testCaseExpectedByte2, string(testCaseExpectedByte2), testCase2)
+	testParseValid(t, dtype, string(testCaseExpectedByte2), string(testCaseExpectedByte2), testCase2)
+
+	testCase3 := map[string]interface{}{
+		"@key": "library:ca683ce5-05bf-5799-a359-b28a1f981f96",
+	}
+	testCaseExpected3 := map[string]interface{}{
+		"@assetType": "library",
+		"@key":       "library:ca683ce5-05bf-5799-a359-b28a1f981f96",
+	}
+	testCaseExpectedByte3, _ := json.Marshal(testCaseExpected3)
+	testParseValid(t, dtype, testCase3, string(testCaseExpectedByte3), testCase3)
+
+	invalidCase1 := map[string]interface{}{
+		"@assetType": "library",
+	}
+	testParseInvalid(t, dtype, invalidCase1, http.StatusBadRequest)
+
+	invalidCase2 := map[string]interface{}{
+		"@assetType": "inexistant",
+	}
+	testParseInvalid(t, dtype, invalidCase2, http.StatusBadRequest)
+
+	invalidCase3 := map[string]interface{}{
+		"@assetType": "person",
+		"@key":       "library:ca683ce5-05bf-5799-a359-b28a1f981f96",
+	}
+	testParseInvalid(t, dtype, invalidCase3, http.StatusBadRequest)
 }

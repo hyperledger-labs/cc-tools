@@ -17,6 +17,7 @@ import (
 	"github.com/golang/protobuf/ptypes/timestamp"
 	"github.com/hyperledger/fabric-chaincode-go/shim"
 	"github.com/hyperledger/fabric-protos-go/ledger/queryresult"
+	"github.com/hyperledger/fabric-protos-go/msp"
 	pb "github.com/hyperledger/fabric-protos-go/peer"
 )
 
@@ -291,10 +292,10 @@ func (stub *MockStub) GetStateByRange(startKey, endKey string) (shim.StateQueryI
 	return NewMockStateRangeQueryIterator(stub, startKey, endKey), nil
 }
 
-//To ensure that simple keys do not go into composite key namespace,
-//we validate simplekey to check whether the key starts with 0x00 (which
-//is the namespace for compositeKey). This helps in avoding simple/composite
-//key collisions.
+// To ensure that simple keys do not go into composite key namespace,
+// we validate simplekey to check whether the key starts with 0x00 (which
+// is the namespace for compositeKey). This helps in avoding simple/composite
+// key collisions.
 func validateSimpleKeys(simpleKeys ...string) error {
 	for _, key := range simpleKeys {
 		if len(key) > 0 && key[0] == compositeKeyNamespace[0] {
@@ -508,8 +509,23 @@ func NewMockStub(name string, cc shim.Chaincode) *MockStub {
 	s.Keys = list.New()
 	s.ChaincodeEventsChannel = make(chan *pb.ChaincodeEvent, 100) //define large capacity for non-blocking setEvent calls.
 	s.Decorations = make(map[string][]byte)
-
+	s.Creator, _ = newCreator(name, []byte{})
 	return s
+}
+
+// NewMockStubWithCert Constructor to initialize mock stub with a certificate. Useful for transactions with robust permissioning.
+func NewMockStubWithCert(name string, cc shim.Chaincode, cert []byte) (*MockStub, error) {
+	s := NewMockStub(name, cc)
+	var err error
+	s.Creator, err = newCreator(name, cert)
+
+	return s, err
+}
+
+func newCreator(orgMSP string, cert []byte) ([]byte, error) {
+	sid := &msp.SerializedIdentity{Mspid: orgMSP,
+		IdBytes: cert}
+	return proto.Marshal(sid)
 }
 
 /*****************************

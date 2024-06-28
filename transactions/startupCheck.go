@@ -15,13 +15,13 @@ func StartupCheck() errors.ICCError {
 	for _, tx := range txList {
 		txName := tx.Tag
 		for _, c := range tx.Callers {
-			if len(c) <= 1 {
+			if len(c.MSP) <= 1 {
 				continue
 			}
-			if c[0] == '$' {
-				_, err := regexp.Compile(c[1:])
+			if c.MSP[0] == '$' {
+				_, err := regexp.Compile(c.MSP[1:])
 				if err != nil {
-					return errors.WrapErrorWithStatus(err, fmt.Sprintf("invalid caller regular expression %s for tx %s", c, txName), 500)
+					return errors.WrapErrorWithStatus(err, fmt.Sprintf("invalid caller msp regular expression %s for tx %s", c, txName), 500)
 				}
 			}
 		}
@@ -41,7 +41,7 @@ func StartupCheck() errors.ICCError {
 				dtype != "@object" {
 				if strings.HasPrefix(dtype, "->") {
 					dtype = strings.TrimPrefix(dtype, "->")
-					if assets.FetchAssetType(dtype) == nil {
+					if assets.FetchAssetType(dtype) == nil && dtype != "@asset" {
 						return errors.NewCCError(fmt.Sprintf("invalid arg type %s in tx %s", arg.DataType, txName), 500)
 					}
 				} else {

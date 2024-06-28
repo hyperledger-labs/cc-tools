@@ -3,6 +3,7 @@ package transactions
 import (
 	"encoding/json"
 	"fmt"
+	"net/http"
 	"strings"
 
 	"github.com/hyperledger-labs/cc-tools/assets"
@@ -122,11 +123,17 @@ func validateTxArg(argType string, arg interface{}) (interface{}, errors.ICCErro
 			return nil, errors.NewCCError("invalid argument format", 400)
 		}
 		assetTypeName, ok := argMap["@assetType"]
-		if ok && assetTypeName != argType { // in case an @assetType is specified, check if it is correct
-			return nil, errors.NewCCError(fmt.Sprintf("invalid @assetType '%s' (expecting '%s')", assetTypeName, argType), 400)
-		}
-		if !ok { // if @assetType is not specified, inject it
-			argMap["@assetType"] = argType
+		if argType != "@asset" {
+			if ok && assetTypeName != argType { // in case an @assetType is specified, check if it is correct
+				return nil, errors.NewCCError(fmt.Sprintf("invalid @assetType '%s' (expecting '%s')", assetTypeName, argType), 400)
+			}
+			if !ok { // if @assetType is not specified, inject it
+				argMap["@assetType"] = argType
+			}
+		} else {
+			if !ok {
+				return nil, errors.NewCCError("missing @assetType", http.StatusBadRequest)
+			}
 		}
 		key, err := assets.NewKey(argMap)
 		if err != nil {

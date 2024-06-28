@@ -6,6 +6,7 @@ import (
 	"math"
 	"net/http"
 	"strconv"
+	"strings"
 	"time"
 
 	"github.com/hyperledger-labs/cc-tools/errors"
@@ -29,6 +30,11 @@ type DataType struct {
 
 // CustomDataTypes allows cc developer to inject custom primitive data types
 func CustomDataTypes(m map[string]DataType) error {
+	// Avoid initialization cycle
+	if FetchAssetType("->@asset") == nil {
+		dataTypeMap["->@asset"] = &assetDatatype
+	}
+
 	for k, v := range m {
 		if v.Parse == nil {
 			return errors.NewCCError(fmt.Sprintf("invalid custom data type '%s': nil Parse function", k), 500)
@@ -190,5 +196,50 @@ var dataTypeMap = map[string]*DataType{
 
 			return string(retVal), dataVal, nil
 		},
+	},
+}
+
+var assetDatatype = DataType{
+	AcceptedFormats: []string{"->@asset"},
+	Parse: func(data interface{}) (string, interface{}, errors.ICCError) {
+		dataVal, ok := data.(map[string]interface{})
+		if !ok {
+			switch v := data.(type) {
+			case []byte:
+				err := json.Unmarshal(v, &dataVal)
+				if err != nil {
+					return "", nil, errors.WrapErrorWithStatus(err, "failed to unmarshal []byte into map[string]interface{}", http.StatusBadRequest)
+				}
+			case string:
+				err := json.Unmarshal([]byte(v), &dataVal)
+				if err != nil {
+					return "", nil, errors.WrapErrorWithStatus(err, "failed to unmarshal string into map[string]interface{}", http.StatusBadRequest)
+				}
+			default:
+				return "", nil, errors.NewCCError(fmt.Sprintf("asset property must be either a byte array or a string, but received type is: %T", data), http.StatusBadRequest)
+			}
+		}
+
+		key, er := GenerateKey(dataVal)
+		if er != nil {
+			return "", nil, errors.WrapError(er, "failed to generate key")
+		}
+		dataVal["@key"] = key
+
+		assetType, ok := dataVal["@assetType"].(string)
+		if ok {
+			if !strings.Contains(key, assetType) {
+				return "", nil, errors.NewCCError(fmt.Sprintf("asset type '%s' doesnt match key '%s'", assetType, key), http.StatusBadRequest)
+			}
+		} else {
+			dataVal["@assetType"] = key[:strings.IndexByte(key, ':')]
+		}
+
+		retVal, err := json.Marshal(dataVal)
+		if err != nil {
+			return "", nil, errors.WrapErrorWithStatus(err, "failed to marshal return value", http.StatusInternalServerError)
+		}
+
+		return string(retVal), dataVal, nil
 	},
 }

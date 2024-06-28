@@ -159,11 +159,9 @@ func (k *Key) Update(stub *sw.StubWrapper, update map[string]interface{}) (map[s
 						writePermission = true
 						break
 					}
-				} else { // if writer is not regexp
-					if w == txCreator {
-						writePermission = true
-						break
-					}
+				} else if w == txCreator { // if writer is not regexp
+					writePermission = true
+					break
 				}
 			}
 			if !writePermission {
@@ -296,7 +294,9 @@ func checkUpdateRecursive(stub *sw.StubWrapper, object map[string]interface{}, r
 				// If subAsset is badly formatted, this method shouldn't have been called
 				return errors.NewCCError(fmt.Sprintf("asset reference property '%s' must be an object", subAsset.Tag), 400)
 			}
-			obj["@assetType"] = dType
+			if dType != "@asset" {
+				obj["@assetType"] = dType
+			}
 			err := checkUpdateRecursive(stub, obj, false)
 			if err != nil {
 				return errors.WrapError(err, fmt.Sprintf("failed to check sub-asset %s recursively", subAsset.Tag))

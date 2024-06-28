@@ -67,11 +67,17 @@ func (a Asset) Refs() ([]Key, errors.ICCError) {
 			}
 
 			subAssetTypeName, ok := subAssetRefMap["@assetType"]
-			if ok && subAssetTypeName != subAssetDataType {
-				return nil, errors.NewCCError("sub-asset reference of wrong asset type", 400)
-			}
-			if !ok {
-				subAssetRefMap["@assetType"] = subAssetDataType
+			if subAssetDataType != "@asset" {
+				if ok && subAssetTypeName != subAssetDataType {
+					return nil, errors.NewCCError("sub-asset reference of wrong asset type", 400)
+				}
+				if !ok {
+					subAssetRefMap["@assetType"] = subAssetDataType
+				}
+			} else {
+				if !ok {
+					return nil, errors.NewCCError("sub-asset reference must have an '@assetType' property", 400)
+				}
 			}
 
 			// Generate key for subAsset

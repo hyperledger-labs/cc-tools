@@ -160,6 +160,7 @@ func TestGetCommittedAsset(t *testing.T) {
 		log.Println(err)
 		t.FailNow()
 	}
+
 	if !reflect.DeepEqual(*gotAsset, expectedResponse) {
 		log.Println("these should be deeply equal")
 		log.Println(expectedResponse)

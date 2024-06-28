@@ -3,6 +3,7 @@ package assets
 import (
 	"encoding/json"
 	"fmt"
+	"reflect"
 	"strings"
 
 	"github.com/hyperledger-labs/cc-tools/errors"
@@ -31,7 +32,7 @@ func (a *Asset) put(stub *sw.StubWrapper) (map[string]interface{}, errors.ICCErr
 
 	// Write asset to blockchain
 	if a.IsPrivate() {
-		err = stub.PutPrivateData(a.TypeTag(), a.Key(), assetJSON)
+		err = stub.PutPrivateData(a.CollectionName(), a.Key(), assetJSON)
 		if err != nil {
 			return nil, errors.WrapError(err, "failed to write asset to ledger")
 		}
@@ -46,6 +47,7 @@ func (a *Asset) put(stub *sw.StubWrapper) (map[string]interface{}, errors.ICCErr
 	if err != nil {
 		return nil, errors.WrapError(err, "failed to write asset to ledger")
 	}
+
 	return *a, nil
 }
 
@@ -89,7 +91,7 @@ func (a *Asset) PutNew(stub *sw.StubWrapper) (map[string]interface{}, errors.ICC
 	return res, nil
 }
 
-func putRecursive(stub *sw.StubWrapper, object map[string]interface{}, root bool) (map[string]interface{}, errors.ICCError) {
+func putRecursive(stub *sw.StubWrapper, object map[string]interface{}) (map[string]interface{}, errors.ICCError) {
 	var err error
 
 	objAsKey, err := NewKey(object)
@@ -97,52 +99,54 @@ func putRecursive(stub *sw.StubWrapper, object map[string]interface{}, root bool
 		return nil, errors.WrapError(err, "unable to create asset object")
 	}
 
-	if !root {
-		exists, err := objAsKey.ExistsInLedger(stub)
-		if err != nil {
-			return nil, errors.WrapError(err, "failed checking if asset exists")
-		}
-		if exists {
-			asset, err := objAsKey.GetRecursive(stub)
-			if err != nil {
-				return nil, errors.WrapError(err, "failed fetching sub-asset that already exists")
-			}
-			if asset == nil {
-				return nil, errors.NewCCError("existing sub-asset could not be fetched", 404)
-			}
-
-			// If asset key is not in object, add asset value to object (so that properties are not erased)
-			for k := range asset {
-				if _, ok := object[k]; !ok {
-					object[k] = asset[k]
-				}
-			}
-
-			// TODO: check property by property if asset must be updated
-		}
+	exists, err := objAsKey.ExistsInLedger(stub)
+	if err != nil {
+		return nil, errors.WrapError(err, "failed checking if asset exists")
 	}
 
-	objAsAsset, err := NewAsset(object)
-	if err != nil {
-		return nil, errors.WrapError(err, "unable to create asset object")
+	propsToUpdate := map[string]bool{}
+	if exists {
+		asset, err := objAsKey.GetMap(stub)
+		if err != nil {
+			return nil, errors.WrapError(err, "failed fetching asset that already exists")
+		}
+
+		// If asset key is not in object, add asset value to object (so that properties are not erased)
+		for k := range asset {
+			if _, ok := object[k]; !ok {
+				object[k] = asset[k]
+			}
+		}
+
+		// Check props to update
+		for k, v := range object {
+			if !reflect.DeepEqual(v, asset[k]) {
+				propsToUpdate[k] = true
+			}
+		}
 	}
 
 	subAssetsMap := map[string]interface{}{}
-	subAssets := objAsAsset.Type().SubAssets()
+	subAssets := objAsKey.Type().SubAssets()
 	for _, subAsset := range subAssets {
+		subAssetInterface, ok := object[subAsset.Tag]
+		if !ok {
+			// if subAsset is not included, continue onwards to the next possible subAsset
+			continue
+		}
+
+		if propsToUpdate[subAsset.Tag] {
+			delete(propsToUpdate, subAsset.Tag)
+		}
+
+		// Extract asset type
 		isArray := false
 		dType := subAsset.DataType
 		if strings.HasPrefix(dType, "[]") {
 			isArray = true
 			dType = strings.TrimPrefix(dType, "[]")
 		}
-
 		dType = strings.TrimPrefix(dType, "->")
-		subAssetInterface, ok := object[subAsset.Tag]
-		if !ok {
-			// if subAsset is not included, continue onwards to the next possible subAsset
-			continue
-		}
 
 		var objArray []interface{}
 		if !isArray {
@@ -167,8 +171,15 @@ func putRecursive(stub *sw.StubWrapper, object map[string]interface{}, root bool
 				// If subAsset is badly formatted, this method shouldn't have been called
 				return nil, errors.NewCCError(fmt.Sprintf("asset reference property '%s' must be an object", subAsset.Tag), 400)
 			}
-			obj["@assetType"] = dType
-			putSubAsset, err := putRecursive(stub, obj, false)
+			if dType != "@asset" {
+				obj["@assetType"] = dType
+			} else {
+				_, ok := obj["@assetType"].(string)
+				if !ok {
+					return nil, errors.NewCCError(fmt.Sprintf("asset reference property '%s' must have an '@assetType' property", subAsset.Tag), 400)
+				}
+			}
+			putSubAsset, err := putRecursive(stub, obj)
 			if err != nil {
 				return nil, errors.WrapError(err, fmt.Sprintf("failed to put sub-asset %s recursively", subAsset.Tag))
 			}
@@ -176,28 +187,36 @@ func putRecursive(stub *sw.StubWrapper, object map[string]interface{}, root bool
 		}
 
 		if isArray {
-			subAssetsMap[subAsset.Tag] = objArray
+			object[subAsset.Tag] = objArray
 		} else {
-			subAssetsMap[subAsset.Tag] = objArray[0]
+			object[subAsset.Tag] = objArray[0]
+		}
+		subAssetsMap[subAsset.Tag] = object[subAsset.Tag]
+	}
+
+	if shouldUpdate := len(propsToUpdate) > 0; shouldUpdate || !exists {
+		objAsAsset, err := NewAsset(object)
+		if err != nil {
+			return nil, errors.WrapError(err, "unable to create asset object")
+		}
+
+		object, err = objAsAsset.Put(stub)
+		if err != nil {
+			return nil, errors.WrapError(err, fmt.Sprintf("failed to put asset of type %s", objAsAsset.TypeTag()))
+		}
+
+		for tag, subAsset := range subAssetsMap {
+			object[tag] = subAsset
 		}
 	}
 
-	putAsset, err := objAsAsset.Put(stub)
-	if err != nil {
-		return nil, errors.WrapError(err, fmt.Sprintf("failed to put asset of type %s", objAsAsset.TypeTag()))
-	}
-
-	for tag, subAsset := range subAssetsMap {
-		putAsset[tag] = subAsset
-	}
-
-	return putAsset, nil
+	return object, nil
 }
 
 // PutRecursive inserts asset and all its subassets in blockchain.
 // This method is experimental and might not work as intended. Use with caution.
 func PutRecursive(stub *sw.StubWrapper, object map[string]interface{}) (map[string]interface{}, errors.ICCError) {
-	return putRecursive(stub, object, true)
+	return putRecursive(stub, object)
 }
 
 // PutNewRecursive inserts asset and all its subassets in blockchain

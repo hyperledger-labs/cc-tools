@@ -48,7 +48,7 @@ func get(stub *sw.StubWrapper, pvtCollection, key string, committed bool) (*Asse
 func (a *Asset) Get(stub *sw.StubWrapper) (*Asset, errors.ICCError) {
 	var pvtCollection string
 	if a.IsPrivate() {
-		pvtCollection = a.TypeTag()
+		pvtCollection = a.CollectionName()
 	}
 
 	return get(stub, pvtCollection, a.Key(), false)
@@ -58,7 +58,7 @@ func (a *Asset) Get(stub *sw.StubWrapper) (*Asset, errors.ICCError) {
 func (k *Key) Get(stub *sw.StubWrapper) (*Asset, errors.ICCError) {
 	var pvtCollection string
 	if k.IsPrivate() {
-		pvtCollection = k.TypeTag()
+		pvtCollection = k.CollectionName()
 	}
 
 	return get(stub, pvtCollection, k.Key(), false)
@@ -71,7 +71,7 @@ func GetMany(stub *sw.StubWrapper, keys []Key) ([]*Asset, errors.ICCError) {
 	for _, k := range keys {
 		var pvtCollection string
 		if k.IsPrivate() {
-			pvtCollection = k.TypeTag()
+			pvtCollection = k.CollectionName()
 		}
 
 		asset, err := get(stub, pvtCollection, k.Key(), false)
@@ -88,7 +88,7 @@ func GetMany(stub *sw.StubWrapper, keys []Key) ([]*Asset, errors.ICCError) {
 func (a *Asset) GetCommitted(stub *sw.StubWrapper) (*Asset, errors.ICCError) {
 	var pvtCollection string
 	if a.IsPrivate() {
-		pvtCollection = a.TypeTag()
+		pvtCollection = a.CollectionName()
 	}
 
 	return get(stub, pvtCollection, a.Key(), true)
@@ -98,7 +98,7 @@ func (a *Asset) GetCommitted(stub *sw.StubWrapper) (*Asset, errors.ICCError) {
 func (k *Key) GetCommitted(stub *sw.StubWrapper) (*Asset, errors.ICCError) {
 	var pvtCollection string
 	if k.IsPrivate() {
-		pvtCollection = k.TypeTag()
+		pvtCollection = k.CollectionName()
 	}
 
 	return get(stub, pvtCollection, k.Key(), true)
@@ -109,7 +109,7 @@ func (k *Key) GetBytes(stub *sw.StubWrapper) ([]byte, errors.ICCError) {
 	var assetBytes []byte
 	var err error
 	if k.IsPrivate() {
-		assetBytes, err = stub.GetPrivateData(k.TypeTag(), k.Key())
+		assetBytes, err = stub.GetPrivateData(k.CollectionName(), k.Key())
 	} else {
 		assetBytes, err = stub.GetState(k.Key())
 	}
@@ -218,7 +218,7 @@ func getRecursive(stub *sw.StubWrapper, pvtCollection, key string, keysChecked [
 
 			var subAsset map[string]interface{}
 			if propKey.IsPrivate() {
-				subAsset, err = getRecursive(stub, propKey.TypeTag(), propKey.Key(), keysChecked)
+				subAsset, err = getRecursive(stub, propKey.CollectionName(), propKey.Key(), keysChecked)
 			} else {
 				subAsset, err = getRecursive(stub, "", propKey.Key(), keysChecked)
 			}
@@ -265,7 +265,7 @@ func getRecursive(stub *sw.StubWrapper, pvtCollection, key string, keysChecked [
 
 					var subAsset map[string]interface{}
 					if elemKey.IsPrivate() {
-						subAsset, err = getRecursive(stub, elemKey.TypeTag(), elemKey.Key(), keysChecked)
+						subAsset, err = getRecursive(stub, elemKey.CollectionName(), elemKey.Key(), keysChecked)
 					} else {
 						subAsset, err = getRecursive(stub, "", elemKey.Key(), keysChecked)
 					}
@@ -287,7 +287,7 @@ func getRecursive(stub *sw.StubWrapper, pvtCollection, key string, keysChecked [
 func (a *Asset) GetRecursive(stub *sw.StubWrapper) (map[string]interface{}, errors.ICCError) {
 	var pvtCollection string
 	if a.IsPrivate() {
-		pvtCollection = a.TypeTag()
+		pvtCollection = a.CollectionName()
 	}
 
 	return getRecursive(stub, pvtCollection, a.Key(), []string{})
@@ -297,7 +297,7 @@ func (a *Asset) GetRecursive(stub *sw.StubWrapper) (map[string]interface{}, erro
 func (k *Key) GetRecursive(stub *sw.StubWrapper) (map[string]interface{}, errors.ICCError) {
 	var pvtCollection string
 	if k.IsPrivate() {
-		pvtCollection = k.TypeTag()
+		pvtCollection = k.CollectionName()
 	}
 
 	return getRecursive(stub, pvtCollection, k.Key(), []string{})

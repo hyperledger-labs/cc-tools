@@ -25,6 +25,7 @@ func History(stub *sw.StubWrapper, key string, resolve bool) (*HistoryResponse, 
 	defer resultsIterator.Close()
 
 	historyResult := make([]map[string]interface{}, 0)
+	var subAssets []AssetProp
 
 	for resultsIterator.HasNext() {
 		queryResponse, err := resultsIterator.Next()
@@ -40,15 +41,18 @@ func History(stub *sw.StubWrapper, key string, resolve bool) (*HistoryResponse, 
 		}
 
 		if resolve {
-			key, err := NewKey(data)
-			if err != nil {
-				return nil, errors.WrapError(err, "failed to create key object to resolve result")
+			if subAssets == nil {
+				key, err := NewKey(data)
+				if err != nil {
+					return nil, errors.WrapError(err, "failed to create key object to resolve result")
+				}
+				subAssets = key.Type().SubAssets()
 			}
-			asset, err := key.GetRecursive(stub)
+
+			err := resolveHistory(stub, data, subAssets)
 			if err != nil {
 				return nil, errors.WrapError(err, "failed to resolve result")
 			}
-			data = asset
 		}
 
 		historyResult = append(historyResult, data)
@@ -59,4 +63,27 @@ func History(stub *sw.StubWrapper, key string, resolve bool) (*HistoryResponse, 
 	}
 
 	return &response, nil
+}
+
+func resolveHistory(stub *sw.StubWrapper, data map[string]interface{}, subAssets []AssetProp) errors.ICCError {
+	for _, refProp := range subAssets {
+		ref, ok := data[refProp.Tag].(map[string]interface{})
+		if !ok {
+			continue
+		}
+
+		key, err := NewKey(ref)
+		if err != nil {
+			return errors.WrapError(err, "could not make subasset key")
+		}
+
+		resolved, err := key.GetRecursive(stub)
+		if err != nil {
+			return errors.WrapError(err, "failed to get subasset recursive")
+		}
+
+		data[refProp.Tag] = resolved
+	}
+
+	return nil
 }
