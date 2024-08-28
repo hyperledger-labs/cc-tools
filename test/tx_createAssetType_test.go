@@ -122,6 +122,7 @@ func TestCreateAssetType(t *testing.T) {
 		"@lastTx":      "createAsset",
 		"@lastUpdated": lastUpdated.AsTime().Format(time.RFC3339),
 		"@assetType":   "magazine",
+		"@lastTxID":    "createAsset",
 		"name":         "MAG",
 		"images": []interface{}{
 			"url.com/1",

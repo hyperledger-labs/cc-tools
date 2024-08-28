@@ -25,6 +25,7 @@ func TestPutAsset(t *testing.T) {
 		"@key":         "person:47061146-c642-51a1-844a-bf0b17cb5e19",
 		"@lastTouchBy": "org1MSP",
 		"@lastTx":      "",
+		"@lastTxID":    "TestPutAsset",
 		"@lastUpdated": lastUpdated.AsTime().Format(time.RFC3339),
 		"@assetType":   "person",
 		"name":         "Maria",
@@ -161,6 +162,7 @@ func TestPutNewAssetRecursive(t *testing.T) {
 		"@lastTouchBy": "org1MSP",
 		"@lastTx":      "",
 		"@lastUpdated": lastUpdated.AsTime().Format(time.RFC3339),
+		"@lastTxID":    "TestPutAsset",
 		"title":        "Meu Nome é Maria",
 		"author":       "Maria Viana",
 		"currentTenant": map[string]interface{}{
@@ -169,6 +171,7 @@ func TestPutNewAssetRecursive(t *testing.T) {
 			"@lastTouchBy": "org1MSP",
 			"@lastTx":      "",
 			"@lastUpdated": lastUpdated.AsTime().Format(time.RFC3339),
+			"@lastTxID":    "TestPutAsset",
 			"name":         "Maria",
 			"id":           "31820792048",
 			"height":       1.66,
@@ -190,6 +193,7 @@ func TestPutNewAssetRecursive(t *testing.T) {
 		"@lastTouchBy": "org1MSP",
 		"@lastTx":      "",
 		"@lastUpdated": lastUpdated.AsTime().Format(time.RFC3339),
+		"@lastTxID":    "TestPutAsset",
 		"title":        "Meu Nome é Maria",
 		"author":       "Maria Viana",
 		"currentTenant": map[string]interface{}{
@@ -270,6 +274,7 @@ func TestUpdateRecursive(t *testing.T) {
 		"@lastTouchBy": "org1MSP",
 		"@lastTx":      "",
 		"@lastUpdated": lastUpdated.AsTime().Format(time.RFC3339),
+		"@lastTxID":    "TestUpdateAsset",
 		"title":        "Meu Nome é Maria",
 		"author":       "Maria Viana",
 		"currentTenant": map[string]interface{}{
@@ -278,6 +283,7 @@ func TestUpdateRecursive(t *testing.T) {
 			"@lastTouchBy": "org1MSP",
 			"@lastTx":      "",
 			"@lastUpdated": lastUpdated.AsTime().Format(time.RFC3339),
+			"@lastTxID":    "TestUpdateAsset",
 			"name":         "Maria",
 			"id":           "31820792048",
 			"height":       1.88,
@@ -300,6 +306,7 @@ func TestUpdateRecursive(t *testing.T) {
 		"@lastTouchBy": "org1MSP",
 		"@lastTx":      "",
 		"@lastUpdated": lastUpdated.AsTime().Format(time.RFC3339),
+		"@lastTxID":    "TestUpdateAsset",
 		"title":        "Meu Nome é Maria",
 		"author":       "Maria Viana",
 		"currentTenant": map[string]interface{}{

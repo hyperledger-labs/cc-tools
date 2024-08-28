@@ -27,6 +27,7 @@ func TestTryout(t *testing.T) {
 			"@lastTouchBy": "org1MSP",
 			"@lastTx":      "createAsset",
 			"@assetType":   "person",
+			"@lastTxID":    "createAsset",
 			"name":         "Maria",
 			"id":           "31820792048",
 			"height":       0.0,
@@ -63,6 +64,7 @@ func TestTryout(t *testing.T) {
 			"@lastTouchBy": "org2MSP",
 			"@lastTx":      "createAsset",
 			"@assetType":   "book",
+			"@lastTxID":    "createAsset",
 			"title":        "Meu Nome é Maria",
 			"author":       "Maria Viana",
 			"currentTenant": map[string]interface{}{
@@ -116,6 +118,7 @@ func TestTryout(t *testing.T) {
 		"@lastTouchBy": "org2MSP",
 		"@lastTx":      "updateAsset",
 		"@assetType":   "person",
+		"@lastTxID":    "updateAsset",
 		"name":         "Maria",
 		"id":           "31820792048",
 		"height":       1.67,
