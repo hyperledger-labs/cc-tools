@@ -93,6 +93,9 @@ func (a *Asset) injectMetadata(stub *sw.StubWrapper) errors.ICCError {
 	}
 	(*a)["@lastUpdated"] = lastUpdated.AsTime().Format(time.RFC3339)
 
+	lastTxID := stub.Stub.GetTxID()
+	(*a)["@lastTxID"] = lastTxID
+
 	return nil
 }
 
