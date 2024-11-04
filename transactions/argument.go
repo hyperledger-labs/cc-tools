@@ -18,7 +18,7 @@ type Argument struct {
 	//	  @asset: any asset type defined in the assets package
 	//	  @key: key properties for any asset type defined in the assets package
 	//	  @update: update request for any asset type defined in the assets package
-	//	  @query: query string according to CouchDB specification: https://docs.couchdb.org/en/2.2.0/api/database/find.html
+	//	  @query: query string according to CouchDB specification: https://docs.couchdb.org/en/stable/ddocs/views/intro.html
 	//	  @object: arbitrary object
 	//	  ->assetType: the specific asset type as defined by <assetType> in the assets packages
 	//    dataType: any specific data type format defined by the chaincode
