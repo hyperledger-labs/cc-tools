@@ -188,6 +188,11 @@ func (stub *MockStub) GetPrivateDataHash(collection, key string) ([]byte, error)
 	return nil, errors.New("Not Implemented")
 }
 
+// PurgePrivateData ...
+func (stub *MockStub) PurgePrivateData(collection, key string) error {
+	return errors.New("Not Implemented")
+}
+
 // PutPrivateData ...
 func (stub *MockStub) PutPrivateData(collection string, key string, value []byte) error {
 	m, in := stub.PvtState[collection]
