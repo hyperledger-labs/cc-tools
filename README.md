@@ -1,4 +1,4 @@
-# GoLedger CC Tools
+# Hyperledger Labs CC Tools
 
 [![Go Report Card](https://goreportcard.com/badge/github.com/hyperledger-labs/cc-tools)](https://goreportcard.com/report/github.com/hyperledger-labs/cc-tools)
 [![GoDoc](https://godoc.org/github.com/hyperledger-labs/cc-tools?status.svg)](https://godoc.org/github.com/hyperledger-labs/cc-tools)
