@@ -39,3 +39,52 @@ func TestKeyJSON(t *testing.T) {
 		t.FailNow()
 	}
 }
+
+func TestKeyGenUsingAssetType(t *testing.T) {
+	m := map[string]interface{}{
+		"@assetType": "person",
+		"id":         "31820792048",
+	}
+
+	key, err := assets.NewKey(m)
+	if err != nil {
+		log.Println(err)
+		t.FailNow()
+	}
+
+	expectedKey := assets.Key{
+		"@assetType": "person",
+		"@key":       "person:47061146-c642-51a1-844a-bf0b17cb5e19",
+	}
+
+	if !reflect.DeepEqual(key, expectedKey) {
+		log.Println("these should be deeply equal")
+		log.Println(key)
+		log.Println(expectedKey)
+		t.FailNow()
+	}
+}
+
+func TestKeyGenUsingKey(t *testing.T) {
+	m := map[string]interface{}{
+		"@key": "person:47061146-c642-51a1-844a-bf0b17cb5e19",
+	}
+
+	key, err := assets.NewKey(m)
+	if err != nil {
+		log.Println(err)
+		t.FailNow()
+	}
+
+	expectedKey := assets.Key{
+		"@assetType": "person",
+		"@key":       "person:47061146-c642-51a1-844a-bf0b17cb5e19",
+	}
+
+	if !reflect.DeepEqual(key, expectedKey) {
+		log.Println("these should be deeply equal")
+		log.Println(key)
+		log.Println(expectedKey)
+		t.FailNow()
+	}
+}
