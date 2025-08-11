@@ -72,6 +72,18 @@ func NewKey(m map[string]interface{}) (k Key, err errors.ICCError) {
 		k["@key"] = keyStr
 	}
 
+	// Validate if @assetType exists
+	_, typeExists := k["@assetType"].(string)
+	if !typeExists {
+		// Get asset type from @key
+		parts := strings.Split(k["@key"].(string), ":")
+		if len(parts) < 2 {
+			err = errors.NewCCError("cannot determine asset type from key", 400)
+			return
+		}
+		k["@assetType"] = parts[0]
+	}
+
 	for t := range k {
 		if t != "@key" && t != "@assetType" {
 			delete(k, t)
