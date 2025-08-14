@@ -59,6 +59,14 @@ func NewKey(m map[string]interface{}) (k Key, err errors.ICCError) {
 			if index != 0 {
 				keyExists = false
 			}
+		} else {
+			// Get asset type from @key
+			parts := strings.Split(k["@key"].(string), ":")
+			if len(parts) < 2 {
+				err = errors.NewCCError("cannot determine asset type from key", 400)
+				return
+			}
+			k["@assetType"] = parts[0]
 		}
 	}
 
