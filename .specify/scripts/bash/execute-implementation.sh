@@ -156,14 +156,14 @@ if [[ -d "$CHECKLISTS_DIR" ]]; then
         if [[ -f "$checklist_file" ]]; then
             filename=$(basename "$checklist_file")
             
-            # Count total items (- [ ] or - [X] or - [x])
-            total=$(grep -E '^\s*-\s*\[[Xx ]\]' "$checklist_file" | wc -l)
-            
             # Count completed items (- [X] or - [x])
-            completed=$(grep -E '^\s*-\s*\[[Xx]\]' "$checklist_file" | wc -l)
+            completed=$(grep -E '^[[:space:]]*-[[:space:]]*\[[Xx]\]' "$checklist_file" | wc -l)
             
             # Count incomplete items (- [ ])
-            incomplete=$(grep -E '^\s*-\s*\[ \]' "$checklist_file" | wc -l)
+            incomplete=$(grep -E '^[[:space:]]*-[[:space:]]*\[ \]' "$checklist_file" | wc -l)
+            
+            # Calculate total
+            total=$((completed + incomplete))
             
             # Determine status
             if [[ $incomplete -eq 0 ]]; then
@@ -318,10 +318,10 @@ echo ""
 echo_info "Step 5: Parsing tasks.md structure..."
 
 # Extract task phases and task count
-# Note: grep -c returns 0 when no matches, which is perfect for counting
+# Note: Using POSIX-compliant [[:space:]] instead of \s for portability
 phase_count=$(grep -c '^## Phase' "$TASKS_FILE" 2>/dev/null) || phase_count=0
-task_count=$(grep -c '^\s*- \[ \]' "$TASKS_FILE" 2>/dev/null) || task_count=0
-completed_count=$(grep -c '^\s*- \[[Xx]\]' "$TASKS_FILE" 2>/dev/null) || completed_count=0
+task_count=$(grep -E -c '^[[:space:]]*-[[:space:]]*\[ \]' "$TASKS_FILE" 2>/dev/null) || task_count=0
+completed_count=$(grep -E -c '^[[:space:]]*-[[:space:]]*\[[Xx]\]' "$TASKS_FILE" 2>/dev/null) || completed_count=0
 
 echo_info "Found $phase_count phases"
 echo_info "Found $task_count incomplete tasks"  
