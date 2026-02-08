@@ -1,1 +1,22 @@
 \vendor
+
+# Go build artifacts
+*.exe
+*.test
+*.out
+*.prof*
+
+# Environment and logs
+.env*
+*.log
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
