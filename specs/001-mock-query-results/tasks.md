@@ -12,20 +12,20 @@ description: "Task list for Mock Rich Query Results"
 
 ## Phase 1: Setup (Shared)
 
-- [ ] T001 Review existing MockStub and iterator patterns in mock/mockstub.go
-- [ ] T002 Identify existing rich-query callers and expectations in assets/search.go (including pagination) and stubwrapper/stubWrapper.go
-- [ ] T003 Capture current baseline by running `go test ./...` (see specs/001-mock-query-results/quickstart.md)
+- [X] T001 Review existing MockStub and iterator patterns in mock/mockstub.go
+- [X] T002 Identify existing rich-query callers and expectations in assets/search.go (including pagination) and stubwrapper/stubWrapper.go
+- [X] T003 Capture current baseline by running `go test ./...` (see specs/001-mock-query-results/quickstart.md)
 
 ---
 
 ## Phase 2: Foundational (Blocking Prerequisites)
 
-- [ ] T004 Add `_find` request parsing types + helpers in mock/richquery_request.go
-- [ ] T005 Add JSON document decode + dotted-field-path access helpers in mock/richquery_doc.go
-- [ ] T006 Add deterministic collation compare helpers for sorting in mock/richquery_collation.go
-- [ ] T007 Add selector evaluation dispatcher (operator routing skeleton) in mock/richquery_selector.go
-- [ ] T008 Add a streaming iterator implementing `shim.StateQueryIteratorInterface` in mock/query_iterator.go
-- [ ] T009 Add pagination helpers for key-based bookmarks + metadata assembly in mock/richquery_pagination.go
+- [X] T004 Add `_find` request parsing types + helpers in mock/richquery_request.go
+- [X] T005 Add JSON document decode + dotted-field-path access helpers in mock/richquery_doc.go
+- [X] T006 Add deterministic collation compare helpers for sorting in mock/richquery_collation.go
+- [X] T007 Add selector evaluation dispatcher (operator routing skeleton) in mock/richquery_selector.go
+- [X] T008 Add a streaming iterator implementing `shim.StateQueryIteratorInterface` in mock/query_iterator.go
+- [X] T009 Add pagination helpers for key-based bookmarks + metadata assembly in mock/richquery_pagination.go
 
 **Checkpoint**: Foundational helpers compile; user story work can begin.
 
@@ -49,17 +49,17 @@ description: "Task list for Mock Rich Query Results"
 
 ### Implementation for User Story 1
 
-- [ ] T017 [US1] Implement derived-mode `GetQueryResult` entrypoint (parse → evaluate → iterator) in mock/mockstub.go
-- [ ] T018 [P] [US1] Implement field matching semantics (implicit $eq, multi-field AND, dot notation) in mock/richquery_selector.go
-- [ ] T019 [P] [US1] Implement combination operators ($and/$or/$not/$nor) in mock/richquery_ops_combination.go
-- [ ] T020 [P] [US1] Implement condition operators ($lt/$lte/$eq/$ne/$gte/$gt/$in/$nin) in mock/richquery_ops_condition.go
-- [ ] T021 [P] [US1] Implement existence/type operators ($exists/$type) in mock/richquery_ops_existence.go
-- [ ] T022 [P] [US1] Implement array/map operators ($all/$elemMatch/$allMatch/$keyMapMatch/$size) in mock/richquery_ops_array.go
-- [ ] T023 [P] [US1] Implement misc operators ($mod/$regex/$beginsWith) in mock/richquery_ops_misc.go
-- [ ] T024 [US1] Implement sort parsing + deterministic multi-key sorting in mock/richquery_sort.go
-- [ ] T025 [US1] Implement skip/limit and fields projection (dot notation) in mock/richquery_projection.go
-- [ ] T026 [US1] Wire the derived query engine pipeline (match → sort → skip/limit → projection) in mock/richquery_engine.go
-- [ ] T027 [US1] Implement mock `GetQueryResultWithPagination` using key-based bookmarks + metadata in mock/mockstub.go
+- [X] T017 [US1] Implement derived-mode `GetQueryResult` entrypoint (parse → evaluate → iterator) in mock/mockstub.go
+- [X] T018 [P] [US1] Implement field matching semantics (implicit $eq, multi-field AND, dot notation) in mock/richquery_selector.go
+- [X] T019 [P] [US1] Implement combination operators ($and/$or/$not/$nor) in mock/richquery_ops_combination.go
+- [X] T020 [P] [US1] Implement condition operators ($lt/$lte/$eq/$ne/$gte/$gt/$in/$nin) in mock/richquery_ops_condition.go
+- [X] T021 [P] [US1] Implement existence/type operators ($exists/$type) in mock/richquery_ops_existence.go
+- [X] T022 [P] [US1] Implement array/map operators ($all/$elemMatch/$allMatch/$keyMapMatch/$size) in mock/richquery_ops_array.go
+- [X] T023 [P] [US1] Implement misc operators ($mod/$regex/$beginsWith) in mock/richquery_ops_misc.go
+- [X] T024 [US1] Implement sort parsing + deterministic multi-key sorting in mock/richquery_sort.go
+- [X] T025 [US1] Implement skip/limit and fields projection (dot notation) in mock/richquery_projection.go
+- [X] T026 [US1] Wire the derived query engine pipeline (match → sort → skip/limit → projection) in mock/richquery_engine.go
+- [X] T027 [US1] Implement mock `GetQueryResultWithPagination` using key-based bookmarks + metadata in mock/mockstub.go
 
 **Checkpoint**: US1 tests pass; derived-mode rich queries work without overrides.
 
@@ -79,10 +79,10 @@ description: "Task list for Mock Rich Query Results"
 
 ### Implementation for User Story 2
 
-- [ ] T031 [US2] Add thread-safe registry fields + `RegisterQueryResult` helper on MockStub in mock/mockstub.go
-- [ ] T032 [US2] Update `GetQueryResult` to check registry first and snapshot keys for iteration in mock/mockstub.go
-- [ ] T033 [US2] Enforce deep-copy semantics on registry set/get to prevent caller mutation in mock/mockstub.go
-- [ ] T034 [US2] Ensure `GetQueryResultWithPagination` checks registry first and paginates registered keys deterministically in mock/mockstub.go
+- [X] T031 [US2] Add thread-safe registry fields + `RegisterQueryResult` helper on MockStub in mock/mockstub.go
+- [X] T032 [US2] Update `GetQueryResult` to check registry first and snapshot keys for iteration in mock/mockstub.go
+- [X] T033 [US2] Enforce deep-copy semantics on registry set/get to prevent caller mutation in mock/mockstub.go
+- [X] T034 [US2] Ensure `GetQueryResultWithPagination` checks registry first and paginates registered keys deterministically in mock/mockstub.go
 
 **Checkpoint**: US2 tests pass; overrides are deterministic and isolated.
 
@@ -103,11 +103,11 @@ description: "Task list for Mock Rich Query Results"
 
 ### Implementation for User Story 3
 
-- [ ] T039 [US3] Implement request validation errors (invalid JSON, selector required/object) in mock/richquery_request.go
-- [ ] T040 [US3] Implement unknown operator detection + error plumbing in mock/richquery_selector.go
-- [ ] T041 [US3] Implement `$text` as unsupported-in-derived-mode with a clear error in mock/richquery_ops_misc.go
-- [ ] T042 [US3] Implement sort validation errors (single-key objects, no mixed directions, etc.) in mock/richquery_sort.go
-- [ ] T043 [US3] Implement pagination validation errors (unknown bookmark, invalid pageSize) in mock/richquery_pagination.go
+- [X] T039 [US3] Implement request validation errors (invalid JSON, selector required/object) in mock/richquery_request.go
+- [X] T040 [US3] Implement unknown operator detection + error plumbing in mock/richquery_selector.go
+- [X] T041 [US3] Implement `$text` as unsupported-in-derived-mode with a clear error in mock/richquery_ops_misc.go
+- [X] T042 [US3] Implement sort validation errors (single-key objects, no mixed directions, etc.) in mock/richquery_sort.go
+- [X] T043 [US3] Implement pagination validation errors (unknown bookmark, invalid pageSize) in mock/richquery_pagination.go
 
 **Checkpoint**: US3 tests pass; failures are clear and consistent.
 
@@ -115,12 +115,12 @@ description: "Task list for Mock Rich Query Results"
 
 ## Phase 6: Polish & Cross-Cutting Concerns
 
-- [ ] T044 [P] Update quickstart expectations/examples to include rich-query behavior in specs/001-mock-query-results/quickstart.md
-- [ ] T045 [P] Finalize registry helper name and document pagination semantics in specs/001-mock-query-results/contracts/mock-rich-query.md
-- [ ] T046 [P] Sync specs/001-mock-query-results/spec.md scope language with the plan (remove “minimal subset” assumption or explicitly constrain scope)
-- [ ] T047 Run `gofmt` over modified files in mock/ (touchpoints include mock/mockstub.go)
-- [ ] T048 Run `go vet ./...` and address any findings in the touched packages (module file: go.mod)
-- [ ] T049 Run `go test ./...` and ensure new tests pass (see specs/001-mock-query-results/quickstart.md)
+- [X] T044 [P] Update quickstart expectations/examples to include rich-query behavior in specs/001-mock-query-results/quickstart.md
+- [X] T045 [P] Finalize registry helper name and document pagination semantics in specs/001-mock-query-results/contracts/mock-rich-query.md
+- [X] T046 [P] Sync specs/001-mock-query-results/spec.md scope language with the plan (remove "minimal subset" assumption or explicitly constrain scope)
+- [X] T047 Run `gofmt` over modified files in mock/ (touchpoints include mock/mockstub.go)
+- [X] T048 Run `go vet ./...` and address any findings in the touched packages (module file: go.mod)
+- [X] T049 Run `go test ./...` and ensure new tests pass (see specs/001-mock-query-results/quickstart.md)
 - [ ] T050 [P] Add/extend an end-to-end regression test that exercises the assets search pagination path via existing tests in test/tx_search_test.go (or a new focused test if needed)
 
 ---
