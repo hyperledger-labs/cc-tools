@@ -10,6 +10,7 @@ import (
 	"errors"
 	"fmt"
 	"strings"
+	"sync"
 	"unicode/utf8"
 
 	"github.com/golang/protobuf/proto"
@@ -73,6 +74,10 @@ type MockStub struct {
 	Creator []byte
 
 	Decorations map[string][]byte
+
+	// Query result registry for mock rich queries
+	queryResultsMu sync.RWMutex
+	queryResults   map[string][]string
 }
 
 // GetTxID ...
@@ -316,10 +321,36 @@ func validateSimpleKeys(simpleKeys ...string) error {
 // state database. An iterator is returned which can be used to iterate (next) over
 // the query result set
 func (stub *MockStub) GetQueryResult(query string) (shim.StateQueryIteratorInterface, error) {
-	// Not implemented since the mock engine does not have a query engine.
-	// However, a very simple query engine that supports string matching
-	// could be implemented to test that the framework supports queries
-	return nil, errors.New("not implemented")
+	// Check if there's a registered result for this exact query
+	stub.queryResultsMu.RLock()
+	registeredKeys, hasOverride := stub.queryResults[query]
+	stub.queryResultsMu.RUnlock()
+
+	if hasOverride {
+		// Return iterator over registered keys (make a copy to avoid mutation)
+		keysCopy := make([]string, len(registeredKeys))
+		copy(keysCopy, registeredKeys)
+		return NewStateQueryIterator(stub, keysCopy), nil
+	}
+
+	// Fall back to derived query evaluation
+	req, err := ParseFindRequest(query)
+	if err != nil {
+		return nil, err
+	}
+
+	// Execute derived query
+	keys, err := executeDerivedQuery(stub, req)
+	if err != nil {
+		return nil, err
+	}
+
+	// Apply field projection if needed
+	if len(req.Fields) > 0 {
+		return applyProjectionToKeys(stub, keys, req.Fields)
+	}
+
+	return NewStateQueryIterator(stub, keys), nil
 }
 
 // GetHistoryForKey function can be invoked by a chaincode to return a history of
@@ -381,7 +412,59 @@ func (stub *MockStub) GetStateByPartialCompositeKeyWithPagination(objectType str
 // GetQueryResultWithPagination ...
 func (stub *MockStub) GetQueryResultWithPagination(query string, pageSize int32,
 	bookmark string) (shim.StateQueryIteratorInterface, *pb.QueryResponseMetadata, error) {
-	return nil, nil, nil
+	// Validate pageSize
+	if pageSize <= 0 {
+		return nil, nil, fmt.Errorf("invalid pageSize: must be greater than 0")
+	}
+
+	// Check if there's a registered result for this exact query
+	stub.queryResultsMu.RLock()
+	registeredKeys, hasOverride := stub.queryResults[query]
+	stub.queryResultsMu.RUnlock()
+
+	var allKeys []string
+	if hasOverride {
+		// Use registered keys (make a copy)
+		allKeys = make([]string, len(registeredKeys))
+		copy(allKeys, registeredKeys)
+	} else {
+		// Fall back to derived query evaluation
+		req, err := ParseFindRequest(query)
+		if err != nil {
+			return nil, nil, err
+		}
+
+		// Execute derived query (without skip/limit, we'll paginate separately)
+		req.Skip = 0
+		req.Limit = 0 // Get all results for pagination
+
+		allKeys, err = executeDerivedQuery(stub, req)
+		if err != nil {
+			return nil, nil, err
+		}
+
+		// Note: field projection will be handled by the iterator if needed
+	}
+
+	// Apply pagination
+	pageKeys, nextBookmark, err := paginateKeys(allKeys, pageSize, bookmark)
+	if err != nil {
+		return nil, nil, err
+	}
+
+	// Create metadata
+	metadata := createQueryMetadata(int32(len(pageKeys)), nextBookmark)
+
+	// Parse request again for field projection (if derived mode)
+	if !hasOverride {
+		req, _ := ParseFindRequest(query)
+		if len(req.Fields) > 0 {
+			iter, err := applyProjectionToKeys(stub, pageKeys, req.Fields)
+			return iter, metadata, err
+		}
+	}
+
+	return NewStateQueryIterator(stub, pageKeys), metadata, nil
 }
 
 // InvokeChaincode locally calls the specified chaincode `Invoke`.
@@ -514,6 +597,7 @@ func NewMockStub(name string, cc shim.Chaincode) *MockStub {
 	s.Keys = list.New()
 	s.ChaincodeEventsChannel = make(chan *pb.ChaincodeEvent, 100) //define large capacity for non-blocking setEvent calls.
 	s.Decorations = make(map[string][]byte)
+	s.queryResults = make(map[string][]string)
 	s.Creator, _ = newCreator(name, []byte{})
 	return s
 }
@@ -531,6 +615,19 @@ func newCreator(orgMSP string, cert []byte) ([]byte, error) {
 	sid := &msp.SerializedIdentity{Mspid: orgMSP,
 		IdBytes: cert}
 	return proto.Marshal(sid)
+}
+
+// RegisterQueryResult registers a list of keys to be returned for a specific query string
+// This provides an override mechanism for tests that need deterministic results
+func (stub *MockStub) RegisterQueryResult(query string, keys []string) {
+	stub.queryResultsMu.Lock()
+	defer stub.queryResultsMu.Unlock()
+
+	// Make a deep copy to prevent caller mutation
+	keysCopy := make([]string, len(keys))
+	copy(keysCopy, keys)
+
+	stub.queryResults[query] = keysCopy
 }
 
 /*****************************
