@@ -6,7 +6,7 @@ import (
 	"reflect"
 	"strings"
 
-	"github.com/hyperledger-labs/cc-tools/errors"
+	"github.com/hyperledger-labs/cc-tools/v2/errors"
 )
 
 // validateProp checks if a given assetProp is valid according to the given property definition

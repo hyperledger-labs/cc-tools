@@ -5,8 +5,8 @@ import (
 	"regexp"
 	"strings"
 
-	"github.com/hyperledger-labs/cc-tools/errors"
-	sw "github.com/hyperledger-labs/cc-tools/stubwrapper"
+	"github.com/hyperledger-labs/cc-tools/v2/errors"
+	sw "github.com/hyperledger-labs/cc-tools/v2/stubwrapper"
 )
 
 // Update receives a map[string]interface{} with key/vals to update the asset value in the world state.

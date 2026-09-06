@@ -1,11 +1,11 @@
 package stubwrapper
 
 import (
-	"github.com/hyperledger-labs/cc-tools/errors"
-	"github.com/hyperledger-labs/cc-tools/mock"
-	"github.com/hyperledger/fabric-chaincode-go/pkg/cid"
-	"github.com/hyperledger/fabric-chaincode-go/shim"
-	pb "github.com/hyperledger/fabric-protos-go/peer"
+	"github.com/hyperledger-labs/cc-tools/v2/errors"
+	"github.com/hyperledger-labs/cc-tools/v2/mock"
+	"github.com/hyperledger/fabric-chaincode-go/v2/pkg/cid"
+	"github.com/hyperledger/fabric-chaincode-go/v2/shim"
+	pb "github.com/hyperledger/fabric-protos-go-apiv2/peer"
 	"github.com/hyperledger/fabric/common/util"
 )
 
