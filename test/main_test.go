@@ -5,9 +5,9 @@ import (
 	"os"
 	"testing"
 
-	"github.com/hyperledger-labs/cc-tools/assets"
-	"github.com/hyperledger-labs/cc-tools/events"
-	tx "github.com/hyperledger-labs/cc-tools/transactions"
+	"github.com/hyperledger-labs/cc-tools/v2/assets"
+	"github.com/hyperledger-labs/cc-tools/v2/events"
+	tx "github.com/hyperledger-labs/cc-tools/v2/transactions"
 )
 
 func TestMain(m *testing.M) {

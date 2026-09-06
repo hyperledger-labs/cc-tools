@@ -6,7 +6,7 @@ import (
 	"log"
 	"reflect"
 
-	"github.com/hyperledger-labs/cc-tools/mock"
+	"github.com/hyperledger-labs/cc-tools/v2/mock"
 )
 
 func invokeAndVerify(stub *mock.MockStub, txName string, req, expectedRes interface{}, expectedStatus int32) error {

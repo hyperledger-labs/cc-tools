@@ -4,7 +4,7 @@ import (
 	"log"
 	"testing"
 
-	"github.com/hyperledger-labs/cc-tools/mock"
+	"github.com/hyperledger-labs/cc-tools/v2/mock"
 )
 
 func TestGetDataTypes(t *testing.T) {

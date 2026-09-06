@@ -3,9 +3,9 @@ package transactions
 import (
 	"encoding/json"
 
-	"github.com/hyperledger-labs/cc-tools/assets"
-	"github.com/hyperledger-labs/cc-tools/errors"
-	sw "github.com/hyperledger-labs/cc-tools/stubwrapper"
+	"github.com/hyperledger-labs/cc-tools/v2/assets"
+	"github.com/hyperledger-labs/cc-tools/v2/errors"
+	sw "github.com/hyperledger-labs/cc-tools/v2/stubwrapper"
 )
 
 // LoadAssetTypeList is the transaction which loads the asset Type list from the blockchain

@@ -6,8 +6,8 @@ import (
 	"reflect"
 	"strings"
 
-	"github.com/hyperledger-labs/cc-tools/errors"
-	sw "github.com/hyperledger-labs/cc-tools/stubwrapper"
+	"github.com/hyperledger-labs/cc-tools/v2/errors"
+	sw "github.com/hyperledger-labs/cc-tools/v2/stubwrapper"
 )
 
 // put writes the reference index to the ledger, then encodes the

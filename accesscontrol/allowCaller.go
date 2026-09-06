@@ -3,9 +3,9 @@ package accesscontrol
 import (
 	"regexp"
 
-	"github.com/hyperledger-labs/cc-tools/errors"
-	"github.com/hyperledger/fabric-chaincode-go/pkg/cid"
-	"github.com/hyperledger/fabric-chaincode-go/shim"
+	"github.com/hyperledger-labs/cc-tools/v2/errors"
+	"github.com/hyperledger/fabric-chaincode-go/v2/pkg/cid"
+	"github.com/hyperledger/fabric-chaincode-go/v2/shim"
 )
 
 func AllowCaller(stub shim.ChaincodeStubInterface, allowedCallers []Caller) (bool, error) {
