@@ -12,17 +12,16 @@ import (
 	"strings"
 	"unicode/utf8"
 
-	"github.com/golang/protobuf/proto"
-	"github.com/golang/protobuf/ptypes"
-	"github.com/golang/protobuf/ptypes/timestamp"
-	"github.com/hyperledger/fabric-chaincode-go/shim"
-	"github.com/hyperledger/fabric-protos-go/ledger/queryresult"
-	"github.com/hyperledger/fabric-protos-go/msp"
-	pb "github.com/hyperledger/fabric-protos-go/peer"
+	"github.com/hyperledger/fabric-chaincode-go/v2/shim"
+	"github.com/hyperledger/fabric-protos-go-apiv2/ledger/queryresult"
+	"github.com/hyperledger/fabric-protos-go-apiv2/msp"
+	pb "github.com/hyperledger/fabric-protos-go-apiv2/peer"
+	"google.golang.org/protobuf/proto"
+	"google.golang.org/protobuf/types/known/timestamppb"
 )
 
 const (
-	minUnicodeRuneValue   = 0 //U+0000
+	minUnicodeRuneValue   = 0 // U+0000
 	compositeKeyNamespace = "\x00"
 )
 
@@ -54,7 +53,7 @@ type MockStub struct {
 	// TODO if a chaincode uses recursion this may need to be a stack of TxIDs or possibly a reference counting map
 	TxID string
 
-	TxTimestamp *timestamp.Timestamp
+	TxTimestamp *timestamppb.Timestamp
 
 	// mocked signedProposal
 	signedProposal *pb.SignedProposal
@@ -118,7 +117,7 @@ func (stub *MockStub) GetFunctionAndParameters() (function string, params []stri
 func (stub *MockStub) MockTransactionStart(txid string) {
 	stub.TxID = txid
 	stub.setSignedProposal(&pb.SignedProposal{})
-	stub.setTxTimestamp(ptypes.TimestampNow())
+	stub.setTxTimestamp(timestamppb.Now())
 }
 
 // MockTransactionEnd End a mocked transaction, clearing the UUID.
@@ -140,7 +139,7 @@ func (stub *MockStub) MockPeerChaincode(invokableChaincodeName string, otherStub
 }
 
 // MockInit Initialise this chaincode,  also starts and ends a transaction.
-func (stub *MockStub) MockInit(uuid string, args [][]byte) pb.Response {
+func (stub *MockStub) MockInit(uuid string, args [][]byte) *pb.Response {
 	stub.args = args
 	stub.MockTransactionStart(uuid)
 	res := stub.cc.Init(stub)
@@ -149,7 +148,7 @@ func (stub *MockStub) MockInit(uuid string, args [][]byte) pb.Response {
 }
 
 // MockInvoke Invoke this chaincode, also starts and ends a transaction.
-func (stub *MockStub) MockInvoke(uuid string, args [][]byte) pb.Response {
+func (stub *MockStub) MockInvoke(uuid string, args [][]byte) *pb.Response {
 	stub.args = args
 	stub.MockTransactionStart(uuid)
 	res := stub.cc.Invoke(stub)
@@ -163,7 +162,7 @@ func (stub *MockStub) GetDecorations() map[string][]byte {
 }
 
 // MockInvokeWithSignedProposal Invoke this chaincode, also starts and ends a transaction.
-func (stub *MockStub) MockInvokeWithSignedProposal(uuid string, args [][]byte, sp *pb.SignedProposal) pb.Response {
+func (stub *MockStub) MockInvokeWithSignedProposal(uuid string, args [][]byte, sp *pb.SignedProposal) *pb.Response {
 	stub.args = args
 	stub.MockTransactionStart(uuid)
 	stub.signedProposal = sp
@@ -368,19 +367,59 @@ func splitCompositeKey(compositeKey string) (string, []string, error) {
 
 // GetStateByRangeWithPagination ...
 func (stub *MockStub) GetStateByRangeWithPagination(startKey, endKey string, pageSize int32,
-	bookmark string) (shim.StateQueryIteratorInterface, *pb.QueryResponseMetadata, error) {
+	bookmark string,
+) (shim.StateQueryIteratorInterface, *pb.QueryResponseMetadata, error) {
 	return nil, nil, nil
 }
 
 // GetStateByPartialCompositeKeyWithPagination ...
 func (stub *MockStub) GetStateByPartialCompositeKeyWithPagination(objectType string, keys []string,
-	pageSize int32, bookmark string) (shim.StateQueryIteratorInterface, *pb.QueryResponseMetadata, error) {
+	pageSize int32, bookmark string,
+) (shim.StateQueryIteratorInterface, *pb.QueryResponseMetadata, error) {
 	return nil, nil, nil
 }
 
+// GetMultipleStates returns the values of the specified keys.
+func (stub *MockStub) GetMultipleStates(keys ...string) ([][]byte, error) {
+	values := make([][]byte, 0, len(keys))
+	for _, key := range keys {
+		value, err := stub.GetState(key)
+		if err != nil {
+			return nil, err
+		}
+		values = append(values, value)
+	}
+	return values, nil
+}
+
+// GetMultiplePrivateData returns the values of the specified keys from the collection.
+func (stub *MockStub) GetMultiplePrivateData(collection string, keys ...string) ([][]byte, error) {
+	values := make([][]byte, 0, len(keys))
+	for _, key := range keys {
+		value, err := stub.GetPrivateData(collection, key)
+		if err != nil {
+			return nil, err
+		}
+		values = append(values, value)
+	}
+	return values, nil
+}
+
+// GetAllStatesCompositeKeyWithPagination ...
+func (stub *MockStub) GetAllStatesCompositeKeyWithPagination(pageSize int32, bookmark string) (shim.StateQueryIteratorInterface, *pb.QueryResponseMetadata, error) {
+	return nil, nil, nil
+}
+
+// StartWriteBatch is a no-op: MockStub does not batch writes.
+func (stub *MockStub) StartWriteBatch() {}
+
+// FinishWriteBatch is a no-op: MockStub does not batch writes.
+func (stub *MockStub) FinishWriteBatch() error { return nil }
+
 // GetQueryResultWithPagination ...
 func (stub *MockStub) GetQueryResultWithPagination(query string, pageSize int32,
-	bookmark string) (shim.StateQueryIteratorInterface, *pb.QueryResponseMetadata, error) {
+	bookmark string,
+) (shim.StateQueryIteratorInterface, *pb.QueryResponseMetadata, error) {
 	return nil, nil, nil
 }
 
@@ -388,7 +427,7 @@ func (stub *MockStub) GetQueryResultWithPagination(query string, pageSize int32,
 // E.g. stub1.InvokeChaincode("othercc", funcArgs, channel)
 // Before calling this make sure to create another MockStub stub2, call shim.NewMockStub("othercc", Chaincode)
 // and register it with stub1 by calling stub1.MockPeerChaincode("othercc", stub2, channel)
-func (stub *MockStub) InvokeChaincode(chaincodeName string, args [][]byte, channel string) pb.Response {
+func (stub *MockStub) InvokeChaincode(chaincodeName string, args [][]byte, channel string) *pb.Response {
 	// Internally we use chaincode name as a composite name
 	if channel != "" {
 		chaincodeName = chaincodeName + "/" + channel
@@ -451,12 +490,12 @@ func (stub *MockStub) GetArgsSlice() ([]byte, error) {
 	return nil, nil
 }
 
-func (stub *MockStub) setTxTimestamp(time *timestamp.Timestamp) {
+func (stub *MockStub) setTxTimestamp(time *timestamppb.Timestamp) {
 	stub.TxTimestamp = time
 }
 
 // GetTxTimestamp ...
-func (stub *MockStub) GetTxTimestamp() (*timestamp.Timestamp, error) {
+func (stub *MockStub) GetTxTimestamp() (*timestamppb.Timestamp, error) {
 	if stub.TxTimestamp == nil {
 		return nil, errors.New("TxTimestamp not set")
 	}
@@ -512,7 +551,7 @@ func NewMockStub(name string, cc shim.Chaincode) *MockStub {
 	s.EndorsementPolicies = make(map[string]map[string][]byte)
 	s.Invokables = make(map[string]*MockStub)
 	s.Keys = list.New()
-	s.ChaincodeEventsChannel = make(chan *pb.ChaincodeEvent, 100) //define large capacity for non-blocking setEvent calls.
+	s.ChaincodeEventsChannel = make(chan *pb.ChaincodeEvent, 100) // define large capacity for non-blocking setEvent calls.
 	s.Decorations = make(map[string][]byte)
 	s.Creator, _ = newCreator(name, []byte{})
 	return s
@@ -528,8 +567,10 @@ func NewMockStubWithCert(name string, cc shim.Chaincode, cert []byte) (*MockStub
 }
 
 func newCreator(orgMSP string, cert []byte) ([]byte, error) {
-	sid := &msp.SerializedIdentity{Mspid: orgMSP,
-		IdBytes: cert}
+	sid := &msp.SerializedIdentity{
+		Mspid:   orgMSP,
+		IdBytes: cert,
+	}
 	return proto.Marshal(sid)
 }
 

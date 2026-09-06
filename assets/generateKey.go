@@ -5,7 +5,7 @@ import (
 	"strings"
 
 	"github.com/google/uuid"
-	"github.com/hyperledger-labs/cc-tools/errors"
+	"github.com/hyperledger-labs/cc-tools/v2/errors"
 )
 
 // GenerateKey implements the logic to generate an asset's unique key. It validates

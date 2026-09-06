@@ -4,12 +4,12 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/hyperledger-labs/cc-tools/assets"
-	"github.com/hyperledger-labs/cc-tools/errors"
-	"github.com/hyperledger-labs/cc-tools/events"
-	tx "github.com/hyperledger-labs/cc-tools/transactions"
-	"github.com/hyperledger/fabric-chaincode-go/shim"
-	pb "github.com/hyperledger/fabric-protos-go/peer"
+	"github.com/hyperledger-labs/cc-tools/v2/assets"
+	"github.com/hyperledger-labs/cc-tools/v2/errors"
+	"github.com/hyperledger-labs/cc-tools/v2/events"
+	tx "github.com/hyperledger-labs/cc-tools/v2/transactions"
+	"github.com/hyperledger/fabric-chaincode-go/v2/shim"
+	pb "github.com/hyperledger/fabric-protos-go-apiv2/peer"
 )
 
 // testCC implements the shim.Chaincode interface
@@ -253,7 +253,7 @@ var testEventTypeList = []events.Event{
 // Init is called during chaincode instantiation to initialize any
 // data. Note that chaincode upgrade also calls this function to reset
 // or to migrate data.
-func (t *testCC) Init(stub shim.ChaincodeStubInterface) (response pb.Response) {
+func (t *testCC) Init(stub shim.ChaincodeStubInterface) (response *pb.Response) {
 	err := tx.StartupCheck()
 	if err != nil {
 		response = err.GetErrorResponse()
@@ -282,11 +282,10 @@ func (t *testCC) Init(stub shim.ChaincodeStubInterface) (response pb.Response) {
 }
 
 // Invoke is called per transaction on the chaincode.
-func (t *testCC) Invoke(stub shim.ChaincodeStubInterface) (response pb.Response) {
+func (t *testCC) Invoke(stub shim.ChaincodeStubInterface) (response *pb.Response) {
 	var result []byte
 
 	result, err := tx.Run(stub)
-
 	if err != nil {
 		response = err.GetErrorResponse()
 		return

@@ -7,7 +7,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/hyperledger-labs/cc-tools/mock"
+	"github.com/hyperledger-labs/cc-tools/v2/mock"
 )
 
 func TestCreateAssetType(t *testing.T) {

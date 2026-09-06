@@ -4,9 +4,9 @@ import (
 	b64 "encoding/base64"
 	"net/http"
 
-	"github.com/hyperledger-labs/cc-tools/errors"
-	"github.com/hyperledger-labs/cc-tools/events"
-	sw "github.com/hyperledger-labs/cc-tools/stubwrapper"
+	"github.com/hyperledger-labs/cc-tools/v2/errors"
+	"github.com/hyperledger-labs/cc-tools/v2/events"
+	sw "github.com/hyperledger-labs/cc-tools/v2/stubwrapper"
 )
 
 // RunEvent runs an event of type "EventCustom" as readOnly

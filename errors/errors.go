@@ -3,7 +3,7 @@ package errors
 import (
 	"errors"
 
-	"github.com/hyperledger/fabric-protos-go/peer"
+	"github.com/hyperledger/fabric-protos-go-apiv2/peer"
 )
 
 // ICCError Interface implements an error interface.
@@ -12,7 +12,7 @@ import (
 type ICCError interface {
 	Status() int32
 	Message() string
-	GetErrorResponse() peer.Response
+	GetErrorResponse() *peer.Response
 	Error() string
 }
 
@@ -38,8 +38,8 @@ func (c *CCError) Error() string {
 }
 
 // GetErrorResponse converts an Httperror instance to a peer.Response
-func (c *CCError) GetErrorResponse() peer.Response {
-	return peer.Response{
+func (c *CCError) GetErrorResponse() *peer.Response {
+	return &peer.Response{
 		Status:  c.status,
 		Message: c.err.Error(),
 	}

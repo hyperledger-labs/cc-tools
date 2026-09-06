@@ -3,9 +3,9 @@ package test
 import (
 	"testing"
 
-	"github.com/hyperledger-labs/cc-tools/assets"
-	"github.com/hyperledger-labs/cc-tools/mock"
-	sw "github.com/hyperledger-labs/cc-tools/stubwrapper"
+	"github.com/hyperledger-labs/cc-tools/v2/assets"
+	"github.com/hyperledger-labs/cc-tools/v2/mock"
+	sw "github.com/hyperledger-labs/cc-tools/v2/stubwrapper"
 )
 
 func TestCommittedInLedgerNoKey(t *testing.T) {
