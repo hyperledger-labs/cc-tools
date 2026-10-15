@@ -4,8 +4,8 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/hyperledger-labs/cc-tools/errors"
-	sw "github.com/hyperledger-labs/cc-tools/stubwrapper"
+	"github.com/hyperledger-labs/cc-tools/v2/errors"
+	sw "github.com/hyperledger-labs/cc-tools/v2/stubwrapper"
 )
 
 // AssetTypeList returns a copy of the assetTypeList variable.

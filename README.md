@@ -104,7 +104,7 @@ var CreateBook = tx.Transaction{
 	},
 }
 
-func (t *CC) Invoke(stub shim.ChaincodeStubInterface) pb.Response {
+func (t *CC) Invoke(stub shim.ChaincodeStubInterface) *pb.Response {
 	return tx.RunResponse(stub)
 }
 ```

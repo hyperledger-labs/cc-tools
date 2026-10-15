@@ -1,9 +1,9 @@
 package assets
 
 import (
-	"github.com/hyperledger-labs/cc-tools/errors"
-	"github.com/hyperledger-labs/cc-tools/mock"
-	sw "github.com/hyperledger-labs/cc-tools/stubwrapper"
+	"github.com/hyperledger-labs/cc-tools/v2/errors"
+	"github.com/hyperledger-labs/cc-tools/v2/mock"
+	sw "github.com/hyperledger-labs/cc-tools/v2/stubwrapper"
 )
 
 func existsInLedger(stub *sw.StubWrapper, isPrivate bool, collection, key string) (bool, errors.ICCError) {

@@ -3,12 +3,12 @@ package transactions
 import (
 	"fmt"
 
-	"github.com/hyperledger-labs/cc-tools/accesscontrol"
-	"github.com/hyperledger-labs/cc-tools/assets"
-	"github.com/hyperledger-labs/cc-tools/errors"
-	sw "github.com/hyperledger-labs/cc-tools/stubwrapper"
-	"github.com/hyperledger/fabric-chaincode-go/shim"
-	pb "github.com/hyperledger/fabric-protos-go/peer"
+	"github.com/hyperledger-labs/cc-tools/v2/accesscontrol"
+	"github.com/hyperledger-labs/cc-tools/v2/assets"
+	"github.com/hyperledger-labs/cc-tools/v2/errors"
+	sw "github.com/hyperledger-labs/cc-tools/v2/stubwrapper"
+	"github.com/hyperledger/fabric-chaincode-go/v2/shim"
+	pb "github.com/hyperledger/fabric-protos-go-apiv2/peer"
 )
 
 // Run defines the rules of transaction execution for the chaincode.
@@ -24,13 +24,13 @@ func Run(stub shim.ChaincodeStubInterface) ([]byte, errors.ICCError) {
 
 // RunResponse executes the transaction like Run and converts the result to a peer.Response,
 // keeping the success status set by a ResponseRoutine and the status of any returned error.
-func RunResponse(stub shim.ChaincodeStubInterface) pb.Response {
+func RunResponse(stub shim.ChaincodeStubInterface) *pb.Response {
 	res, err := execute(stub)
 	if err != nil {
 		return err.GetErrorResponse()
 	}
 
-	return pb.Response{
+	return &pb.Response{
 		Status:  res.Status,
 		Payload: res.Payload,
 	}

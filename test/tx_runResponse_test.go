@@ -3,22 +3,22 @@ package test
 import (
 	"testing"
 
-	"github.com/hyperledger-labs/cc-tools/errors"
-	"github.com/hyperledger-labs/cc-tools/mock"
-	sw "github.com/hyperledger-labs/cc-tools/stubwrapper"
-	tx "github.com/hyperledger-labs/cc-tools/transactions"
-	"github.com/hyperledger/fabric-chaincode-go/shim"
-	pb "github.com/hyperledger/fabric-protos-go/peer"
+	"github.com/hyperledger-labs/cc-tools/v2/errors"
+	"github.com/hyperledger-labs/cc-tools/v2/mock"
+	sw "github.com/hyperledger-labs/cc-tools/v2/stubwrapper"
+	tx "github.com/hyperledger-labs/cc-tools/v2/transactions"
+	"github.com/hyperledger/fabric-chaincode-go/v2/shim"
+	pb "github.com/hyperledger/fabric-protos-go-apiv2/peer"
 )
 
 // responseCC implements the shim.Chaincode interface using tx.RunResponse
 type responseCC struct{}
 
-func (t *responseCC) Init(stub shim.ChaincodeStubInterface) pb.Response {
+func (t *responseCC) Init(stub shim.ChaincodeStubInterface) *pb.Response {
 	return shim.Success(nil)
 }
 
-func (t *responseCC) Invoke(stub shim.ChaincodeStubInterface) pb.Response {
+func (t *responseCC) Invoke(stub shim.ChaincodeStubInterface) *pb.Response {
 	return tx.RunResponse(stub)
 }
 

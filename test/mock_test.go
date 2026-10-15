@@ -9,7 +9,7 @@ import (
 	"reflect"
 	"testing"
 
-	"github.com/hyperledger-labs/cc-tools/mock"
+	"github.com/hyperledger-labs/cc-tools/v2/mock"
 	"github.com/stretchr/testify/assert"
 )
 

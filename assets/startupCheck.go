@@ -5,7 +5,7 @@ import (
 	"regexp"
 	"strings"
 
-	"github.com/hyperledger-labs/cc-tools/errors"
+	"github.com/hyperledger-labs/cc-tools/v2/errors"
 )
 
 // StartupCheck verifies if asset definitions are properly coded, returning an error if they're not
