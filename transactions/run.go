@@ -8,10 +8,35 @@ import (
 	"github.com/hyperledger-labs/cc-tools/v2/errors"
 	sw "github.com/hyperledger-labs/cc-tools/v2/stubwrapper"
 	"github.com/hyperledger/fabric-chaincode-go/v2/shim"
+	pb "github.com/hyperledger/fabric-protos-go-apiv2/peer"
 )
 
 // Run defines the rules of transaction execution for the chaincode.
+// The success status set by a ResponseRoutine is discarded; use RunResponse to propagate it.
 func Run(stub shim.ChaincodeStubInterface) ([]byte, errors.ICCError) {
+	res, err := execute(stub)
+	if err != nil {
+		return nil, err
+	}
+
+	return res.Payload, nil
+}
+
+// RunResponse executes the transaction like Run and converts the result to a peer.Response,
+// keeping the success status set by a ResponseRoutine and the status of any returned error.
+func RunResponse(stub shim.ChaincodeStubInterface) *pb.Response {
+	res, err := execute(stub)
+	if err != nil {
+		return err.GetErrorResponse()
+	}
+
+	return &pb.Response{
+		Status:  res.Status,
+		Payload: res.Payload,
+	}
+}
+
+func execute(stub shim.ChaincodeStubInterface) (*Response, errors.ICCError) {
 	var err error
 
 	// Extract the function and args from the transaction proposal
@@ -49,5 +74,28 @@ func Run(stub shim.ChaincodeStubInterface) ([]byte, errors.ICCError) {
 		return nil, errors.NewCCError("current caller not allowed", 403)
 	}
 
-	return tx.Routine(sw, reqMap)
+	if tx.ResponseRoutine == nil {
+		payload, err := tx.Routine(sw, reqMap)
+		if err != nil {
+			return nil, err
+		}
+		return &Response{Status: 200, Payload: payload}, nil
+	}
+
+	res, ccErr := tx.ResponseRoutine(sw, reqMap)
+	if ccErr != nil {
+		return nil, ccErr
+	}
+
+	if res == nil {
+		res = &Response{}
+	}
+	if res.Status == 0 {
+		res.Status = 200
+	}
+	if res.Status < 200 || res.Status > 299 {
+		return nil, errors.NewCCError(fmt.Sprintf("invalid success status %d returned by tx %s", res.Status, txName), 500)
+	}
+
+	return res, nil
 }

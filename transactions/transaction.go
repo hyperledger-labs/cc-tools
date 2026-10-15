@@ -37,5 +37,20 @@ type Transaction struct {
 	MetaTx bool `json:"metaTx"`
 
 	// Routine is the function called when running the tx. It is where the tx logic can be programmed.
+	// A successful Routine always responds with status 200.
 	Routine func(*sw.StubWrapper, map[string]interface{}) ([]byte, errors.ICCError) `json:"-"`
+
+	// ResponseRoutine is an alternative to Routine that also sets the success status of the response.
+	// Only one of Routine and ResponseRoutine may be defined. The status is only propagated
+	// when the chaincode calls RunResponse instead of Run.
+	ResponseRoutine func(*sw.StubWrapper, map[string]interface{}) (*Response, errors.ICCError) `json:"-"`
+}
+
+// Response is the successful result of a ResponseRoutine.
+type Response struct {
+	// Status must be a 2xx status. A zero value defaults to 200.
+	// It is recorded in the ledger, so it must be deterministic across endorsers.
+	Status int32
+
+	Payload []byte
 }

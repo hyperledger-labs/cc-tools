@@ -88,6 +88,33 @@ It is possible to also create custom transactions in the chaincode, that must be
 
 The transactions package has the `StartupCheck` just like the assets package, which is a function that verifies if all the transactions are correctly implemented in the chaincode.
 
+#### **Response Status**
+A transaction returns errors with a specific status through `errors.NewCCError` or `errors.WrapErrorWithStatus`. Error statuses must be 400 or above: Fabric peers endorse any response with status below 400 as a successful transaction, so `GetErrorResponse` replaces lower statuses with 500.
+
+By default, a successful transaction responds with status 200. To respond with another success status, define `ResponseRoutine` instead of `Routine` and run the transactions with `tx.RunResponse` in the chaincode `Invoke`:
+
+```go
+var CreateBook = tx.Transaction{
+	Tag:    "createBook",
+	Method: "POST",
+	// ...
+	ResponseRoutine: func(stub *sw.StubWrapper, req map[string]interface{}) (*tx.Response, errors.ICCError) {
+		// ...
+		return &tx.Response{Status: 201, Payload: bookJSON}, nil
+	},
+}
+
+func (t *CC) Invoke(stub shim.ChaincodeStubInterface) *pb.Response {
+	return tx.RunResponse(stub)
+}
+```
+
+* The status must be a 2xx status. A zero status responds with 200, and any other status results in a 500 error.
+* The status is part of the endorsed response recorded in the ledger, so it must be deterministic: every endorser must return the same status for the same transaction.
+* A transaction must define only one of `Routine` and `ResponseRoutine`, which is verified by `StartupCheck`.
+* Chaincodes that still call `tx.Run` keep working: a `ResponseRoutine` returns its payload with status 200.
+* To replicate the status in an HTTP response, the client must read the chaincode response status. Fabric Gateway and fabric-sdk-go accept any status from 200 to 399 as success.
+
 ### **StubWrapper**
 The main purpose of the StubWrapper is to provide additional functionalities and simplify the development of chaincodes. 
 
