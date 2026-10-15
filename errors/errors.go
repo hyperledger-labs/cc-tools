@@ -2,6 +2,7 @@ package errors
 
 import (
 	"errors"
+	"fmt"
 
 	"github.com/hyperledger/fabric-protos-go/peer"
 )
@@ -34,13 +35,20 @@ func (c *CCError) Message() string {
 
 // Implements the error interface
 func (c *CCError) Error() string {
-	return string(c.status) + c.err.Error()
+	return fmt.Sprintf("%d %s", c.status, c.err.Error())
 }
 
-// GetErrorResponse converts an Httperror instance to a peer.Response
+// GetErrorResponse converts an Httperror instance to a peer.Response.
+// Statuses below 400 are replaced by 500, since Fabric peers endorse any
+// response with status below 400 as a successful transaction.
 func (c *CCError) GetErrorResponse() peer.Response {
+	status := c.status
+	if status < 400 {
+		status = 500
+	}
+
 	return peer.Response{
-		Status:  c.status,
+		Status:  status,
 		Message: c.err.Error(),
 	}
 }
