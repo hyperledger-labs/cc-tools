@@ -1,12 +1,13 @@
 package stubwrapper
 
 import (
+	"crypto/sha256"
+
 	"github.com/hyperledger-labs/cc-tools/v2/errors"
 	"github.com/hyperledger-labs/cc-tools/v2/mock"
 	"github.com/hyperledger/fabric-chaincode-go/v2/pkg/cid"
 	"github.com/hyperledger/fabric-chaincode-go/v2/shim"
 	pb "github.com/hyperledger/fabric-protos-go-apiv2/peer"
-	"github.com/hyperledger/fabric/common/util"
 )
 
 type StubWrapper struct {
@@ -102,7 +103,8 @@ func (sw *StubWrapper) GetPrivateDataHash(collection, key string) ([]byte, error
 	obj, inSet := sw.PvtWriteSet[collection][key]
 	if inSet {
 		if obj != nil {
-			return util.ComputeSHA256(obj), nil
+			hash := sha256.Sum256(obj)
+			return hash[:], nil
 		} else {
 			return nil, nil
 		}
