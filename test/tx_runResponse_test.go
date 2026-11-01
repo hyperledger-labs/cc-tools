@@ -1,6 +1,7 @@
 package test
 
 import (
+	goerrors "errors"
 	"testing"
 
 	"github.com/hyperledger-labs/cc-tools/v2/errors"
@@ -10,6 +11,21 @@ import (
 	"github.com/hyperledger/fabric-chaincode-go/v2/shim"
 	pb "github.com/hyperledger/fabric-protos-go-apiv2/peer"
 )
+
+// customError implements errors.ICCError without replacing statuses below 400
+type customError struct {
+	status int32
+}
+
+func (e *customError) Status() int32   { return e.status }
+func (e *customError) Message() string { return "custom error" }
+func (e *customError) Error() string   { return "custom error" }
+func (e *customError) GetErrorResponse() *pb.Response {
+	return &pb.Response{Status: e.status, Message: e.Message()}
+}
+
+// sharedResponse is returned by a routine to check that RunResponse does not modify it
+var sharedResponse = &tx.Response{Payload: []byte(`{}`)}
 
 // responseCC implements the shim.Chaincode interface using tx.RunResponse
 type responseCC struct{}
@@ -60,6 +76,18 @@ var responseTestTxs = []tx.Transaction{
 		},
 	},
 	{
+		Tag: "respondShared",
+		ResponseRoutine: func(stub *sw.StubWrapper, req map[string]interface{}) (*tx.Response, errors.ICCError) {
+			return sharedResponse, nil
+		},
+	},
+	{
+		Tag: "customErrorBelowThreshold",
+		ResponseRoutine: func(stub *sw.StubWrapper, req map[string]interface{}) (*tx.Response, errors.ICCError) {
+			return nil, &customError{status: 300}
+		},
+	},
+	{
 		Tag: "routineErrorBelowThreshold",
 		Routine: func(stub *sw.StubWrapper, req map[string]interface{}) ([]byte, errors.ICCError) {
 			return nil, errors.NewCCError("wrong status", 300)
@@ -88,7 +116,9 @@ func TestRunResponse(t *testing.T) {
 		{"respondCreated", 201, `{"created":true}`, ""},
 		{"respondDefault", 200, `{}`, ""},
 		{"respondNil", 200, "", ""},
-		{"respondInvalid", 500, "", "invalid success status 302 returned by tx respondInvalid"},
+		{"respondInvalid", 500, "", "invalid success status 302 returned by tx respondInvalid, expected a 2xx status"},
+		{"respondShared", 200, `{}`, ""},
+		{"customErrorBelowThreshold", 500, "", "custom error"},
 		{"respondError", 404, "", "asset not found"},
 		{"routineError", 409, "", "conflict"},
 		{"routineErrorBelowThreshold", 500, "", "wrong status"},
@@ -106,6 +136,10 @@ func TestRunResponse(t *testing.T) {
 		if res.Message != c.message {
 			t.Errorf("%s: expected message %q, got %q", c.txName, c.message, res.Message)
 		}
+	}
+
+	if sharedResponse.Status != 0 {
+		t.Errorf("expected the routine response to be unchanged, got status %d", sharedResponse.Status)
 	}
 }
 
@@ -137,6 +171,29 @@ func TestStartupCheckBothRoutines(t *testing.T) {
 	err := tx.StartupCheck()
 	if err == nil || err.Status() != 500 {
 		t.Fatalf("expected startup check error, got %v", err)
+	}
+}
+
+func TestStartupCheckNoRoutine(t *testing.T) {
+	tx.InitTxList([]tx.Transaction{{Tag: "none"}})
+	t.Cleanup(func() { tx.InitTxList(testTxList) })
+
+	err := tx.StartupCheck()
+	if err == nil || err.Status() != 500 {
+		t.Fatalf("expected startup check error, got %v", err)
+	}
+}
+
+func TestCCErrorStatusBelowThreshold(t *testing.T) {
+	cases := []errors.ICCError{
+		errors.NewCCError("wrong status", 300),
+		errors.WrapErrorWithStatus(goerrors.New("cause"), "wrong status", 302),
+	}
+
+	for _, err := range cases {
+		if err.Status() != 500 || err.GetErrorResponse().Status != 500 {
+			t.Errorf("expected status 500, got %d and %d", err.Status(), err.GetErrorResponse().Status)
+		}
 	}
 }
 

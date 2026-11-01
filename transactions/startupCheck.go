@@ -14,8 +14,8 @@ func StartupCheck() errors.ICCError {
 	// Checks if there are references to undefined types
 	for _, tx := range txList {
 		txName := tx.Tag
-		if tx.Routine != nil && tx.ResponseRoutine != nil {
-			return errors.NewCCError(fmt.Sprintf("tx %s must define only one of Routine and ResponseRoutine", txName), 500)
+		if (tx.Routine == nil) == (tx.ResponseRoutine == nil) {
+			return errors.NewCCError(fmt.Sprintf("tx %s must define exactly one of Routine and ResponseRoutine", txName), 500)
 		}
 
 		for _, c := range tx.Callers {

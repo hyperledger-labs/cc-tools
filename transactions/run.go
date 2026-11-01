@@ -27,7 +27,15 @@ func Run(stub shim.ChaincodeStubInterface) ([]byte, errors.ICCError) {
 func RunResponse(stub shim.ChaincodeStubInterface) *pb.Response {
 	res, err := execute(stub)
 	if err != nil {
-		return err.GetErrorResponse()
+		// Other ICCError implementations may keep statuses below 400, which peers would endorse
+		errRes := err.GetErrorResponse()
+		if errRes == nil {
+			errRes = &pb.Response{Message: err.Error()}
+		}
+		if errRes.Status < 400 {
+			errRes.Status = 500
+		}
+		return errRes
 	}
 
 	return &pb.Response{
@@ -87,15 +95,17 @@ func execute(stub shim.ChaincodeStubInterface) (*Response, errors.ICCError) {
 		return nil, ccErr
 	}
 
-	if res == nil {
-		res = &Response{}
+	// Copy the response so the value returned by the routine is not modified
+	out := Response{}
+	if res != nil {
+		out = *res
 	}
-	if res.Status == 0 {
-		res.Status = 200
+	if out.Status == 0 {
+		out.Status = 200
 	}
-	if res.Status < 200 || res.Status > 299 {
-		return nil, errors.NewCCError(fmt.Sprintf("invalid success status %d returned by tx %s", res.Status, txName), 500)
+	if out.Status < 200 || out.Status > 299 {
+		return nil, errors.NewCCError(fmt.Sprintf("invalid success status %d returned by tx %s, expected a 2xx status", out.Status, txName), 500)
 	}
 
-	return res, nil
+	return &out, nil
 }

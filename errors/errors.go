@@ -38,25 +38,29 @@ func (c *CCError) Error() string {
 	return fmt.Sprintf("%d %s", c.status, c.err.Error())
 }
 
-// GetErrorResponse converts an Httperror instance to a peer.Response.
-// Statuses below 400 are replaced by 500, since Fabric peers endorse any
-// response with status below 400 as a successful transaction.
+// GetErrorResponse converts an Httperror instance to a peer.Response
 func (c *CCError) GetErrorResponse() *peer.Response {
-	status := c.status
-	if status < 400 {
-		status = 500
-	}
-
 	return &peer.Response{
-		Status:  status,
+		Status:  errorStatus(c.status),
 		Message: c.err.Error(),
 	}
 }
 
-// NewCCError creates a new CCError instance
+// errorStatus replaces statuses below 400 with 500, since Fabric peers endorse
+// any response with status below 400 as a successful transaction.
+func errorStatus(status int32) int32 {
+	if status < 400 {
+		return 500
+	}
+
+	return status
+}
+
+// NewCCError creates a new CCError instance.
+// Statuses below 400 are replaced by 500.
 func NewCCError(errMsg string, status int32) *CCError {
 	return &CCError{
-		status: status,
+		status: errorStatus(status),
 		err:    errors.New(errMsg),
 	}
 }
@@ -77,10 +81,11 @@ func WrapError(err error, errMsg string) *CCError {
 	return NewCCError(e, 500)
 }
 
-// WrapErrorWithStatus wraps an existing error and adds a status to it
+// WrapErrorWithStatus wraps an existing error and adds a status to it.
+// Statuses below 400 are replaced by 500.
 func WrapErrorWithStatus(err error, errMsg string, status int32) *CCError {
 	newErr := WrapError(err, errMsg)
-	newErr.status = status
+	newErr.status = errorStatus(status)
 
 	return newErr
 }

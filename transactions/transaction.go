@@ -41,7 +41,7 @@ type Transaction struct {
 	Routine func(*sw.StubWrapper, map[string]interface{}) ([]byte, errors.ICCError) `json:"-"`
 
 	// ResponseRoutine is an alternative to Routine that also sets the success status of the response.
-	// Only one of Routine and ResponseRoutine may be defined. The status is only propagated
+	// Exactly one of Routine and ResponseRoutine must be defined. The status is only propagated
 	// when the chaincode calls RunResponse instead of Run.
 	ResponseRoutine func(*sw.StubWrapper, map[string]interface{}) (*Response, errors.ICCError) `json:"-"`
 }
